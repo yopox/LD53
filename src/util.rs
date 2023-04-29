@@ -3,11 +3,11 @@ pub mod size {
     const TILE_SIZE: usize = 8;
 
     /// Screen size in tiles
-    pub const WIDTH: usize = 32;
-    pub const HEIGHT: usize = 18;
+    pub const WIDTH: usize = 40;
+    pub const HEIGHT: usize = 22;
 
     /// Camera scale
-    pub const SCALE: f32 = 5.;
+    pub const SCALE: f32 = 4.;
 
     /// Returns world coordinates for a tile, for instance `2` -> `(2 * TILE_SIZE) as f32 `.
     pub const fn tile_to_f32(tile: usize) -> f32 { (tile * TILE_SIZE) as f32 }
@@ -16,7 +16,8 @@ pub mod size {
 pub mod z_pos {
     pub const BACKGROUND: f32 = 0.;
     pub const TITLE_TEXT: f32 = 1.;
-    pub const ENEMIES: f32 = 2.;
+    pub const GRID: f32 = 2.;
+    pub const ENEMIES: f32 = 6.;
     pub const TRANSITION: f32 = 10.;
     pub const GUI: f32 = 11.;
 }

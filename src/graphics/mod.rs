@@ -4,6 +4,7 @@ use bevy_text_mode::{TextModeSpriteSheetBundle, TextModeTextureAtlasSprite};
 use bevy_tweening::TweeningPlugin;
 
 use crate::graphics::animation::AnimationPlugin;
+use crate::graphics::grid::GridPlugin;
 use crate::graphics::loading::LoadingPlugin;
 use crate::graphics::palette::Palette;
 use crate::graphics::sprites::TILE;
@@ -96,6 +97,7 @@ impl Plugin for GraphicsPlugin {
             .add_plugin(TransitionPlugin)
             .add_plugin(AnimationPlugin)
             .add_plugin(TweeningPlugin)
+            .add_plugin(GridPlugin)
         ;
     }
 }
