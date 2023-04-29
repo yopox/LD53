@@ -4,7 +4,7 @@ use crate::{GameState, util};
 use crate::enemy::Enemies;
 use crate::graphics::{MainBundle, sprite_from_tile};
 use crate::graphics::loading::Textures;
-use crate::tower::Towers;
+use crate::tower::{tower_fire, Towers, update_just_fired};
 
 pub struct PlayingPlugin;
 
@@ -16,6 +16,10 @@ impl Plugin for PlayingPlugin {
             )
             .add_system(
                 exit_playing.in_schedule(OnExit(GameState::Main))
+            )
+            .add_systems(
+                (update_just_fired, tower_fire)
+                    .in_set(OnUpdate(GameState::Main))
             )
         ;
     }

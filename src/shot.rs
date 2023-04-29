@@ -12,7 +12,7 @@ pub enum Shots {
 impl Shots {
     pub const fn get_default_damages(&self) -> f32 {
         match self {
-            Self::Basic => 32.,
+            Self::Basic => 6.,
         }
     }
 }

@@ -5,7 +5,7 @@ use crate::graphics::sprites::TILE;
 
 #[derive(Debug, Clone)]
 pub struct EnemyStats {
-    hp: f32,
+    pub(crate) hp: f32,
     speed: f32,
 }
 
@@ -17,7 +17,8 @@ pub enum Enemies {
 #[derive(Component)]
 pub struct Enemy {
     class: Enemies,
-    stats: EnemyStats,
+    pub(crate) stats: EnemyStats,
+    pub(crate) advance: f32,
 }
 
 impl Enemies {
@@ -34,6 +35,7 @@ impl Enemies {
         Enemy {
             class: *self,
             stats: self.get_default_stats().clone(),
+            advance: 0.,
         }
     }
 
