@@ -11,6 +11,7 @@ use crate::title::TitlePlugin;
 mod util;
 mod title;
 mod graphics;
+mod logic;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
