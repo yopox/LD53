@@ -62,9 +62,10 @@ pub fn tower_fire(
         let mut chosen_enemy = None;
         let mut max_advance: f32 = -1.;
         for (e_enemy, enemy) in enemies.iter_mut() {
-            if enemy.advance >= max_advance {
+            let advance = enemy.advance;
+            if advance >= max_advance {
                 chosen_enemy = Some((e_enemy, enemy));
-                max_advance = enemy.advance;
+                max_advance = advance;
             }
         }
 
