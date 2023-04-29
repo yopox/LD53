@@ -1,7 +1,11 @@
 use bevy::prelude::*;
-use crate::enemy::{Enemies, spawn_enemy};
-use crate::GameState;
+
+use crate::{GameState, util};
+use crate::enemy::Enemies;
+use crate::graphics::{MainBundle, sprite_from_tile};
 use crate::graphics::loading::Textures;
+use crate::graphics::sprites::DEFAULT_PALETTE;
+use crate::tower::Towers;
 
 pub struct PlayingPlugin;
 
@@ -9,7 +13,7 @@ impl Plugin for PlayingPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system(
-            setup_playing.in_schedule(OnEnter(GameState::Main))
+                setup_playing.in_schedule(OnEnter(GameState::Main))
             )
             .add_system(
                 exit_playing.in_schedule(OnExit(GameState::Main))
@@ -25,7 +29,23 @@ fn setup_playing (
     mut commands: Commands,
     textures: Res<Textures>,
 ) {
-    spawn_enemy(Enemies::Drone, Vec2::new(200., 48.), &textures.mrmotext, commands);
+    let atlas = &textures.mrmotext;
+
+    commands.spawn(Enemies::Drone.instantiate())
+        .insert(
+            MainBundle::from_xyz(200., 48., util::z_pos::ENEMIES)
+        )
+        .with_children(|builder|
+            sprite_from_tile(builder, Enemies::Drone.get_tiles(), atlas, DEFAULT_PALETTE.into(), 0.))
+        .insert(PlayingUI);
+
+    commands.spawn(Towers::Basic.instantiate())
+        .insert(
+            MainBundle::from_xyz(128., 80., util::z_pos::ENEMIES)
+        )
+        .with_children(|builder|
+            sprite_from_tile(builder, Towers::Basic.get_tiles(), atlas, DEFAULT_PALETTE.into(), 0.))
+        .insert(PlayingUI);
 }
 
 fn exit_playing (

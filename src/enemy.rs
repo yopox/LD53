@@ -1,9 +1,10 @@
+use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 use crate::graphics::{MainBundle, sprite_from_tile};
 use crate::graphics::sprites::{TILE, CASH_KNIGHT, DEFAULT_PALETTE};
 use crate::util;
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct EnemyStats {
     hp: f32,
     speed: f32,
@@ -12,6 +13,12 @@ pub struct EnemyStats {
 #[derive(Debug, Clone, Copy)]
 pub enum Enemies {
     Drone
+}
+
+#[derive(Component)]
+pub struct Enemy {
+    class: Enemies,
+    stats: EnemyStats,
 }
 
 impl Enemies {
@@ -24,30 +31,16 @@ impl Enemies {
         }
     }
 
+    pub fn instantiate(&self) -> Enemy {
+        Enemy {
+            class: *self,
+            stats: self.get_default_stats().clone(),
+        }
+    }
+
     pub const fn get_tiles(&self) -> &[TILE] {
         match self {
             Self::Drone => &CASH_KNIGHT,
         }
     }
-}
-
-#[derive(Component)]
-pub struct Enemy {
-    class: Enemies,
-    stats: EnemyStats,
-}
-
-pub fn spawn_enemy(
-    class: Enemies,
-    position: Vec2,
-    atlas: &Handle<TextureAtlas>,
-    mut commands: Commands,
-) {
-    commands.spawn(Enemy {
-        class, stats: class.get_default_stats().clone()
-    }).insert(
-        MainBundle::from_xyz(position.x, position.y,util::z_pos::ENEMIES)
-    ).with_children(|builder|
-        sprite_from_tile(builder, class.get_tiles(), atlas, DEFAULT_PALETTE.into(), 0.))
-    ;
 }
