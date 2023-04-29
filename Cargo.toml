@@ -25,5 +25,6 @@ bevy_tweening = "0.7"
 lazy_static = "1.4"
 strum = "0.24"
 strum_macros = "0.24"
+enum-derived = "0.8.2"
 
 rand = { version = "0.8", features = ["alloc"]}
