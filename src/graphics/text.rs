@@ -1,8 +1,9 @@
 use bevy::app::App;
 use bevy::prelude::*;
+use bevy::sprite::Anchor;
 
 use crate::graphics::{MainBundle, Palette, sprite};
-use crate::graphics::loading::Textures;
+use crate::graphics::loading::{Fonts, Textures};
 use crate::util::size;
 
 pub struct TextPlugin;
@@ -89,5 +90,48 @@ pub fn glyph_index(c: char) -> Option<usize> {
         'a'..='z' => Some(c as usize - 'a' as usize + 897),
         '!'..='_' => Some(c as usize - '!' as usize + 865),
         _ => None,
+    }
+}
+
+pub enum TextStyles {
+    Heading,
+    Body,
+}
+
+impl TextStyles {
+    fn get_font(&self, fonts: &Fonts) -> Handle<Font> {
+        match self {
+            TextStyles::Heading => fonts.yesterday.clone(),
+            TextStyles::Body => fonts.axones.clone(),
+        }
+    }
+
+    fn get_size(&self) -> f32 {
+        match self {
+            TextStyles::Heading => 8.,
+            TextStyles::Body => 8.,
+        }
+    }
+
+    pub fn style(&self, fonts: &Fonts, color: Palette) -> TextStyle {
+        TextStyle {
+            font: self.get_font(fonts),
+            font_size: self.get_size(),
+            color: color.into(),
+        }
+    }
+}
+
+pub fn ttf(x: f32, y: f32, z: f32, text: &str, style: TextStyles, fonts: &Fonts, color: Palette) -> Text2dBundle {
+    Text2dBundle {
+        text: bevy::text::Text {
+            sections: vec![
+                TextSection::new(text, style.style(fonts, color)),
+            ],
+            ..default()
+        },
+        text_anchor: Anchor::BottomLeft,
+        transform: Transform::from_xyz(x, y, z),
+        ..default()
     }
 }

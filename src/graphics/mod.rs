@@ -5,6 +5,7 @@ use bevy_tweening::TweeningPlugin;
 
 use crate::graphics::animation::AnimationPlugin;
 use crate::graphics::grid::GridPlugin;
+use crate::graphics::gui::GuiPlugin;
 use crate::graphics::loading::LoadingPlugin;
 use crate::graphics::palette::Palette;
 use crate::graphics::sprites::TILE;
@@ -21,6 +22,7 @@ pub mod tile;
 pub mod sprites;
 pub mod grid;
 pub mod package;
+pub mod gui;
 
 #[derive(Bundle, Debug, Default)]
 pub struct MainBundle {
@@ -113,6 +115,7 @@ impl Plugin for GraphicsPlugin {
             .add_plugin(AnimationPlugin)
             .add_plugin(TweeningPlugin)
             .add_plugin(GridPlugin)
+            .add_plugin(GuiPlugin)
         ;
     }
 }
