@@ -1,5 +1,9 @@
 use bevy::math::Vec2;
 
+use util::size::tile_to_f32;
+
+use crate::util;
+
 pub type X = usize;
 pub type Y = usize;
 pub type INDEX = usize;
@@ -26,7 +30,14 @@ impl DroneModels {
     pub fn package_offset(&self) -> Vec2 {
         match self {
             DroneModels::Simple => Vec2::new(0., -1.),
-            DroneModels::Super => Vec2::new(8., 0.),
+            DroneModels::Super => Vec2::new(8., -3.),
+        }
+    }
+
+    pub fn get_size(&self) -> Vec2 {
+        match self {
+            DroneModels::Simple => Vec2::new(tile_to_f32(1), tile_to_f32(2)),
+            DroneModels::Super => Vec2::new(tile_to_f32(3), tile_to_f32(2)),
         }
     }
 }
@@ -46,7 +57,6 @@ const DRONE_2: &'static [TILE] = &[
 ];
 
 pub const TOWER_1: &'static [TILE] = &[
-    (0, 2, 478, 16, 8, false, 0),
-    (0, 1, 1022, 16, 3, false, 0),
-    (0, 0, 451, 16, 3, false, 0),
+    (0, 1, 478, 16, 8, false, 0),
+    (0, 0, 451, 16, 1, false, 0),
 ];

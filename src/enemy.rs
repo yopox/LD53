@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use strum_macros::EnumIter;
 
-use crate::{graphics, util};
-use crate::collision::{body_size, BodyType, Contact, HitBox, SolidBody};
+use crate::graphics;
+use crate::collision::{body_size, BodyType, Contact, SolidBody};
 use crate::graphics::sprites::{DroneModels, TILE};
 use crate::shot::Shot;
+use crate::util::size::f32_tile_to_f32;
 
 #[derive(Debug, Clone)]
 pub struct EnemyStats {
@@ -73,8 +74,12 @@ pub fn update_drones(
         drone.advance += drone.stats.speed * time.delta_seconds();
 
         let Some(progress) = path.0.pos(drone.advance) else { continue };
-        pos.translation.x = util::size::path_to_f32(progress.x);
-        pos.translation.y = util::size::path_to_f32(progress.y);
+
+        let size = drone.class.get_model().get_size();
+        pos.translation.x = f32_tile_to_f32(progress.x)
+            - size.x / 2. + f32_tile_to_f32(0.5); // Center sprite
+        pos.translation.y = f32_tile_to_f32(progress.y)
+            + f32_tile_to_f32(0.5); // Make sprite levitate over the road
     }
 }
 
