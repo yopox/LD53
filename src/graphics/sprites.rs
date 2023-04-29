@@ -10,23 +10,23 @@ pub type ROTATION = u8;
 pub type TILE = (X, Y, INDEX, BG, FG, FLIP, ROTATION);
 
 pub enum DroneModels {
-    Small,
-    Big,
+    Simple,
+    Super,
 }
 
 impl DroneModels {
     pub fn get_tiles(&self) -> &'static [TILE] {
         match self {
-            DroneModels::Small => &DRONE_1,
-            DroneModels::Big => &DRONE_2,
+            DroneModels::Simple => &DRONE_1,
+            DroneModels::Super => &DRONE_2,
         }
     }
 
     /// Returns the offset for the package in pixels from the bottom-left tile.
     pub fn package_offset(&self) -> Vec2 {
         match self {
-            DroneModels::Small => Vec2::new(0., -1.),
-            DroneModels::Big => Vec2::new(8., 0.),
+            DroneModels::Simple => Vec2::new(0., -1.),
+            DroneModels::Super => Vec2::new(8., 0.),
         }
     }
 }
