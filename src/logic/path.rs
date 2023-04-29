@@ -19,7 +19,9 @@ impl Path {
 
 
         for i in 0..points.len() - 1 {
-            let distance = points[i].distance(points[i+1]);
+            let (p1, p2) = (points[i], points[i + 1]);
+            assert!(p1.x == p2.x || p1.y == p2.y);
+            let distance = p1.distance(p2);
             length += distance;
             segments.push(distance);
             combined.push(length);

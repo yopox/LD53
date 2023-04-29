@@ -52,7 +52,7 @@ fn setup_playing (
 
     commands.spawn(Towers::Basic.instantiate())
         .insert(
-            MainBundle::from_xyz(128., 80., util::z_pos::ENEMIES)
+            MainBundle::from_xyz(100., 80., util::z_pos::ENEMIES)
         )
         .with_children(|builder|
             sprite_from_tile(builder, Towers::Basic.get_tiles(), atlas, 0.))

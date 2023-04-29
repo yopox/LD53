@@ -17,6 +17,7 @@ pub mod z_pos {
     pub const BACKGROUND: f32 = 0.;
     pub const TITLE_TEXT: f32 = 1.;
     pub const GRID: f32 = 2.;
+    pub const ROAD: f32 = 2.5;
     pub const ENEMIES: f32 = 6.;
     pub const TRANSITION: f32 = 10.;
     pub const GUI: f32 = 11.;
