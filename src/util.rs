@@ -15,10 +15,10 @@ pub mod size {
 
 pub mod z_pos {
     pub const BACKGROUND: f32 = 0.;
-    pub const TITLE_TEXT: f32 = 8.5;
-    pub const TRANSITION: f32 = 9.;
-    pub const ENEMIES: f32 = 10.;
-    pub const GUI: f32 = 12.;
+    pub const TITLE_TEXT: f32 = 1.;
+    pub const ENEMIES: f32 = 2.;
+    pub const TRANSITION: f32 = 10.;
+    pub const GUI: f32 = 11.;
 }
 
 pub mod transition {
