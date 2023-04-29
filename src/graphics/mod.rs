@@ -20,6 +20,7 @@ pub mod animation;
 pub mod tile;
 pub mod sprites;
 pub mod grid;
+pub mod package;
 
 #[derive(Bundle, Debug, Default)]
 pub struct MainBundle {
@@ -48,6 +49,20 @@ pub fn sprite(
     flip: bool, rotation: u8,
     atlas: Handle<TextureAtlas>,
 ) -> TextModeSpriteSheetBundle {
+    sprite_f32(
+        index,
+        tile_to_f32(x), tile_to_f32(y), z,
+        bg, fg, flip, rotation, atlas.clone(),
+    )
+}
+
+pub fn sprite_f32(
+    index: usize,
+    x: f32, y: f32, z: f32,
+    bg: Palette, fg: Palette,
+    flip: bool, rotation: u8,
+    atlas: Handle<TextureAtlas>,
+) -> TextModeSpriteSheetBundle {
     TextModeSpriteSheetBundle {
         sprite: TextModeTextureAtlasSprite {
             bg: bg.into(),
@@ -61,14 +76,14 @@ pub fn sprite(
         },
         texture_atlas: atlas,
         transform: Transform {
-            translation: Vec3::new(tile_to_f32(x), tile_to_f32(y) , z),
+            translation: Vec3::new(x, y, z),
             ..default()
         },
         ..default()
     }
 }
 
-pub fn sprite_from_tile (
+pub fn sprite_from_tile(
     builder: &mut ChildBuilder,
     tiles: &[TILE],
     atlas: &Handle<TextureAtlas>,

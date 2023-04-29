@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{enemy, GameState, util};
 use crate::enemy::Enemies;
-use crate::graphics::{animation, MainBundle, sprite_from_tile};
+use crate::graphics::{animation, MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::Wiggle;
 use crate::graphics::loading::Textures;
 use crate::tower::{tower_fire, update_just_fired};
@@ -39,17 +39,20 @@ fn setup_playing (
         .insert(
             MainBundle::from_xyz(0., 0., util::z_pos::ENEMIES)
         )
-        .with_children(|builder|
-            sprite_from_tile(builder, Enemies::Drone.get_tiles(), atlas, 0.))
+        .insert(Wiggle::with_frequency(Wiggle::slow()))
+        .with_children(|builder| {
+            sprite_from_tile(builder, Enemies::Drone.get_tiles(), atlas, 0.);
+            package::spawn(builder, Enemies::Drone.get_model().package_offset(), atlas);
+        })
         .insert(PlayingUI);
 
-    commands.spawn(Towers::Basic.instantiate())
-        .insert(
-            MainBundle::from_xyz(100., 80., util::z_pos::ENEMIES)
-        )
-        .with_children(|builder|
-            sprite_from_tile(builder, Towers::Basic.get_tiles(), atlas, 0.))
-        .insert(PlayingUI);
+    // commands.spawn(Towers::Basic.instantiate())
+    //     .insert(
+    //         MainBundle::from_xyz(100., 80., util::z_pos::ENEMIES)
+    //     )
+    //     .with_children(|builder|
+    //         sprite_from_tile(builder, Towers::Basic.get_tiles(), atlas, 0.))
+    //     .insert(PlayingUI);
 }
 
 fn exit_playing (

@@ -1,3 +1,5 @@
+use bevy::math::Vec2;
+
 pub type X = usize;
 pub type Y = usize;
 pub type INDEX = usize;
@@ -7,16 +9,43 @@ pub type FLIP = bool;
 pub type ROTATION = u8;
 pub type TILE = (X, Y, INDEX, BG, FG, FLIP, ROTATION);
 
-pub const DRONE_1: [TILE; 6] = [
-    (0, 1, 222, 16, 15, false, 0),
-    (1, 1, 644, 15, 12, false, 0),
-    (2, 1, 222, 16, 15, false, 1),
+pub enum DroneModels {
+    Small,
+    Big,
+}
+
+impl DroneModels {
+    pub fn get_tiles(&self) -> &'static [TILE] {
+        match self {
+            DroneModels::Small => &DRONE_1,
+            DroneModels::Big => &DRONE_2,
+        }
+    }
+
+    /// Returns the offset for the package in pixels from the bottom-left tile.
+    pub fn package_offset(&self) -> Vec2 {
+        match self {
+            DroneModels::Small => Vec2::new(0., -1.),
+            DroneModels::Big => Vec2::new(8., 0.),
+        }
+    }
+}
+
+const DRONE_1: &'static [TILE] = &[
+    (0, 1, 338, 16, 9, false, 0),
+    (0, 0, 458, 16, 15, true, 2),
+];
+
+const DRONE_2: &'static [TILE] = &[
+    (0, 1, 222, 16, 9, false, 0),
+    (1, 1, 644, 9, 12, false, 0),
+    (2, 1, 222, 16, 9, false, 1),
     (0, 0, 153, 16, 10, true, 3),
     (1, 0, 0, 16, 10, false, 0),
     (2, 0, 153, 16, 10, false, 3),
 ];
 
-pub const TOWER_1: [TILE; 3] = [
+pub const TOWER_1: &'static [TILE] = &[
     (0, 2, 478, 16, 8, false, 0),
     (0, 1, 1022, 16, 3, false, 0),
     (0, 0, 451, 16, 3, false, 0),
