@@ -1,8 +1,7 @@
 use bevy::prelude::*;
-use crate::graphics::{MainBundle, sprite_from_tile};
-use crate::graphics::sprites::{CASH_KNIGHT, DEFAULT_PALETTE, TILE};
-use crate::shot::{Shot, Shots};
-use crate::util;
+
+use crate::graphics::sprites::{CASH_KNIGHT, TILE};
+use crate::shot::Shots;
 
 #[derive(Component)]
 pub struct Tower {

@@ -2,14 +2,13 @@ use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy_text_mode::{TextModeSpriteSheetBundle, TextModeTextureAtlasSprite};
 use bevy_tweening::TweeningPlugin;
+
 use crate::graphics::animation::AnimationPlugin;
 use crate::graphics::loading::LoadingPlugin;
 use crate::graphics::palette::Palette;
 use crate::graphics::sprites::TILE;
 use crate::graphics::text::TextPlugin;
-use crate::graphics::tile::Rotation;
-use crate::graphics::transition::{end_transition, start_transition, TransitionPlugin};
-use crate::util;
+use crate::graphics::transition::TransitionPlugin;
 use crate::util::size::tile_to_f32;
 
 pub mod text;
@@ -19,6 +18,7 @@ pub mod transition;
 mod animation;
 pub mod tile;
 pub mod sprites;
+mod grid;
 
 #[derive(Bundle, Debug, Default)]
 pub struct MainBundle {
@@ -71,17 +71,16 @@ pub fn sprite_from_tile (
     builder: &mut ChildBuilder,
     tiles: &[TILE],
     atlas: &Handle<TextureAtlas>,
-    palette: Vec<Palette>,
     z: f32,
 ) {
-    for &(x, y, i, bg, fg, rotation) in tiles {
+    for &(x, y, i, bg, fg, flip, rotation) in tiles {
         builder.spawn(
             sprite(
                 i, x, y, z,
-                palette[bg],
-                palette[fg],
-                rotation == Rotation::Flip,
-                rotation.into(),
+                bg.into(),
+                fg.into(),
+                flip,
+                rotation,
                 atlas.clone(),
             )
         );

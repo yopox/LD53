@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+
 use crate::GameState;
 use crate::graphics::palette::Palette;
 use crate::graphics::text::color_text;
@@ -29,7 +30,7 @@ fn setup_title (
         ("Press any key to continue", 20, 6),
     ] {
         commands
-            .spawn(color_text(t, x, y, z_pos::TITLE_TEXT, Palette::Black, Palette::White))
+            .spawn(color_text(t, x, y, z_pos::TITLE_TEXT, Palette::A, Palette::E))
             .insert(TitleUI);
     }
 }

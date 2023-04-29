@@ -1,13 +1,13 @@
-use crate::util::size;
-use crate::util::size::tile_to_f32;
 use bevy::prelude::*;
 use bevy_text_mode::TextModePlugin;
+
 use graphics::palette::Palette;
+
 use crate::graphics::GraphicsPlugin;
-use crate::graphics::loading::LoadingPlugin;
-use crate::graphics::text::TextPlugin;
 use crate::playing::PlayingPlugin;
 use crate::title::TitlePlugin;
+use crate::util::size;
+use crate::util::size::tile_to_f32;
 
 mod util;
 mod title;
@@ -28,7 +28,7 @@ pub enum GameState {
 
 fn main() {
     App::new()
-        .insert_resource(ClearColor(Palette::Black.into()))
+        .insert_resource(ClearColor(Palette::E.into()))
         .insert_resource(Msaa::Off)
         .add_plugins(DefaultPlugins
             .set(ImagePlugin::default_nearest())

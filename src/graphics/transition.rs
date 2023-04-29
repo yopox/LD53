@@ -5,8 +5,8 @@ use bevy_tweening::{Animator, Delay, EaseFunction, Tween, TweenCompleted};
 use bevy_tweening::lens::TransformPositionLens;
 
 use crate::{GameState, util};
-use crate::graphics::loading::Textures;
 use crate::graphics::{MainBundle, sprite};
+use crate::graphics::loading::Textures;
 use crate::graphics::palette::Palette;
 use crate::util::size::{tile_to_f32, WIDTH};
 
@@ -86,7 +86,7 @@ pub(in crate::graphics) fn start_transition(
                         };
                         builder.spawn(sprite(
                             index, x, y, 0.,
-                            Palette::Transparent, Palette::Black,
+                            Palette::Transparent, Palette::B,
                             flip, 0, textures.mrmotext.clone()
                         ));
                     }
@@ -109,7 +109,7 @@ pub(in crate::graphics) fn start_transition(
                         };
                         builder.spawn(sprite(
                             index, x, y, 0.,
-                            Palette::Transparent, Palette::Black,
+                            Palette::Transparent, Palette::B,
                             flip, 2, textures.mrmotext.clone()
                         ));
                     }

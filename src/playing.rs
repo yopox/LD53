@@ -4,7 +4,6 @@ use crate::{GameState, util};
 use crate::enemy::Enemies;
 use crate::graphics::{MainBundle, sprite_from_tile};
 use crate::graphics::loading::Textures;
-use crate::graphics::sprites::DEFAULT_PALETTE;
 use crate::tower::Towers;
 
 pub struct PlayingPlugin;
@@ -36,7 +35,7 @@ fn setup_playing (
             MainBundle::from_xyz(200., 48., util::z_pos::ENEMIES)
         )
         .with_children(|builder|
-            sprite_from_tile(builder, Enemies::Drone.get_tiles(), atlas, DEFAULT_PALETTE.into(), 0.))
+            sprite_from_tile(builder, Enemies::Drone.get_tiles(), atlas, 0.))
         .insert(PlayingUI);
 
     commands.spawn(Towers::Basic.instantiate())
@@ -44,7 +43,7 @@ fn setup_playing (
             MainBundle::from_xyz(128., 80., util::z_pos::ENEMIES)
         )
         .with_children(|builder|
-            sprite_from_tile(builder, Towers::Basic.get_tiles(), atlas, DEFAULT_PALETTE.into(), 0.))
+            sprite_from_tile(builder, Towers::Basic.get_tiles(), atlas, 0.))
         .insert(PlayingUI);
 }
 

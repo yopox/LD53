@@ -1,8 +1,8 @@
 use bevy::app::App;
 use bevy::prelude::*;
 
-use crate::graphics::loading::Textures;
 use crate::graphics::{MainBundle, Palette, sprite};
+use crate::graphics::loading::Textures;
 use crate::util::size;
 
 pub struct TextPlugin;
@@ -29,8 +29,8 @@ pub fn text(text: &str, x: usize, y: usize, z: f32) -> Text {
         x,
         y,
         z,
-        bg: Palette::Black,
-        fg: Palette::White,
+        bg: Palette::E,
+        fg: Palette::A,
     }
 }
 

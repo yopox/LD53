@@ -1,8 +1,6 @@
-use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
-use crate::graphics::{MainBundle, sprite_from_tile};
-use crate::graphics::sprites::{TILE, CASH_KNIGHT, DEFAULT_PALETTE};
-use crate::util;
+
+use crate::graphics::sprites::{CASH_KNIGHT, TILE};
 
 #[derive(Debug, Clone)]
 pub struct EnemyStats {

@@ -1,22 +1,8 @@
 use bevy::prelude::*;
-use bevy_text_mode::{TextModeSpriteSheetBundle, TextModeTextureAtlasSprite};
+use bevy_text_mode::TextModeSpriteSheetBundle;
+
 use crate::graphics::palette::Palette;
 use crate::graphics::sprite;
-
-#[derive(Copy, Clone, PartialEq, Eq, Default)]
-pub enum Rotation {
-    #[default]
-    No = 0,
-    Right,
-    Flip,
-    Left,
-}
-
-impl Into<u8> for Rotation {
-    fn into(self) -> u8 {
-        self as u8
-    }
-}
 
 #[derive(Copy, Clone)]
 pub struct Tile {
@@ -24,7 +10,7 @@ pub struct Tile {
     pub bg: Palette,
     pub fg: Palette,
     pub flip: bool,
-    pub rotation: Rotation,
+    pub rotation: u8,
 }
 
 impl Default for Tile {
@@ -34,13 +20,13 @@ impl Default for Tile {
             bg: Palette::Transparent,
             fg: Palette::Transparent,
             flip: false,
-            rotation: Rotation::default(),
+            rotation: 0,
         }
     }
 }
 
 impl Tile {
-    pub fn new(index: usize, flip: bool, rotation: Rotation) -> Self {
+    pub fn new(index: usize, flip: bool, rotation: u8) -> Self {
         Tile { index, flip, rotation, ..Tile::default() }
     }
 
@@ -52,7 +38,7 @@ impl Tile {
         Tile { fg, ..self }
     }
 
-    pub fn with_rotation(self, rotation: Rotation) -> Self {
+    pub fn with_rotation(self, rotation: u8) -> Self {
         Tile { rotation, ..self }
     }
 
@@ -61,6 +47,6 @@ impl Tile {
     }
 
     pub fn sprite(&self, x: usize, y: usize, z: f32, atlas: &Handle<TextureAtlas>) -> TextModeSpriteSheetBundle {
-        sprite(self.index, x, y, z, self.bg, self.fg, self.flip, self.rotation.into(), atlas.clone())
+        sprite(self.index, x, y, z, self.bg, self.fg, self.flip, self.rotation, atlas.clone())
     }
 }
