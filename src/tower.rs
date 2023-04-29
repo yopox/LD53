@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::graphics::sprites::{CASH_KNIGHT, TILE};
+use crate::graphics::sprites;
+use crate::graphics::sprites::TILE;
 use crate::shot::Shots;
 
 #[derive(Component)]
@@ -29,7 +30,7 @@ impl Towers {
 
     pub const fn get_tiles(&self) -> &[TILE] {
         match &self {
-            Towers::Basic => &CASH_KNIGHT,
+            Towers::Basic => &sprites::TOWER_1,
         }
     }
 }

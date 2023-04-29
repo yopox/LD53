@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::graphics::sprites::{CASH_KNIGHT, TILE};
+use crate::graphics::sprites;
+use crate::graphics::sprites::TILE;
 
 #[derive(Debug, Clone)]
 pub struct EnemyStats {
@@ -38,7 +39,7 @@ impl Enemies {
 
     pub const fn get_tiles(&self) -> &[TILE] {
         match self {
-            Self::Drone => &CASH_KNIGHT,
+            Self::Drone => &sprites::DRONE_1,
         }
     }
 }
