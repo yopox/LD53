@@ -11,6 +11,8 @@ pub mod size {
 
     /// Returns world coordinates for a tile, for instance `2` -> `(2 * TILE_SIZE) as f32 `.
     pub const fn tile_to_f32(tile: usize) -> f32 { (tile * TILE_SIZE) as f32 }
+
+    pub fn path_to_f32(pos: f32) -> f32 { pos * TILE_SIZE as f32 * 2. }
 }
 
 pub mod z_pos {

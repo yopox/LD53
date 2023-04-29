@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{GameState, util};
+use crate::{enemy, GameState, util};
 use crate::enemy::Enemies;
 use crate::graphics::{MainBundle, sprite_from_tile};
 use crate::graphics::loading::Textures;
@@ -18,7 +18,7 @@ impl Plugin for PlayingPlugin {
                 exit_playing.in_schedule(OnExit(GameState::Main))
             )
             .add_systems(
-                (update_just_fired, tower_fire)
+                (update_just_fired, tower_fire, enemy::update_drones)
                     .in_set(OnUpdate(GameState::Main))
             )
         ;
@@ -36,15 +36,7 @@ fn setup_playing (
 
     commands.spawn(Enemies::Drone.instantiate())
         .insert(
-            MainBundle::from_xyz(200., 48., util::z_pos::ENEMIES)
-        )
-        .with_children(|builder|
-            sprite_from_tile(builder, Enemies::Drone.get_tiles(), atlas, 0.))
-        .insert(PlayingUI);
-
-    commands.spawn(Enemies::Drone.instantiate())
-        .insert(
-            MainBundle::from_xyz(28., 48., util::z_pos::ENEMIES)
+            MainBundle::from_xyz(0., 0., util::z_pos::ENEMIES)
         )
         .with_children(|builder|
             sprite_from_tile(builder, Enemies::Drone.get_tiles(), atlas, 0.))

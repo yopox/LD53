@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::{graphics, util};
 use crate::graphics::sprites;
 use crate::graphics::sprites::TILE;
 
@@ -26,7 +27,7 @@ impl Enemies {
         match self {
             Self::Drone => EnemyStats {
                 hp: 10.,
-                speed: 32.,
+                speed: 0.02,
             }
         }
     }
@@ -43,5 +44,19 @@ impl Enemies {
         match self {
             Self::Drone => &sprites::DRONE_1,
         }
+    }
+}
+
+pub fn update_drones(
+    mut drones: Query<(&mut Transform, &mut Enemy)>,
+    path: Option<Res<graphics::grid::CurrentPath>>,
+) {
+    let Some(path) = path else { return; };
+    for (mut pos, mut drone) in drones.iter_mut() {
+        drone.advance += drone.stats.speed;
+
+        let Some(progress) = path.0.pos(drone.advance) else { continue };
+        pos.translation.x = util::size::path_to_f32(progress.x);
+        pos.translation.y = util::size::path_to_f32(progress.y);
     }
 }

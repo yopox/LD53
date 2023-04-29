@@ -19,7 +19,7 @@ pub mod transition;
 mod animation;
 pub mod tile;
 pub mod sprites;
-mod grid;
+pub mod grid;
 
 #[derive(Bundle, Debug, Default)]
 pub struct MainBundle {

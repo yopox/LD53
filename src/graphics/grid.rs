@@ -27,6 +27,9 @@ impl Plugin for GridPlugin {
 #[derive(Component)]
 struct GridUI;
 
+#[derive(Resource)]
+pub struct CurrentPath(pub logic::path::Path);
+
 fn setup(
     mut commands: Commands,
     textures: Res<Textures>,
@@ -44,6 +47,7 @@ fn setup(
         Vec2::new(20., 7.),
     ];
     let path = logic::path::Path::from_points(points.clone());
+    commands.insert_resource(CurrentPath(path));
 
     // Draw grass
     for x in 0..util::size::WIDTH {
