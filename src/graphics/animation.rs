@@ -1,5 +1,4 @@
-use bevy::app::{App, Plugin};
-use bevy::prelude::{Component, Query, ResMut, Resource, Transform, Without};
+use bevy::prelude::*;
 use bevy_text_mode::TextModeTextureAtlasSprite;
 
 use crate::util;

@@ -1,11 +1,20 @@
 use std::time::Duration;
 
+use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
+use bevy_tweening::{Animator, Tween};
+use bevy_tweening::EaseMethod::Linear;
+use bevy_tweening::lens::TransformPositionLens;
+use strum_macros::EnumIter;
 
-use crate::enemy::Enemy;
-use crate::graphics::sprites;
+use crate::enemy::{Enemies, Enemy};
+use crate::graphics::{MainBundle, sprite_from_tile, sprites};
+use crate::graphics::loading::Textures;
 use crate::graphics::sprites::TILE;
+use crate::playing::PlayingUI;
 use crate::shot::Shots;
+use crate::util::{with_z, z_pos};
+use crate::util::tweening::SHOT_DESPAWNED;
 
 #[derive(Component)]
 pub struct Tower {
@@ -13,10 +22,11 @@ pub struct Tower {
     /// Time between two shots in seconds
     reloading_delay: f32,
     range: f32,
+    radius: f32,
     shot: Shots,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, EnumIter)]
 pub enum Towers {
     Basic,
 }
@@ -42,6 +52,7 @@ impl Towers {
                 class: *self,
                 reloading_delay: 10.,
                 range: 120.,
+                radius: 120.,
                 shot: Shots::Basic,
             }
         }
@@ -62,28 +73,37 @@ pub fn tower_fire(
     )>,
     mut commands: Commands,
     time: Res<Time>,
+    textures: Res<Textures>,
 ) {
     for (e_tower, &t_tower, tower) in towers.iter() {
-        let mut chosen_enemy: Option<Entity> = None;
+        let mut chosen_enemy: Option<(Vec3, f32)> = None;
         let mut max_advance: f32 = -1.;
-        for (e_enemy, t_enemy, enemy) in enemies.p0().iter() {
+        for (_e_enemy, t_enemy, enemy) in enemies.p0().iter() {
             let advance = enemy.advance;
-            if advance >= max_advance && t_tower.translation.distance_squared(t_enemy.translation) <= tower.range * tower.range {
-                chosen_enemy = Some(e_enemy);
+            let distance = t_tower.translation.distance(t_enemy.translation);
+            if advance >= max_advance && distance <= tower.range {
+                chosen_enemy = Some((t_enemy.translation, distance));
                 max_advance = advance;
             }
         }
 
-        if let Some(e_enemy) = chosen_enemy {
-            if let Ok(mut enemy) = enemies.p1().get_mut(e_enemy) {
-                enemy.stats.hp -= tower.shot.get_default_damages();
-                if enemy.stats.hp <= 0. {
-                    enemy.stats.hp = 0.;
-                    if let Some(entity_commands) = commands.get_entity(e_enemy) {
-                        entity_commands.despawn_recursive();
-                    }
-                }
-            }
+        if let Some((enemy_position, distance)) = chosen_enemy {
+            commands
+                .spawn(tower.shot.instantiate())
+                .insert(MainBundle::from_xyz(t_tower.translation.x, t_tower.translation.y, z_pos::SHOT))
+                .insert(Animator::new(Tween::new(
+                    Linear,
+                    Duration::from_secs_f32(distance / tower.shot.get_speed()),
+                    TransformPositionLens {
+                        start: with_z(t_tower.translation, z_pos::SHOT),
+                        end: with_z(enemy_position, z_pos::SHOT),
+                    },
+                ).with_completed_event(SHOT_DESPAWNED)))
+                .with_children(|builder|
+                    sprite_from_tile(builder, Enemies::Drone.get_tiles(), &textures.mrmotext, 0.)
+                )
+                .insert(PlayingUI)
+            ;
 
             if let Some(mut entity_commands) = commands.get_entity(e_tower) {
                 entity_commands.insert(JustFired::new(&time, tower.reloading_delay));

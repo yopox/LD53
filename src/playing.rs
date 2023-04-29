@@ -5,7 +5,8 @@ use crate::enemy::Enemies;
 use crate::graphics::{animation, MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::Wiggle;
 use crate::graphics::loading::Textures;
-use crate::tower::{tower_fire, update_just_fired};
+use crate::shot::remove_shots;
+use crate::tower::{tower_fire, Towers, update_just_fired};
 
 pub struct PlayingPlugin;
 
@@ -19,7 +20,7 @@ impl Plugin for PlayingPlugin {
                 exit_playing.in_schedule(OnExit(GameState::Main))
             )
             .add_systems(
-                (update_just_fired, tower_fire, enemy::update_drones.before(animation::wiggle))
+                (update_just_fired, tower_fire, enemy::update_drones, remove_shots)
                     .in_set(OnUpdate(GameState::Main))
             )
         ;
@@ -46,13 +47,13 @@ fn setup_playing (
         })
         .insert(PlayingUI);
 
-    // commands.spawn(Towers::Basic.instantiate())
-    //     .insert(
-    //         MainBundle::from_xyz(100., 80., util::z_pos::ENEMIES)
-    //     )
-    //     .with_children(|builder|
-    //         sprite_from_tile(builder, Towers::Basic.get_tiles(), atlas, 0.))
-    //     .insert(PlayingUI);
+    commands.spawn(Towers::Basic.instantiate())
+        .insert(
+            MainBundle::from_xyz(100., 80., util::z_pos::ENEMIES)
+        )
+        .with_children(|builder|
+            sprite_from_tile(builder, Towers::Basic.get_tiles(), atlas, 0.))
+        .insert(PlayingUI);
 }
 
 fn exit_playing (

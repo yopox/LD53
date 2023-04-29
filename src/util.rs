@@ -1,3 +1,5 @@
+use bevy::prelude::Vec3;
+
 pub mod size {
     /// Tile size from the tileset
     const TILE_SIZE: usize = 8;
@@ -22,6 +24,7 @@ pub mod z_pos {
     pub const ROAD: f32 = 2.5;
     pub const PACKAGES: f32 = 5.99;
     pub const ENEMIES: f32 = 6.;
+    pub const SHOT: f32 = 7.;
     pub const TRANSITION: f32 = 10.;
     pub const GUI: f32 = 11.;
 }
@@ -35,9 +38,14 @@ pub mod transition {
 
 pub mod tweening {
     pub const TRANSITION_OVER: u64 = 1;
+    pub const SHOT_DESPAWNED: u64 = 2;
     pub const DELAY: u64 = 200;
 }
 
 pub mod misc {
     pub const ANIMATION_INTERVAL: usize = 80;
+}
+
+pub const fn with_z(Vec3 { x, y, .. }: Vec3, z: f32) -> Vec3 {
+    Vec3 { x, y, z }
 }

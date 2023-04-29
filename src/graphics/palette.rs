@@ -53,6 +53,13 @@ impl Into<Palette> for u8 {
     }
 }
 
+pub const TRANSPARENT: Color = Color::Rgba {
+    red: 0.0,
+    green: 0.0,
+    blue: 0.0,
+    alpha: 0.0,
+};
+
 lazy_static! {
     static ref COLOR_OF_PALETTE: [Color; 17] = [
         Color::hex("#ffffff").unwrap(),
@@ -71,6 +78,6 @@ lazy_static! {
         Color::hex("#f48cb6").unwrap(),
         Color::hex("#f7b69e").unwrap(),
         Color::hex("#9b9c82").unwrap(),
-        Color::hex("#00000000").unwrap(),
+        TRANSPARENT,
     ];
 }
