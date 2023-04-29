@@ -1,5 +1,5 @@
 use bevy::app::{App, Plugin};
-use bevy::prelude::{Component, Query, ResMut, Resource, Without};
+use bevy::prelude::{Component, Query, ResMut, Resource, Transform, Without};
 use bevy_text_mode::TextModeTextureAtlasSprite;
 
 use crate::util;
@@ -10,7 +10,8 @@ impl Plugin for AnimationPlugin {
     fn build(&self, app: &mut App) {
         app
             .insert_resource(AnimationTimer(util::misc::ANIMATION_INTERVAL))
-            .add_system(animate);
+            .add_system(animate)
+            .add_system(wiggle);
     }
 }
 
@@ -55,5 +56,26 @@ fn animate(
             sprite.flip_x = new_sprite.flip_x;
             sprite.rotation = new_sprite.rotation;
         }
+    }
+}
+
+#[derive(Component)]
+pub struct Wiggle(f32, usize);
+
+impl Wiggle {
+    pub fn with_frequency(f: f32) -> Self {
+        Wiggle(f, 0)
+    }
+
+    pub fn slow() -> f32 { 0.05 }
+}
+
+pub fn wiggle(
+    mut query: Query<(&mut Transform, &mut Wiggle)>,
+) {
+    for (mut pos, mut w) in query.iter_mut() {
+        pos.translation.y += (w.0 * w.1 as f32).sin() * 0.75;
+        pos.translation.x += (w.0 * w.1 as f32).cos() * 0.75;
+        w.1 += 1;
     }
 }

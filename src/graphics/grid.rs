@@ -34,7 +34,7 @@ fn setup(
     textures: Res<Textures>,
 ) {
     let points = vec![
-        Vec2::new(0., 6.),
+        Vec2::new(-3., 6.),
         Vec2::new(3., 6.),
         Vec2::new(3., 4.),
         Vec2::new(8., 4.),
@@ -43,7 +43,7 @@ fn setup(
         Vec2::new(11., 4.),
         Vec2::new(16., 4.),
         Vec2::new(16., 6.),
-        Vec2::new(20., 6.),
+        Vec2::new(22., 6.),
     ];
     let path = logic::path::Path::from_points(points.clone());
     commands.insert_resource(CurrentPath(path));

@@ -16,7 +16,7 @@ pub mod text;
 pub mod loading;
 pub mod palette;
 pub mod transition;
-mod animation;
+pub mod animation;
 pub mod tile;
 pub mod sprites;
 pub mod grid;
