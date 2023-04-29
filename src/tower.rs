@@ -12,6 +12,7 @@ pub struct Tower {
     class: Towers,
     /// Time between two shots in seconds
     reloading_delay: f32,
+    range: f32,
     shot: Shots,
 }
 
@@ -40,6 +41,7 @@ impl Towers {
             Towers::Basic => Tower {
                 class: *self,
                 reloading_delay: 10.,
+                range: 120.,
                 shot: Shots::Basic,
             }
         }
@@ -53,28 +55,33 @@ impl Towers {
 }
 
 pub fn tower_fire(
-    mut towers: Query<(Entity, &Tower), Without<JustFired>>,
-    mut enemies: Query<(Entity, &mut Enemy)>,
+    towers: Query<(Entity, &Transform, &Tower), Without<JustFired>>,
+    mut enemies: ParamSet<(
+        Query<(Entity, &Transform, &Enemy)>,
+        Query<&mut Enemy>,
+    )>,
     mut commands: Commands,
     time: Res<Time>,
 ) {
-    for (e_tower, tower) in towers.iter_mut() {
-        let mut chosen_enemy = None;
+    for (e_tower, &t_tower, tower) in towers.iter() {
+        let mut chosen_enemy: Option<Entity> = None;
         let mut max_advance: f32 = -1.;
-        for (e_enemy, enemy) in enemies.iter_mut() {
+        for (e_enemy, t_enemy, enemy) in enemies.p0().iter() {
             let advance = enemy.advance;
-            if advance >= max_advance {
-                chosen_enemy = Some((e_enemy, enemy));
+            if advance >= max_advance && t_tower.translation.distance_squared(t_enemy.translation) <= tower.range * tower.range {
+                chosen_enemy = Some(e_enemy);
                 max_advance = advance;
             }
         }
 
-        if let Some((e_enemy, mut enemy)) = chosen_enemy {
-            enemy.stats.hp -= tower.shot.get_default_damages();
-            if enemy.stats.hp <= 0. {
-                enemy.stats.hp = 0.;
-                if let Some(entity_commands) = commands.get_entity(e_enemy) {
-                    entity_commands.despawn_recursive();
+        if let Some(e_enemy) = chosen_enemy {
+            if let Ok(mut enemy) = enemies.p1().get_mut(e_enemy) {
+                enemy.stats.hp -= tower.shot.get_default_damages();
+                if enemy.stats.hp <= 0. {
+                    enemy.stats.hp = 0.;
+                    if let Some(entity_commands) = commands.get_entity(e_enemy) {
+                        entity_commands.despawn_recursive();
+                    }
                 }
             }
 

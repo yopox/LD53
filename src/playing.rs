@@ -42,6 +42,14 @@ fn setup_playing (
             sprite_from_tile(builder, Enemies::Drone.get_tiles(), atlas, 0.))
         .insert(PlayingUI);
 
+    commands.spawn(Enemies::Drone.instantiate())
+        .insert(
+            MainBundle::from_xyz(28., 48., util::z_pos::ENEMIES)
+        )
+        .with_children(|builder|
+            sprite_from_tile(builder, Enemies::Drone.get_tiles(), atlas, 0.))
+        .insert(PlayingUI);
+
     commands.spawn(Towers::Basic.instantiate())
         .insert(
             MainBundle::from_xyz(128., 80., util::z_pos::ENEMIES)
