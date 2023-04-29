@@ -6,12 +6,17 @@ use graphics::palette::Palette;
 use crate::graphics::GraphicsPlugin;
 use crate::graphics::loading::LoadingPlugin;
 use crate::graphics::text::TextPlugin;
+use crate::playing::PlayingPlugin;
 use crate::title::TitlePlugin;
 
 mod util;
 mod title;
 mod graphics;
 mod logic;
+mod enemy;
+mod tower;
+mod shot;
+mod playing;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
@@ -44,6 +49,7 @@ fn main() {
         .add_plugin(TextModePlugin)
         .add_plugin(TitlePlugin)
         .add_plugin(GraphicsPlugin)
+        .add_plugin(PlayingPlugin)
         .add_startup_system(init)
         .run();
 }

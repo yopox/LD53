@@ -1,3 +1,4 @@
+use crate::graphics::palette::Palette;
 use crate::graphics::tile::Rotation;
 
 pub type X = usize;
@@ -17,4 +18,10 @@ pub const CASH_KNIGHT: [TILE; 9] = [
     (0, 0, 343, 0, 1, Rotation::Flip),
     (1, 0, 206, 0, 1, Rotation::No),
     (2, 0, 343, 0, 1, Rotation::No),
+];
+
+pub const DEFAULT_PALETTE: [Palette; 3] = [
+    Palette::Black,
+    Palette::White,
+    Palette::Transparent,
 ];

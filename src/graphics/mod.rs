@@ -17,8 +17,8 @@ pub mod loading;
 pub mod palette;
 pub mod transition;
 mod animation;
-mod tile;
-mod sprites;
+pub mod tile;
+pub mod sprites;
 
 #[derive(Bundle, Debug, Default)]
 pub struct MainBundle {
@@ -70,7 +70,7 @@ pub fn sprite(
 pub fn sprite_from_tile (
     builder: &mut ChildBuilder,
     tiles: &[TILE],
-    atlas: Handle<TextureAtlas>,
+    atlas: &Handle<TextureAtlas>,
     palette: Vec<Palette>,
     z: f32,
 ) {
