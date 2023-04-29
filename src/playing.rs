@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{enemy, GameState, util};
-use crate::enemy::Enemies;
+use crate::enemy::{drones_dead, Enemies, update_drones};
 use crate::graphics::{animation, MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::Wiggle;
 use crate::graphics::loading::Textures;
@@ -20,7 +20,7 @@ impl Plugin for PlayingPlugin {
                 exit_playing.in_schedule(OnExit(GameState::Main))
             )
             .add_systems(
-                (update_just_fired, tower_fire, enemy::update_drones, remove_shots)
+                (update_just_fired, tower_fire, update_drones, remove_shots, drones_dead)
                     .in_set(OnUpdate(GameState::Main))
             )
         ;

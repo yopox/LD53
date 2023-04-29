@@ -93,10 +93,12 @@ pub fn tower_fire(
                 .insert(MainBundle::from_xyz(t_tower.translation.x, t_tower.translation.y, z_pos::SHOT))
                 .insert(Animator::new(Tween::new(
                     Linear,
-                    Duration::from_secs_f32(distance / tower.shot.get_speed()),
+                    Duration::from_secs_f32(tower.radius / tower.shot.get_speed()),
                     TransformPositionLens {
                         start: with_z(t_tower.translation, z_pos::SHOT),
-                        end: with_z(enemy_position, z_pos::SHOT),
+                        end: with_z(
+                            t_tower.translation + (enemy_position - t_tower.translation) * tower.radius / distance,
+                            z_pos::SHOT),
                     },
                 ).with_completed_event(SHOT_DESPAWNED)))
                 .with_children(|builder|

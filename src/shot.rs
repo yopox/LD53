@@ -4,15 +4,15 @@ use bevy::prelude::*;
 use bevy_tweening::TweenCompleted;
 use strum_macros::EnumIter;
 
-use crate::collision::HitBox;
+use crate::collision::{body_size, BodyType, HitBox, SolidBody};
 use crate::graphics::palette::{Palette, TRANSPARENT};
 use crate::graphics::sprites::TILE;
 use crate::util::tweening::SHOT_DESPAWNED;
 
 #[derive(Component, Copy, Clone)]
 pub struct Shot {
-    damages: f32,
-    speed: f32,
+    pub damages: f32,
+    pub speed: f32,
 }
 
 #[derive(Copy, Clone, EnumIter, Debug)]
@@ -36,10 +36,15 @@ impl Shots {
         }
     }
 
-    pub fn instantiate(&self) -> (Shot, HitBox) {
-        let (index, _, _, bg, _, _, _) = self.get_tile();
-        let hitbox = HitBox::for_tile(index, <u8 as Into<Palette>>::into(bg) == Palette::Transparent).unwrap();
-        (self.get_shot(), hitbox)
+    pub fn instantiate(&self) -> (Shot, SolidBody) {
+        let body_size = body_size(self.get_tiles());
+        let solid_body = SolidBody {
+            body_type: BodyType::ShipShot,
+            width: body_size.x,
+            height: body_size.y,
+            bottom_right_anchor: false,
+        };
+        (self.get_shot(), solid_body)
     }
 
     pub const fn get_tile(&self) -> TILE {

@@ -2,8 +2,9 @@ use bevy::prelude::*;
 use strum_macros::EnumIter;
 
 use crate::{graphics, util};
-use crate::collision::{body_size, HitBox};
+use crate::collision::{body_size, BodyType, Contact, HitBox, SolidBody};
 use crate::graphics::sprites::{DroneModels, TILE};
+use crate::shot::Shot;
 
 #[derive(Debug, Clone)]
 pub struct EnemyStats {
@@ -28,23 +29,23 @@ impl Enemies {
         match self {
             Self::Drone => EnemyStats {
                 hp: 10.,
-                speed: 2.,
+                speed: 0.5,
             }
         }
     }
 
-    pub fn instantiate(&self) -> (Enemy, HitBox) {
+    pub fn instantiate(&self) -> (Enemy, SolidBody) {
         (Enemy {
             class: *self,
             stats: self.get_default_stats().clone(),
             advance: 0.,
         }, {
              let body_size = body_size(self.get_tiles());
-             HitBox {
-                 dx: 0.,
-                 dy: 0.,
+             SolidBody {
+                 body_type: BodyType::Enemy,
                  width: body_size.x,
                  height: body_size.y,
+                 bottom_right_anchor: false,
              }
          })
     }
@@ -74,5 +75,38 @@ pub fn update_drones(
         let Some(progress) = path.0.pos(drone.advance) else { continue };
         pos.translation.x = util::size::path_to_f32(progress.x);
         pos.translation.y = util::size::path_to_f32(progress.y);
+    }
+}
+
+pub fn drones_dead(
+    mut event_reader: EventReader<Contact>,
+    mut commands: Commands,
+    mut enemies: Query<&mut Enemy>,
+    shots: Query<&Shot>,
+) {
+    for event in event_reader.iter() {
+        match event {
+            Contact((BodyType::Enemy, e_enemy), (BodyType::ShipShot, e_shot)) |
+            Contact((BodyType::ShipShot, e_shot), (BodyType::Enemy, e_enemy))
+            => {
+                if let Some(mut entity_commands) = commands.get_entity(*e_shot) {
+                    entity_commands.despawn_recursive()
+                }
+
+                if let Ok(mut enemy) = enemies.get_mut(*e_enemy) {
+                    if let Ok(&shot) = shots.get(*e_shot) {
+                        enemy.stats.hp -= shot.damages;
+                        if enemy.stats.hp <= 0. {
+                            enemy.stats.hp = 0.;
+
+                            if let Some(entity_commands) = commands.get_entity(*e_enemy) {
+                                entity_commands.despawn_recursive();
+                            }
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
     }
 }
