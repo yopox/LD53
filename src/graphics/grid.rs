@@ -34,23 +34,23 @@ fn setup(
     textures: Res<Textures>,
 ) {
     let points = vec![
-        Vec2::new(-3., 6.),
-        Vec2::new(3., 6.),
-        Vec2::new(3., 4.),
-        Vec2::new(8., 4.),
-        Vec2::new(8., 6.),
-        Vec2::new(11., 6.),
-        Vec2::new(11., 4.),
-        Vec2::new(16., 4.),
-        Vec2::new(16., 6.),
-        Vec2::new(22., 6.),
+        Vec2::new(-3., 5.),
+        Vec2::new(3., 5.),
+        Vec2::new(3., 3.),
+        Vec2::new(8., 3.),
+        Vec2::new(8., 5.),
+        Vec2::new(11., 5.),
+        Vec2::new(11., 3.),
+        Vec2::new(16., 3.),
+        Vec2::new(16., 5.),
+        Vec2::new(22., 5.),
     ];
     let path = logic::path::Path::from_points(points.clone());
     commands.insert_resource(CurrentPath(path));
 
     let mut grid = vec![vec![RoadElement::Plain; util::size::WIDTH]; util::size::HEIGHT];
 
-    let is_oob = |x: isize, y: isize| { x < 0 || y < 0 || x >= util::size::WIDTH as isize || y >= util::size::HEIGHT as isize };
+    let is_oob = |x: isize, y: isize| { x < 0 || y < 0 || x >= util::size::WIDTH as isize || y >= util::size::GRID_HEIGHT as isize };
 
     // Draw road
     for i in 0..points.len() - 1 {
@@ -74,7 +74,7 @@ fn setup(
         }
     }
 
-    for y in 0..util::size::HEIGHT {
+    for y in 0..util::size::GRID_HEIGHT {
         for x in 0..util::size::WIDTH {
             if grid[y][x] == RoadElement::Road { continue }
             for (dx, dy) in [
@@ -119,7 +119,7 @@ fn draw_road_tiles(grid: &Vec<Vec<RoadElement>>, commands: &mut Commands, atlas:
         for x in 0..grid[y].len() {
             let (i, bg, fg, f, r) = grid[y][x].get_tiles();
             let tile = sprite(
-                i, x, y, util::z_pos::ROAD,
+                i, x, y + util::size::GUI_HEIGHT, util::z_pos::ROAD,
                 bg.into(), fg.into(), f, r, atlas.clone(),
             );
             commands

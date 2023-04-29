@@ -11,6 +11,9 @@ pub mod size {
     /// Camera scale
     pub const SCALE: f32 = 8.;
 
+    pub const GUI_HEIGHT: usize = 3;
+    pub const GRID_HEIGHT: usize = HEIGHT - GUI_HEIGHT;
+
     /// Returns world coordinates for a tile, for instance `2` -> `(2 * TILE_SIZE) as f32 `.
     pub const fn tile_to_f32(tile: usize) -> f32 { (tile * TILE_SIZE) as f32 }
 
@@ -26,7 +29,8 @@ pub mod z_pos {
     pub const ENEMIES: f32 = 6.;
     pub const SHOT: f32 = 7.;
     pub const TRANSITION: f32 = 10.;
-    pub const GUI: f32 = 11.;
+    pub const GUI_BG: f32 = 11.;
+    pub const GUI_FG: f32 = 12.;
 }
 
 pub mod transition {

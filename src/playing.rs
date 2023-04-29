@@ -50,7 +50,7 @@ fn setup_playing (
 
     commands.spawn(Towers::Basic.instantiate())
         .insert(
-            MainBundle::from_xyz(tile_to_f32(6), f32_tile_to_f32(5. + 0.5), util::z_pos::ENEMIES)
+            MainBundle::from_xyz(tile_to_f32(6), f32_tile_to_f32(8. + 0.5), util::z_pos::ENEMIES)
         )
         .with_children(|builder|
             sprite_from_tile(builder, Towers::Basic.get_tiles(), atlas, 0.))

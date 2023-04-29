@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use strum_macros::EnumIter;
 
-use crate::graphics;
+use crate::{graphics, util};
 use crate::collision::{body_size, BodyType, Contact, SolidBody};
 use crate::graphics::sprites::{DroneModels, TILE};
 use crate::shot::Shot;
@@ -78,7 +78,7 @@ pub fn update_drones(
         let size = drone.class.get_model().get_size();
         pos.translation.x = f32_tile_to_f32(progress.x)
             - size.x / 2. + f32_tile_to_f32(0.5); // Center sprite
-        pos.translation.y = f32_tile_to_f32(progress.y)
+        pos.translation.y = f32_tile_to_f32(progress.y + util::size::GUI_HEIGHT as f32)
             + f32_tile_to_f32(0.5); // Make sprite levitate over the road
     }
 }
