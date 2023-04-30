@@ -40,7 +40,7 @@ fn main() {
                         size::SCALE * tile_to_f32(size::WIDTH),
                         size::SCALE * tile_to_f32(size::HEIGHT),
                     ).into(),
-                    title: "bevy_template".to_string(),
+                    title: "LD53".to_string(),
                     canvas: Some("#bevy".to_owned()),
                     ..default()
                 }),
