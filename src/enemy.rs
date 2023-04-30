@@ -8,9 +8,12 @@ use strum_macros::EnumIter;
 
 use crate::{graphics, util};
 use crate::collision::{body_size, BodyType, Contact, HitBox};
+use crate::graphics::{sprite_f32, tween};
 use crate::graphics::animation::Wiggle;
+use crate::graphics::grid::CurrentPath;
+use crate::graphics::loading::Textures;
+use crate::graphics::package::{ClickablePackage, Package};
 use crate::graphics::sprites::{DroneModels, TILE};
-use crate::graphics::tween;
 use crate::shot::{Bomb, Shot, Shots, spawn_bomb};
 use crate::util::size::{f32_tile_to_f32, tile_to_f32};
 
@@ -96,6 +99,9 @@ pub fn drones_dead(
     mut enemies: Query<(&mut Enemy, &Transform)>,
     children: Query<&Children>,
     shots: Query<(&Shot, &Transform)>,
+    package: Query<&Package>,
+    path: Res<CurrentPath>,
+    textures: Res<Textures>,
 ) {
     for event in event_reader.iter() {
         match event {
@@ -120,7 +126,7 @@ pub fn drones_dead(
                         enemy.stats.hp = 0.;
 
                         // Enemy death animation
-                        kill_drone(&mut commands, &children, e_enemy, e_pos);
+                        kill_drone(&mut commands, &children, enemy.as_ref(), e_enemy, e_pos, &package, &path, &textures);
                     }
                 }
             }
@@ -129,7 +135,18 @@ pub fn drones_dead(
     }
 }
 
-fn kill_drone(mut commands: &mut Commands, children: &Query<&Children>, e_enemy: &Entity, e_pos: &Transform) {
+fn kill_drone(
+    mut commands: &mut Commands,
+    children: &Query<&Children>,
+    enemy: &Enemy,
+    e_enemy: &Entity,
+    e_pos: &Transform,
+    package: &Query<&Package>,
+    path: &Res<CurrentPath>,
+    textures: &Res<Textures>,
+) {
+    let (x, y) = (e_pos.translation.x, e_pos.translation.y);
+
     if let Some(mut entity_commands) = commands.get_entity(*e_enemy) {
         entity_commands
             .remove::<HitBox>()
@@ -140,7 +157,7 @@ fn kill_drone(mut commands: &mut Commands, children: &Query<&Children>, e_enemy:
                 Duration::from_millis(util::tweening::DRONE_DEATH_POS),
                 TransformPositionLens {
                     start: e_pos.translation,
-                    end: Vec3::new(e_pos.translation.x, e_pos.translation.y + tile_to_f32(1), e_pos.translation.z),
+                    end: Vec3::new(x, y + tile_to_f32(1), e_pos.translation.z),
                 },
             ).with_completed_event(util::tweening::DRONE_DESPAWN)
             )));
@@ -149,11 +166,49 @@ fn kill_drone(mut commands: &mut Commands, children: &Query<&Children>, e_enemy:
     children
         .iter_descendants(*e_enemy)
         .for_each(|child_id| {
-            commands
-                .entity(child_id)
-                .insert(Animator::new(Delay::<TextModeTextureAtlasSprite>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE)).then(
-                    tween::tween_text_mode_sprite_opacity(util::tweening::DRONE_DEATH_ALPHA, false)
-                )));
+            match package.get(child_id) {
+                Ok(package) => {
+                    // Despawn drone package
+                    commands
+                        .entity(child_id)
+                        .despawn();
+
+                    // Respawn the package and make it fall on the road
+                    let (_, _, i, bg, fg, f, r) = package.tile();
+                    let progress = path.0.pos(enemy.advance).unwrap();
+                    let offset = enemy.class.get_model().package_offset();
+                    let (px, py, pz) = (x + offset.x, y + offset.y, util::z_pos::PACKAGES);
+                    commands
+                        .spawn(sprite_f32(
+                            i, px, py, pz,
+                            bg.into(), fg.into(), f, r,
+                            textures.tileset.clone(),
+                        ))
+                        .insert(package.clone())
+                        .insert(ClickablePackage)
+                        .insert(Animator::new(Tween::new(
+                            EaseFunction::CubicOut,
+                            Duration::from_millis(util::tweening::PACKAGE_DROP),
+                            TransformPositionLens {
+                                start: Vec3::new(px, py, pz),
+                                end: Vec3::new(
+                                    f32_tile_to_f32(progress.x * 2. + 0.5),
+                                    f32_tile_to_f32(progress.y * 2. + util::size::GUI_HEIGHT as f32 + 0.5),
+                                    util::z_pos::PACKAGES,
+                                ),
+                            },
+                        )))
+                    ;
+                }
+                Err(_) => {
+                    // Regular tile -> animate alpha
+                    commands
+                        .entity(child_id)
+                        .insert(Animator::new(Delay::<TextModeTextureAtlasSprite>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE)).then(
+                            tween::tween_text_mode_sprite_opacity(util::tweening::DRONE_DEATH_ALPHA, false)
+                        )));
+                }
+            }
         })
 }
 

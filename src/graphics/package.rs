@@ -9,7 +9,10 @@ use rand::RngCore;
 use crate::{graphics, util};
 use crate::graphics::sprites::TILE;
 
-#[derive(Rand)]
+#[derive(Component)]
+pub struct ClickablePackage;
+
+#[derive(Rand, Copy, Clone)]
 pub enum PackageKind {
     #[weight(20)]
     Common,
@@ -34,7 +37,7 @@ impl PackageKind {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Package {
     kind: PackageKind,
 }
@@ -57,5 +60,6 @@ pub fn spawn(builder: &mut ChildBuilder, offset: Vec2, atlas: &Handle<TextureAtl
             i, offset.x, offset.y, util::z_pos::PACKAGES - util::z_pos::ENEMIES,
             bg.into(), fg.into(), f, r, atlas.clone(),
         ))
+        .insert(package)
     ;
 }

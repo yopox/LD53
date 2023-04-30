@@ -73,6 +73,7 @@ pub mod tweening {
     pub const DRONE_DEATH_FREEZE: u64 = 400;
     pub const DRONE_DEATH_ALPHA: u64 = 800;
     pub const DRONE_DEATH_POS: u64 = 1200;
+    pub const PACKAGE_DROP: u64 = 800;
 }
 
 pub mod misc {
