@@ -3,9 +3,9 @@ use bevy_text_mode::TextModePlugin;
 
 use graphics::palette::Palette;
 
+use crate::battle::BattlePlugin;
 use crate::collision::CollisionPlugin;
 use crate::graphics::GraphicsPlugin;
-use crate::playing::PlayingPlugin;
 use crate::title::TitlePlugin;
 use crate::util::size;
 use crate::util::size::tile_to_f32;
@@ -17,7 +17,7 @@ mod logic;
 mod enemy;
 mod tower;
 mod shot;
-mod playing;
+mod battle;
 mod collision;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
@@ -51,7 +51,7 @@ fn main() {
         .add_plugin(TextModePlugin)
         .add_plugin(TitlePlugin)
         .add_plugin(GraphicsPlugin)
-        .add_plugin(PlayingPlugin)
+        .add_plugin(BattlePlugin)
         .add_plugin(CollisionPlugin)
         .add_startup_system(init)
         .run();

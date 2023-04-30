@@ -8,16 +8,16 @@ use crate::graphics::loading::Textures;
 use crate::shot::remove_shots;
 use crate::tower::{tower_fire, Towers, update_just_fired};
 
-pub struct PlayingPlugin;
+pub struct BattlePlugin;
 
-impl Plugin for PlayingPlugin {
+impl Plugin for BattlePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system(
-                setup_playing.in_schedule(OnEnter(GameState::Main))
+                setup.in_schedule(OnEnter(GameState::Main))
             )
             .add_system(
-                exit_playing.in_schedule(OnExit(GameState::Main))
+                cleanup.in_schedule(OnExit(GameState::Main))
             )
             .add_systems(
                 (update_just_fired, tower_fire, update_drones, remove_shots, drones_dead)
@@ -38,7 +38,7 @@ pub enum CursorState {
     Build(Towers),
 }
 
-fn setup_playing(
+fn setup(
     mut commands: Commands,
     textures: Res<Textures>,
 ) {
@@ -59,7 +59,7 @@ fn setup_playing(
         .insert(PlayingUI);
 }
 
-fn exit_playing (
+fn cleanup(
     query: Query<Entity, With<PlayingUI>>,
     mut commands: Commands,
 ) {

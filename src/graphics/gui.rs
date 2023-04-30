@@ -3,13 +3,13 @@ use bevy::prelude::*;
 use bevy_text_mode::TextModeTextureAtlasSprite;
 
 use crate::{GameState, tower, util};
+use crate::battle::{CursorState, PlayingUI};
 use crate::collision::body_size;
 use crate::graphics::{grid, MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, text};
 use crate::graphics::grid::Grid;
 use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
 use crate::graphics::text::TextStyles;
-use crate::playing::{CursorState, PlayingUI};
 use crate::tower::Towers;
 use crate::util::size::{f32_tile_to_f32, is_oob, tile_to_f32};
 
