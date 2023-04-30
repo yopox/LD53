@@ -18,13 +18,19 @@ pub mod size {
     pub const fn tile_to_f32(tile: usize) -> f32 { (tile * TILE_SIZE) as f32 }
 
     pub fn f32_tile_to_f32(pos: f32) -> f32 { pos * TILE_SIZE as f32 }
+
+    pub fn is_oob(x: isize, y: isize) -> bool {
+        x < 0 || y < 0 || x >= WIDTH as isize || y >= GRID_HEIGHT as isize
+    }
 }
 
 pub mod z_pos {
     pub const BACKGROUND: f32 = 0.;
     pub const TITLE_TEXT: f32 = 1.;
     pub const GRID: f32 = 2.;
-    pub const ROAD: f32 = 2.5;
+    pub const ROAD: f32 = 3.;
+    pub const CURSOR: f32 = 3.5;
+    pub const TOWERS: f32 = 4.;
     pub const PACKAGES: f32 = 5.99;
     pub const ENEMIES: f32 = 6.;
     pub const SHOT: f32 = 7.;

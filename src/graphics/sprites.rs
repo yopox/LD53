@@ -69,5 +69,5 @@ const DRONE_3: &'static [TILE] = &[
 
 pub const TOWER_1: &'static [TILE] = &[
     (0, 1, 64, 16, 8, false, 0),
-    (0, 0, 96, 16, 1, false, 0),
+    (0, 0, 96, 16, 10, false, 0),
 ];

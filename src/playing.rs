@@ -37,6 +37,7 @@ fn setup_playing (
 ) {
     let atlas = &textures.tileset;
 
+    // TODO: Move drones spawn logic out of playing
     commands.spawn(Enemies::Drone.instantiate())
         .insert(
             MainBundle::from_xyz(0., 0., util::z_pos::ENEMIES)
@@ -48,9 +49,10 @@ fn setup_playing (
         })
         .insert(PlayingUI);
 
+    // TODO: Move towers spawn logic out of playing
     commands.spawn(Towers::Basic.instantiate())
         .insert(
-            MainBundle::from_xyz(tile_to_f32(6), f32_tile_to_f32(8.), util::z_pos::ENEMIES)
+            MainBundle::from_xyz(tile_to_f32(6), f32_tile_to_f32(8.), util::z_pos::TOWERS)
         )
         .with_children(|builder|
             sprite_from_tile(builder, Towers::Basic.get_tiles(), atlas, 0.))

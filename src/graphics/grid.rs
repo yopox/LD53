@@ -7,6 +7,7 @@ use rand::RngCore;
 use crate::{GameState, logic, util};
 use crate::graphics::{sprite, sprites};
 use crate::graphics::loading::Textures;
+use crate::util::size::is_oob;
 
 pub struct GridPlugin;
 
@@ -29,6 +30,9 @@ struct GridUI;
 #[derive(Resource)]
 pub struct CurrentPath(pub logic::path::Path);
 
+#[derive(Resource)]
+pub struct Grid(pub Vec<Vec<RoadElement>>);
+
 fn setup(
     mut commands: Commands,
     textures: Res<Textures>,
@@ -49,8 +53,6 @@ fn setup(
     commands.insert_resource(CurrentPath(path));
 
     let mut grid = vec![vec![RoadElement::Plain; util::size::WIDTH]; util::size::HEIGHT];
-
-    let is_oob = |x: isize, y: isize| { x < 0 || y < 0 || x >= util::size::WIDTH as isize || y >= util::size::GRID_HEIGHT as isize };
 
     // Draw road
     for i in 0..points.len() - 1 {
@@ -94,10 +96,11 @@ fn setup(
     }
 
     draw_road_tiles(&grid, &mut commands, &textures.tileset);
+    commands.insert_resource(Grid(grid));
 }
 
 #[derive(Rand, Copy, Clone, PartialEq)]
-enum RoadElement {
+pub enum RoadElement {
     Plain,
     Road,
     Rock,
