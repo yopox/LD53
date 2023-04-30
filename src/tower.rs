@@ -11,20 +11,45 @@ use crate::enemy::Enemy;
 use crate::graphics::{gui, MainBundle, sprite_from_tile, sprites};
 use crate::graphics::loading::Textures;
 use crate::graphics::sprites::TILE;
-use crate::shot::{Shot, Shots};
+use crate::shot::Shots;
 use crate::util;
 use crate::util::{with_z, z_pos};
 use crate::util::size::tile_to_f32;
 use crate::util::tweening::SHOT_DESPAWNED;
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Tower {
-    class: Towers,
+    model: Towers,
     /// Time between two shots in seconds
     reloading_delay: f32,
     range: f32,
     radius: f32,
     shot: Shots,
+    rank: u8,
+}
+
+impl Tower {
+    pub fn upgrade_cost(&self) -> Option<u16> {
+        match self.rank {
+            1 => Some(2 * self.model.get_cost()),
+            2 => Some(4 * self.model.get_cost()),
+            _ => None,
+        }
+    }
+
+    pub fn get_name(&self) -> &str {
+        match self.model {
+            Towers::Lightning => "Lightning Tower",
+            Towers::PaintBomb => "Paint Bomb",
+        }
+    }
+
+    pub fn get_description(&self) -> String {
+        match self.upgrade_cost() {
+            Some(n) => format!("Rank {} (up: €{})", self.rank, n),
+            None => format!("Rank {} (rank max)", self.rank),
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone, EnumIter, PartialEq)]
@@ -51,18 +76,20 @@ impl Towers {
     pub const fn instantiate(&self) -> Tower {
         match &self {
             Towers::Lightning => Tower {
-                class: *self,
+                model: *self,
                 reloading_delay: 10.,
                 range: tile_to_f32(5),
                 radius: tile_to_f32(5),
                 shot: Shots::Basic,
+                rank: 1,
             },
             Towers::PaintBomb => Tower {
-                class: *self,
+                model: *self,
                 reloading_delay: 15.,
                 range: tile_to_f32(8),
                 radius: tile_to_f32(9),
                 shot: Shots::Bomb,
+                rank: 1,
             }
         }
     }
@@ -94,15 +121,17 @@ pub fn place_tower(
     tower: Towers, atlas: &Handle<TextureAtlas>,
     time: &Time,
 ) {
-    commands.spawn(tower.instantiate())
+    let tower = tower.instantiate();
+    commands
+        .spawn(tower.clone())
         .insert(
             MainBundle::from_xyz(tile_to_f32(x), tile_to_f32(y + util::size::GUI_HEIGHT), z_pos::TOWERS)
         )
         .with_children(|builder|
-            sprite_from_tile(builder, tower.get_tiles(), atlas, 0.)
+            sprite_from_tile(builder, tower.model.get_tiles(), atlas, 0.)
         )
-        .insert(JustFired::new(time, tower.initial_delay()))
-        .insert(gui::HoverPopup::new("Lightning tower", "Tier 1 (up: €80)", Some(("Damage", 1)), Some(("Speed", 4)), 8., 16.))
+        .insert(JustFired::new(time, tower.model.initial_delay()))
+        .insert(gui::HoverPopup::new(tower.get_name(), &tower.get_description(), Some(("Damage", 1)), Some(("Speed", 4)), 8., 16.))
         .insert(BattleUI)
     ;
 }
