@@ -168,7 +168,7 @@ fn update_popup(
                 Ok((p, _)) if p.0 == id => {
                     // Popup exists -> correct entity -> do nothing
                 }
-                Ok((p, popup_id)) => {
+                Ok((_, popup_id)) => {
                     // Popup exists -> wrong entity -> respawn popup
                     commands.entity(popup_id).despawn_recursive();
                     recreate_popup = true;
@@ -294,6 +294,7 @@ fn place_tower(
     textures: Res<Textures>,
     mouse: Res<Input<MouseButton>>,
     keys: Res<Input<KeyCode>>,
+    time: Res<Time>,
 ) {
     let Some(mut state) = state else { return; };
     let cursor: Option<(usize, usize)> = match cursor {
@@ -318,7 +319,7 @@ fn place_tower(
                 if mouse.just_pressed(MouseButton::Left) {
                     // Build the tower
                     // TODO: Check money
-                    tower::place_tower(x, y, &mut commands, *t, &textures.tileset);
+                    tower::place_tower(x, y, &mut commands, *t, &textures.tileset, &time);
                     commands.insert_resource(CursorState::Select);
                     return;
                 }

@@ -64,6 +64,11 @@ impl Towers {
             Towers::Basic => &sprites::TOWER_1,
         }
     }
+
+    /// Returns the delay on tower construction
+    pub const fn initial_delay(&self) -> f32 {
+        5.
+    }
 }
 
 /// Place a tower on (x, y) in grid coordinates.
@@ -71,14 +76,16 @@ pub fn place_tower(
     x: usize, y: usize,
     commands: &mut Commands,
     tower: Towers, atlas: &Handle<TextureAtlas>,
+    time: &Time,
 ) {
     commands.spawn(tower.instantiate())
         .insert(
-            MainBundle::from_xyz(tile_to_f32(x), tile_to_f32(y + util::size::GUI_HEIGHT), util::z_pos::TOWERS)
+            MainBundle::from_xyz(tile_to_f32(x), tile_to_f32(y + util::size::GUI_HEIGHT), z_pos::TOWERS)
         )
         .with_children(|builder|
             sprite_from_tile(builder, tower.get_tiles(), atlas, 0.)
         )
+        .insert(JustFired::new(time, tower.initial_delay()))
         .insert(gui::HoverPopup::new("Lightning tower", "Level 1", Some(("Damage", 1)), Some(("Speed", 4)), 8., 16.))
         .insert(PlayingUI)
     ;
