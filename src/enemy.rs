@@ -53,7 +53,7 @@ impl Enemies {
 
     pub fn get_model(&self) -> DroneModels {
         match self {
-            Self::Drone => DroneModels::Simple,
+            Self::Drone => DroneModels::Super,
         }
     }
 

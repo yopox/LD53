@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
 use bevy_tweening::{Animator, Tween};
 use bevy_tweening::EaseMethod::Linear;
@@ -102,7 +101,7 @@ pub fn tower_fire(
                     },
                 ).with_completed_event(SHOT_DESPAWNED)))
                 .with_children(|builder|
-                    sprite_from_tile(builder, Enemies::Drone.get_tiles(), &textures.mrmotext, 0.)
+                    sprite_from_tile(builder, Enemies::Drone.get_tiles(), &textures.tileset, 0.)
                 )
                 .insert(PlayingUI)
             ;

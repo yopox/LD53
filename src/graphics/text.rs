@@ -73,7 +73,7 @@ fn update_texts(
                 i, 0, 0.,
                 text.bg, text.fg,
                 false, 0,
-                textures.mrmotext.clone(),
+                textures.tileset.clone(),
             )).id();
             commands.entity(e).add_child(child);
         }

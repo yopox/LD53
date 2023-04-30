@@ -87,7 +87,7 @@ pub(in crate::graphics) fn start_transition(
                         builder.spawn(sprite(
                             index, x, y, 0.,
                             Palette::Transparent, Palette::B,
-                            flip, 0, textures.mrmotext.clone()
+                            flip, 0, textures.tileset.clone(),
                         ));
                     }
                 }
@@ -110,7 +110,7 @@ pub(in crate::graphics) fn start_transition(
                         builder.spawn(sprite(
                             index, x, y, 0.,
                             Palette::Transparent, Palette::B,
-                            flip, 2, textures.mrmotext.clone()
+                            flip, 2, textures.tileset.clone(),
                         ));
                     }
                 }

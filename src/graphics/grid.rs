@@ -93,7 +93,7 @@ fn setup(
         }
     }
 
-    draw_road_tiles(&grid, &mut commands, &textures.mrmotext);
+    draw_road_tiles(&grid, &mut commands, &textures.tileset);
 }
 
 #[derive(Rand, Copy, Clone, PartialEq)]
@@ -103,13 +103,12 @@ enum RoadElement {
     Rock,
 }
 
-// TODO: Types of elements (4 tiles, 1 tile random pos, 1 tile repeated)
 impl RoadElement {
     /// Returns tiles for a road element with horizontal orientation
     fn get_tiles(&self) -> (sprites::INDEX, sprites::BG, sprites::FG, sprites::FLIP, sprites::ROTATION) {
         match self {
             RoadElement::Plain | RoadElement::Road => (0, 4, 3, false, 0),
-            RoadElement::Rock => ((202 + rand::thread_rng().next_u32() % 3) as usize, 4, 3, false, 0),
+            RoadElement::Rock => ((1 + rand::thread_rng().next_u32() % 8) as usize, 4, 3, false, 0),
         }
     }
 }

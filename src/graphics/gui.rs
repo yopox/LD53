@@ -37,14 +37,14 @@ fn setup(
 
     for x in 0..util::size::WIDTH {
         for (i, y, bg, fg) in [
-            (26, 2, Palette::E, Palette::D),
+            (32, 2, Palette::E, Palette::D),
             (0, 1, Palette::E, Palette::Transparent),
             (0, 0, Palette::E, Palette::Transparent),
         ] {
             commands.spawn(sprite(
                 i, x, y, util::z_pos::GUI_BG,
                 bg, fg, false, 0,
-                textures.mrmotext.clone(),
+                textures.tileset.clone(),
             ));
         }
     }

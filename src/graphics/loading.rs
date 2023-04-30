@@ -20,9 +20,9 @@ impl Plugin for LoadingPlugin {
 
 #[derive(AssetCollection, Resource)]
 pub struct Textures {
-    #[asset(texture_atlas(tile_size_x = 8., tile_size_y = 8., columns = 32, rows = 32, padding_x = 2., padding_y = 2.))]
-    #[asset(path = "MRMOTEXT EX.png")]
-    pub mrmotext: Handle<TextureAtlas>,
+    #[asset(texture_atlas(tile_size_x = 8., tile_size_y = 8., columns = 32, rows = 32, padding_x = 0., padding_y = 0.))]
+    #[asset(path = "tileset.png")]
+    pub tileset: Handle<TextureAtlas>,
 }
 
 #[derive(AssetCollection, Resource)]
