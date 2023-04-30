@@ -102,54 +102,59 @@ pub fn drones_dead(
             Contact((BodyType::Enemy, e_enemy), (BodyType::ShipShot, e_shot)) |
             Contact((BodyType::ShipShot, e_shot), (BodyType::Enemy, e_enemy))
             => {
-                if let Ok((&shot, &t_shot)) = shots.get(*e_shot) {
-                    // Despawn shot
-                    if let Some(mut entity_commands) = commands.get_entity(*e_shot) {
-                        entity_commands.despawn_recursive()
+                let Ok((&shot, &t_shot)) = shots.get(*e_shot) else { continue };
+
+                // Despawn shot
+                if let Some(mut entity_commands) = commands.get_entity(*e_shot) {
+                    entity_commands.despawn_recursive()
+                }
+
+                let Ok((mut enemy, e_pos)) = enemies.get_mut(*e_enemy) else { continue };
+                match shot.class {
+                    Shots::Bomb => {
+                        spawn_bomb(Bomb::from_shot_translation(shot, t_shot.translation), &mut commands);
                     }
+                    Shots::Basic => {
+                        enemy.stats.hp -= shot.damages;
+                        if enemy.stats.hp > 0. { continue }
+                        enemy.stats.hp = 0.;
 
-                    if let Ok((mut enemy, e_pos)) = enemies.get_mut(*e_enemy) {
-                        if shot.class == Shots::Bomb {
-                            spawn_bomb(Bomb::from_shot_translation(shot, t_shot.translation), &mut commands);
-                        } else {
-                            enemy.stats.hp -= shot.damages;
-                            if enemy.stats.hp <= 0. {
-                                enemy.stats.hp = 0.;
-
-                                // Enemy death animation
-                                if let Some(mut entity_commands) = commands.get_entity(*e_enemy) {
-                                    entity_commands
-                                        .remove::<HitBox>()
-                                        .remove::<Enemy>()
-                                        .remove::<Wiggle>()
-                                        .insert(Animator::new(Delay::<Transform>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE)).then(Tween::new(
-                                            EaseFunction::CubicOut,
-                                            Duration::from_millis(util::tweening::DRONE_DEATH_POS),
-                                            TransformPositionLens {
-                                                start: e_pos.translation,
-                                                end: Vec3::new(e_pos.translation.x, e_pos.translation.y + tile_to_f32(1), e_pos.translation.z),
-                                            },
-                                        ).with_completed_event(util::tweening::DRONE_DESPAWN)
-                                        )));
-                                }
-
-                                children
-                                    .iter_descendants(*e_enemy)
-                                    .for_each(|child_id| {
-                                        commands
-                                            .entity(child_id)
-                                            .insert(Animator::new(Delay::<TextModeTextureAtlasSprite>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE)).then(
-                                                tween::tween_text_mode_sprite_opacity(util::tweening::DRONE_DEATH_ALPHA, false)
-                                            )));
-                                    })
-                            }
-                        }
+                        // Enemy death animation
+                        kill_drone(&mut commands, &children, e_enemy, e_pos);
                     }
                 }
             }
             _ => {}
         }
     }
+}
+
+fn kill_drone(mut commands: &mut Commands, children: &Query<&Children>, e_enemy: &Entity, e_pos: &Transform) {
+    if let Some(mut entity_commands) = commands.get_entity(*e_enemy) {
+        entity_commands
+            .remove::<HitBox>()
+            .remove::<Enemy>()
+            .remove::<Wiggle>()
+            .insert(Animator::new(Delay::<Transform>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE)).then(Tween::new(
+                EaseFunction::CubicOut,
+                Duration::from_millis(util::tweening::DRONE_DEATH_POS),
+                TransformPositionLens {
+                    start: e_pos.translation,
+                    end: Vec3::new(e_pos.translation.x, e_pos.translation.y + tile_to_f32(1), e_pos.translation.z),
+                },
+            ).with_completed_event(util::tweening::DRONE_DESPAWN)
+            )));
+    }
+
+    children
+        .iter_descendants(*e_enemy)
+        .for_each(|child_id| {
+            commands
+                .entity(child_id)
+                .insert(Animator::new(Delay::<TextModeTextureAtlasSprite>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE)).then(
+                    tween::tween_text_mode_sprite_opacity(util::tweening::DRONE_DEATH_ALPHA, false)
+                )));
+        })
 }
 
 pub fn despawn_drone(
