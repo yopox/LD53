@@ -7,11 +7,12 @@ use bevy_tweening::lens::TransformPositionLens;
 use strum_macros::EnumIter;
 
 use crate::enemy::Enemy;
-use crate::graphics::{MainBundle, sprite_from_tile, sprites};
+use crate::graphics::{gui, MainBundle, sprite_from_tile, sprites};
 use crate::graphics::loading::Textures;
 use crate::graphics::sprites::TILE;
 use crate::playing::PlayingUI;
 use crate::shot::Shots;
+use crate::util;
 use crate::util::{with_z, z_pos};
 use crate::util::size::tile_to_f32;
 use crate::util::tweening::SHOT_DESPAWNED;
@@ -63,6 +64,23 @@ impl Towers {
             Towers::Basic => &sprites::TOWER_1,
         }
     }
+}
+
+pub fn place_tower(
+    x: usize, y: usize,
+    commands: &mut Commands,
+    tower: Towers, atlas: &Handle<TextureAtlas>,
+) {
+    commands.spawn(tower.instantiate())
+        .insert(
+            MainBundle::from_xyz(tile_to_f32(x), tile_to_f32(y), util::z_pos::TOWERS)
+        )
+        .with_children(|builder|
+            sprite_from_tile(builder, tower.get_tiles(), atlas, 0.)
+        )
+        .insert(gui::HoverPopup::new("Lightning tower", "Level 1", Some(("Damage", 1)), Some(("Range", 3)), 8., 16.))
+        .insert(PlayingUI)
+    ;
 }
 
 pub fn tower_fire(

@@ -1,4 +1,5 @@
-use bevy::prelude::Vec3;
+use bevy::math::Vec2;
+use bevy::prelude::{Query, Vec3, Window};
 
 pub mod size {
     /// Tile size from the tileset
@@ -37,6 +38,8 @@ pub mod z_pos {
     pub const TRANSITION: f32 = 10.;
     pub const GUI_BG: f32 = 11.;
     pub const GUI_FG: f32 = 12.;
+    pub const POPUP_BG: f32 = 13.;
+    pub const POPUP_FG: f32 = 14.;
 }
 
 pub mod transition {
@@ -58,4 +61,12 @@ pub mod misc {
 
 pub const fn with_z(Vec3 { x, y, .. }: Vec3, z: f32) -> Vec3 {
     Vec3 { x, y, z }
+}
+
+pub fn cursor_pos(
+    windows: Query<&Window>,
+) -> Option<Vec2> {
+    let window = windows.get_single().unwrap();
+    let Some(cursor_pos) = window.cursor_position() else { return None; };
+    return Some(Vec2::new(cursor_pos.x / size::SCALE, cursor_pos.y / size::SCALE));
 }

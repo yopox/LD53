@@ -1,13 +1,12 @@
 use bevy::prelude::*;
 
-use crate::{GameState, util};
+use crate::{GameState, tower, util};
 use crate::enemy::{drones_dead, Enemies, update_drones};
 use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::Wiggle;
 use crate::graphics::loading::Textures;
 use crate::shot::remove_shots;
 use crate::tower::{tower_fire, Towers, update_just_fired};
-use crate::util::size::{f32_tile_to_f32, tile_to_f32};
 
 pub struct PlayingPlugin;
 
@@ -49,14 +48,7 @@ fn setup_playing (
         })
         .insert(PlayingUI);
 
-    // TODO: Move towers spawn logic out of playing
-    commands.spawn(Towers::Basic.instantiate())
-        .insert(
-            MainBundle::from_xyz(tile_to_f32(6), f32_tile_to_f32(8.), util::z_pos::TOWERS)
-        )
-        .with_children(|builder|
-            sprite_from_tile(builder, Towers::Basic.get_tiles(), atlas, 0.))
-        .insert(PlayingUI);
+    tower::place_tower(6, 8, &mut commands, Towers::Basic, &textures.tileset);
 }
 
 fn exit_playing (
