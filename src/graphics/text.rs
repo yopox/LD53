@@ -108,8 +108,8 @@ impl TextStyles {
 
     fn get_size(&self) -> f32 {
         match self {
-            TextStyles::Heading => 8.,
-            TextStyles::Body => 8.,
+            TextStyles::Heading => 16.,
+            TextStyles::Body => 16.,
         }
     }
 

@@ -73,13 +73,13 @@ pub fn update_drones(
     for (mut pos, mut drone) in drones.iter_mut() {
         drone.advance += drone.stats.speed * time.delta_seconds();
 
-        let Some(progress) = path.0.pos(drone.advance) else { continue };
+        let Some(progress) = path.0.pos(drone.advance) else { continue; };
 
         let size = drone.class.get_model().get_size();
-        pos.translation.x = f32_tile_to_f32(progress.x)
-            - size.x / 2. + f32_tile_to_f32(0.5); // Center sprite
-        pos.translation.y = f32_tile_to_f32(progress.y + util::size::GUI_HEIGHT as f32)
-            + f32_tile_to_f32(0.5); // Make sprite levitate over the road
+        pos.translation.x = f32_tile_to_f32(progress.x * 2.)
+            - size.x / 2. + f32_tile_to_f32(1.); // Center sprite
+        pos.translation.y = f32_tile_to_f32(progress.y * 2. + util::size::GUI_HEIGHT as f32)
+            + f32_tile_to_f32(1.5); // Make sprite levitate over the road
     }
 }
 

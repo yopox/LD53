@@ -6,13 +6,13 @@ pub mod size {
     const TILE_SIZE: usize = 8;
 
     /// Screen size in tiles
-    pub const WIDTH: usize = 20;
-    pub const HEIGHT: usize = 12;
+    pub const WIDTH: usize = 40;
+    pub const HEIGHT: usize = 24;
 
     /// Camera scale
-    pub const SCALE: f32 = 8.;
+    pub const SCALE: f32 = 4.;
 
-    pub const GUI_HEIGHT: usize = 3;
+    pub const GUI_HEIGHT: usize = 6;
     pub const GRID_HEIGHT: usize = HEIGHT - GUI_HEIGHT;
 
     /// Returns world coordinates for a tile, for instance `2` -> `(2 * TILE_SIZE) as f32 `.

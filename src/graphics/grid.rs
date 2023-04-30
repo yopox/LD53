@@ -5,8 +5,9 @@ use enum_derived::Rand;
 use rand::RngCore;
 
 use crate::{GameState, logic, util};
-use crate::graphics::{sprite, sprites};
+use crate::graphics::sprite;
 use crate::graphics::loading::Textures;
+use crate::graphics::sprites::TILE;
 use crate::util::size::is_oob;
 
 pub struct GridPlugin;
@@ -30,8 +31,13 @@ struct GridUI;
 #[derive(Resource)]
 pub struct CurrentPath(pub logic::path::Path);
 
+/// BE CAREFUL THERE IS A FACTOR 2 BETWEEN GRID AND TILES, `GRID[.][.]` = 4 TILES
 #[derive(Resource)]
 pub struct Grid(pub Vec<Vec<RoadElement>>);
+
+/// Add this to entities on the grid to set their z dynamically
+#[derive(Component)]
+pub struct GridElement;
 
 fn setup(
     mut commands: Commands,
@@ -108,10 +114,20 @@ pub enum RoadElement {
 
 impl RoadElement {
     /// Returns tiles for a road element with horizontal orientation
-    fn get_tiles(&self) -> (sprites::INDEX, sprites::BG, sprites::FG, sprites::FLIP, sprites::ROTATION) {
+    fn get_tiles(&self) -> [TILE; 4] {
         match self {
-            RoadElement::Plain | RoadElement::Road => (0, 4, 3, false, 0),
-            RoadElement::Rock => ((1 + rand::thread_rng().next_u32() % 8) as usize, 4, 3, false, 0),
+            RoadElement::Plain | RoadElement::Road => [
+                (0, 1, 0, 4, 3, false, 0),
+                (1, 1, 0, 4, 3, false, 0),
+                (0, 0, 0, 4, 3, false, 0),
+                (1, 0, 0, 4, 3, false, 0),
+            ],
+            RoadElement::Rock => [
+                (0, 1, (1 + rand::thread_rng().next_u32() % 8) as usize, 4, 3, false, 0),
+                (1, 1, (1 + rand::thread_rng().next_u32() % 8) as usize, 4, 3, false, 0),
+                (0, 0, (1 + rand::thread_rng().next_u32() % 8) as usize, 4, 3, false, 0),
+                (1, 0, (1 + rand::thread_rng().next_u32() % 8) as usize, 4, 3, false, 0),
+            ],
         }
     }
 }
@@ -119,14 +135,15 @@ impl RoadElement {
 fn draw_road_tiles(grid: &Vec<Vec<RoadElement>>, commands: &mut Commands, atlas: &Handle<TextureAtlas>) {
     for y in 0..grid.len() {
         for x in 0..grid[y].len() {
-            let (i, bg, fg, f, r) = grid[y][x].get_tiles();
-            let tile = sprite(
-                i, x, y + util::size::GUI_HEIGHT, util::z_pos::ROAD,
-                bg.into(), fg.into(), f, r, atlas.clone(),
-            );
-            commands
-                .spawn(tile)
-                .insert(GridUI);
+            for (dx, dy, i, bg, fg, f, r) in grid[y][x].get_tiles() {
+                let tile = sprite(
+                    i, 2 * x + dx, 2 * y + dy + util::size::GUI_HEIGHT, util::z_pos::ROAD,
+                    bg.into(), fg.into(), f, r, atlas.clone(),
+                );
+                commands
+                    .spawn(tile)
+                    .insert(GridUI);
+            }
         }
     }
 }

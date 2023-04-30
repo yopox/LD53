@@ -44,9 +44,10 @@ fn setup(
     textures: Res<Textures>,
 ) {
     // Text
+    let left_margin = f32_tile_to_f32(2.);
     for (x, y, text, style) in [
-        (f32_tile_to_f32(1.), f32_tile_to_f32(1.8), "Level 1", TextStyles::Heading),
-        (f32_tile_to_f32(1.), f32_tile_to_f32(1.05), "Haunted streets", TextStyles::Body),
+        (left_margin, f32_tile_to_f32(3.6), "Level 1", TextStyles::Heading),
+        (left_margin, f32_tile_to_f32(2.1), "Haunted streets", TextStyles::Body),
     ] {
         commands
             .spawn(text::ttf(
@@ -58,7 +59,7 @@ fn setup(
 
     commands
         .spawn(text::ttf(
-            f32_tile_to_f32(1.), f32_tile_to_f32(0.25), util::z_pos::GUI_FG,
+            left_margin, f32_tile_to_f32(0.5), util::z_pos::GUI_FG,
             "€0", TextStyles::Heading, &fonts, Palette::D,
         ))
         .insert(MoneyText)
@@ -66,11 +67,11 @@ fn setup(
 
     // Background
     for x in 0..util::size::WIDTH {
-        for (i, y, bg, fg) in [
-            (32, 2, Palette::E, Palette::D),
-            (0, 1, Palette::E, Palette::Transparent),
-            (0, 0, Palette::E, Palette::Transparent),
-        ] {
+        for y in 0..util::size::GUI_HEIGHT {
+            let (i, bg, fg) = match y {
+                5 => (32, Palette::E, Palette::D),
+                _ => (0, Palette::E, Palette::Transparent),
+            };
             commands.spawn(sprite(
                 i, x, y, util::z_pos::GUI_BG,
                 bg, fg, false, 0,
@@ -81,11 +82,16 @@ fn setup(
 
     // Cursor
     commands
-        .spawn(sprite(
-            33, 4, 4, util::z_pos::CURSOR,
-            Palette::Transparent, Palette::B,
-            false, 0, textures.tileset.clone(),
-        ))
+        .spawn(MainBundle::from_xyz(0., 0., util::z_pos::CURSOR))
+        .with_children(|builder| {
+            for (x, y, r) in [(0, 1, 0), (1, 1, 1), (1, 0, 2), (0, 0, 3)] {
+                builder.spawn(sprite(
+                    33, x, y, 0.,
+                    Palette::Transparent, Palette::B,
+                    false, r, textures.tileset.clone(),
+                ));
+            }
+        })
         .insert(Cursor)
     ;
 
@@ -93,11 +99,11 @@ fn setup(
     for (i, tower) in Towers::iter().enumerate() {
         commands
             .spawn(TowerButton(tower))
-            .insert(MainBundle::from_xyz(tile_to_f32(8 + i), f32_tile_to_f32(0.9), util::z_pos::GUI_FG))
+            .insert(MainBundle::from_xyz(tile_to_f32(14 + 4 * i), f32_tile_to_f32(2.), util::z_pos::GUI_FG))
             .with_children(|builder| {
                 sprite_from_tile_with_alpha(builder, tower.get_tiles(), &textures.tileset, 0., ButtonState::CanBuild.get_alpha());
                 builder.spawn(text::ttf_anchor(
-                    f32_tile_to_f32(0.5), f32_tile_to_f32(0.25), util::z_pos::GUI_FG,
+                    f32_tile_to_f32(1.0), f32_tile_to_f32(0.3), util::z_pos::GUI_FG,
                     &format!("€{}", tower.get_cost()),
                     TextStyles::Heading, &fonts, Palette::D,
                     Anchor::TopCenter,
@@ -143,7 +149,8 @@ fn update_cursor(
     // Get hovered tile
     let tile_size = tile_to_f32(1);
     let (x, y) = (cursor_pos.x / tile_size, cursor_pos.y / tile_size);
-    let (x, y) = (x as isize, y as isize - 3);
+    let (x, y) = (x as isize, y as isize - util::size::GUI_HEIGHT as isize);
+    let (x, y) = (x / 2, y / 2);
 
     /// Set visibility and position on [grid::RoadElement::Rock] hover.
     if is_oob(x, y) { return; }
@@ -156,8 +163,8 @@ fn update_cursor(
             Some(_) => {},
             None => commands.insert_resource(HoveredPos(new_hovered)),
         }
-        pos.translation.x = tile_to_f32(x as usize);
-        pos.translation.y = tile_to_f32(y as usize + util::size::GUI_HEIGHT);
+        pos.translation.x = tile_to_f32(x as usize * 2);
+        pos.translation.y = tile_to_f32(y as usize * 2 + util::size::GUI_HEIGHT);
     } else {
         clean();
     }
@@ -192,7 +199,7 @@ impl HoverPopup {
     }
 }
 
-/// A 6*3 information popup showed on [Information] hover
+/// A 12*6 information popup showed on [Information] hover
 #[derive(Component)]
 struct Popup(Entity);
 
@@ -255,42 +262,47 @@ fn spawn_popup(
         .insert(Popup(owner_id))
         .insert(BattleUI)
         .with_children(|builder| {
-            for (i, x, y, r) in [
-                (34, 0, 2, 0), (35, 1, 2, 0), (35, 2, 2, 0), (35, 3, 2, 0), (35, 4, 2, 0), (34, 5, 2, 1),
-                (35, 0, 1, 0), (35, 1, 1, 0), (35, 2, 1, 0), (35, 3, 1, 0), (35, 4, 1, 0), (35, 5, 1, 0),
-                (34, 0, 0, 3), (35, 1, 0, 0), (35, 2, 0, 0), (35, 3, 0, 0), (35, 4, 0, 0), (34, 5, 0, 2),
-            ] {
-                let mut bundle = sprite(
-                    i, x, y, 0.,
-                    Palette::Transparent, Palette::F,
-                    false, r,
-                    textures.tileset.clone(),
-                );
-                bundle.sprite.alpha = 0.75;
-                builder.spawn(bundle);
+            for y in 0..6 {
+                for x in 0..12 {
+                    let (i, r) = match (x, y) {
+                        (0, 0) => (34, 3),
+                        (11, 0) => (34, 2),
+                        (11, 5) => (34, 1),
+                        (0, 5) => (34, 0),
+                        _ => (35, 0)
+                    };
+                    let mut bundle = sprite(
+                        i, x, y, 0.,
+                        Palette::Transparent, Palette::F,
+                        false, r,
+                        textures.tileset.clone(),
+                    );
+                    bundle.sprite.alpha = 0.75;
+                    builder.spawn(bundle);
+                }
             }
 
             let fg_z = util::z_pos::POPUP_FG - util::z_pos::POPUP_BG;
 
-            for (text, style, y) in [(&info.name, TextStyles::Heading, 1.95), (&info.description, TextStyles::Body, 1.3)] {
+            for (text, style, y) in [(&info.name, TextStyles::Heading, 3.9), (&info.description, TextStyles::Body, 2.6)] {
                 builder.spawn(text::ttf(
-                    f32_tile_to_f32(0.5), f32_tile_to_f32(y), fg_z,
+                    f32_tile_to_f32(1.), f32_tile_to_f32(y), fg_z,
                     text, style,
                     &fonts, Palette::B,
                 ));
             }
 
-            for (attr, y) in [(&info.attr1, 0.65), (&info.attr2, 0.15)] {
+            for (attr, y) in [(&info.attr1, 1.3), (&info.attr2, 0.3)] {
                 if let Some((t, i)) = attr {
                     builder.spawn(text::ttf(
-                        f32_tile_to_f32(0.5), f32_tile_to_f32(y), fg_z,
+                        f32_tile_to_f32(1.), f32_tile_to_f32(y), fg_z,
                         t, TextStyles::Body,
                         &fonts, Palette::B,
                     ));
 
                     for x in 0..10 {
                         builder.spawn(sprite_f32(
-                            36, f32_tile_to_f32(x as f32 / 4. + 3.), f32_tile_to_f32(y + 7. / 32.), fg_z,
+                            36, f32_tile_to_f32(x as f32 / 2. + 6.), f32_tile_to_f32(y + 7. / 16.), fg_z,
                             Palette::Transparent, if x < *i { Palette::K } else { Palette::P },
                             false, 0, textures.tileset.clone(),
                         ));
@@ -386,8 +398,8 @@ fn place_tower(
             (CursorState::Build(t), Some((x, y))) => {
                 if cursor_changed {
                     // Update its position
-                    pos.translation.x = tile_to_f32(x);
-                    pos.translation.y = tile_to_f32(y + util::size::GUI_HEIGHT);
+                    pos.translation.x = tile_to_f32(2 * x);
+                    pos.translation.y = tile_to_f32(2 * y + util::size::GUI_HEIGHT);
                 }
 
                 if mouse.just_pressed(MouseButton::Left) {
@@ -411,7 +423,7 @@ fn place_tower(
             let Some((x, y)) = cursor else { return; };
             commands
                 .spawn(TransparentTower)
-                .insert(MainBundle::from_xyz(tile_to_f32(x), tile_to_f32(y + util::size::GUI_HEIGHT), util::z_pos::TOWERS))
+                .insert(MainBundle::from_xyz(tile_to_f32(2 * x), tile_to_f32(2 * y + util::size::GUI_HEIGHT), util::z_pos::TOWERS))
                 .with_children(|builder| {
                     sprite_from_tile_with_alpha(builder, t.get_tiles(), &textures.tileset, 0., 0.85);
                 });

@@ -7,6 +7,7 @@ use bevy_tweening::lens::TransformPositionLens;
 use strum_macros::EnumIter;
 
 use crate::battle::BattleUI;
+use crate::collision::body_size;
 use crate::enemy::Enemy;
 use crate::graphics::{gui, MainBundle, sprite_from_tile, sprites};
 use crate::graphics::loading::Textures;
@@ -122,16 +123,17 @@ pub fn place_tower(
     time: &Time,
 ) {
     let tower = tower.instantiate();
+    let size = body_size(tower.model.get_tiles());
     commands
         .spawn(tower.clone())
         .insert(
-            MainBundle::from_xyz(tile_to_f32(x), tile_to_f32(y + util::size::GUI_HEIGHT), z_pos::TOWERS)
+            MainBundle::from_xyz(tile_to_f32(2 * x), tile_to_f32(2 * y + util::size::GUI_HEIGHT), z_pos::TOWERS)
         )
         .with_children(|builder|
             sprite_from_tile(builder, tower.model.get_tiles(), atlas, 0.)
         )
         .insert(JustFired::new(time, tower.model.initial_delay()))
-        .insert(gui::HoverPopup::new(tower.get_name(), &tower.get_description(), Some(("Damage", 1)), Some(("Speed", 4)), 8., 16.))
+        .insert(gui::HoverPopup::new(tower.get_name(), &tower.get_description(), Some(("Damage", 1)), Some(("Speed", 4)), size.x, size.y))
         .insert(BattleUI)
     ;
 }
