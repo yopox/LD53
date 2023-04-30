@@ -30,6 +30,9 @@ impl Plugin for BattlePlugin {
 #[derive(Component)]
 pub struct PlayingUI;
 
+#[derive(Resource)]
+pub struct Money(pub u16);
+
 #[derive(Resource, PartialEq)]
 pub enum CursorState {
     /// Default state
@@ -43,6 +46,7 @@ fn setup(
     textures: Res<Textures>,
 ) {
     commands.insert_resource(CursorState::Select);
+    commands.insert_resource(Money(100));
 
     let atlas = &textures.tileset;
 

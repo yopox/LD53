@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy_text_mode::TextModeTextureAtlasSprite;
 
 use crate::{GameState, tower, util};
-use crate::battle::{CursorState, PlayingUI};
+use crate::battle::{CursorState, Money, PlayingUI};
 use crate::collision::body_size;
 use crate::graphics::{grid, MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, text};
 use crate::graphics::grid::Grid;
@@ -19,7 +19,7 @@ impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system(setup.in_schedule(OnEnter(GameState::Main)))
-            .add_systems((update_cursor, update_popup, update_tower_button, place_tower).in_set(OnUpdate(GameState::Main)))
+            .add_systems((update_money, update_cursor, update_popup, update_tower_button, place_tower).in_set(OnUpdate(GameState::Main)))
         ;
     }
 }
@@ -33,6 +33,9 @@ struct HoveredPos(pub (usize, usize));
 #[derive(Component)]
 struct TowerButton(Towers);
 
+#[derive(Component)]
+struct MoneyText;
+
 fn setup(
     mut commands: Commands,
     fonts: Res<Fonts>,
@@ -40,14 +43,24 @@ fn setup(
 ) {
     // Text
     for (x, y, text, style) in [
-        (f32_tile_to_f32(1.), f32_tile_to_f32(1.25), "Level 1", TextStyles::Heading),
-        (f32_tile_to_f32(1.), f32_tile_to_f32(0.5), "Haunted streets", TextStyles::Body),
+        (f32_tile_to_f32(1.), f32_tile_to_f32(1.8), "Level 1", TextStyles::Heading),
+        (f32_tile_to_f32(1.), f32_tile_to_f32(1.05), "Haunted streets", TextStyles::Body),
     ] {
         commands
-            .spawn(text::ttf(x, y, util::z_pos::GUI_FG,
-                             text, style, &fonts, Palette::D))
+            .spawn(text::ttf(
+                x, y, util::z_pos::GUI_FG,
+                text, style, &fonts, Palette::D,
+            ))
         ;
     }
+
+    commands
+        .spawn(text::ttf(
+            f32_tile_to_f32(1.), f32_tile_to_f32(0.25), util::z_pos::GUI_FG,
+            "€0", TextStyles::Heading, &fonts, Palette::D,
+        ))
+        .insert(MoneyText)
+    ;
 
     // Background
     for x in 0..util::size::WIDTH {
@@ -81,6 +94,16 @@ fn setup(
         .with_children(|builder| {
             sprite_from_tile_with_alpha(builder, Towers::Basic.get_tiles(), &textures.tileset, 0., util::misc::TRANSPARENT_TOWER_ALPHA);
         });
+}
+
+fn update_money(
+    money: Res<Money>,
+    mut text: Query<&mut Text, With<MoneyText>>,
+) {
+    if money.is_changed() || money.is_added() {
+        let mut text = text.single_mut();
+        text.sections[0].value = format!("€{}", money.0);
+    }
 }
 
 fn update_cursor(
