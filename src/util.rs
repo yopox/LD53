@@ -65,9 +65,14 @@ pub mod transition {
 
 pub mod tweening {
     pub const TRANSITION_OVER: u64 = 1;
-    pub const SHOT_DESPAWNED: u64 = 2;
+    pub const SHOT_DESPAWN: u64 = 2;
     pub const BOMB_EXPLODED: u64 = 3;
+    pub const DRONE_DESPAWN: u64 = 4;
+
     pub const DELAY: u64 = 200;
+    pub const DRONE_DEATH_FREEZE: u64 = 400;
+    pub const DRONE_DEATH_ALPHA: u64 = 800;
+    pub const DRONE_DEATH_POS: u64 = 1200;
 }
 
 pub mod misc {

@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
 use crate::{GameState, util};
-use crate::enemy::{drones_dead, Enemies, update_drones};
+use crate::enemy::{despawn_drone, drones_dead, Enemies, update_drones};
 use crate::graphics::{MainBundle, package, sprite_from_tile};
-use crate::graphics::animation::Wiggle;
+use crate::graphics::animation::{Wiggle, wiggle};
 use crate::graphics::loading::Textures;
 use crate::shot::{bomb_exploded, bomb_exploding, make_bomb_explode, remove_shots};
 use crate::tower::{tower_fire, Towers, update_just_fired};
@@ -20,8 +20,9 @@ impl Plugin for BattlePlugin {
                 cleanup.in_schedule(OnExit(GameState::Main))
             )
             .add_systems(
-                (update_just_fired, tower_fire, update_drones, remove_shots, drones_dead,
-                 bomb_exploding, make_bomb_explode, bomb_exploded)
+                (update_just_fired, tower_fire, update_drones, remove_shots,
+                 bomb_exploding, make_bomb_explode, bomb_exploded, despawn_drone,
+                 drones_dead.after(wiggle))
                     .in_set(OnUpdate(GameState::Main))
             )
         ;

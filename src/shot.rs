@@ -5,10 +5,9 @@ use bevy::ecs::system::EntityCommands;
 use bevy::math::{vec2, vec3, Vec3Swizzles};
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
-use bevy_tweening::{Animator, Sequence, Tween, TweenCompleted};
+use bevy_tweening::{Animator, Tween, TweenCompleted};
 use bevy_tweening::EaseFunction::ElasticIn;
-use bevy_tweening::EaseMethod::Linear;
-use bevy_tweening::lens::{ColorMaterialColorLens, TransformScaleLens};
+use bevy_tweening::lens::TransformScaleLens;
 use strum_macros::EnumIter;
 
 use crate::battle::BattleUI;
@@ -16,10 +15,9 @@ use crate::collision::{body_size, BodyType, HitBox};
 use crate::enemy::Enemy;
 use crate::graphics::MainBundle;
 use crate::graphics::sprites::TILE;
-use crate::util::{with_z, z_pos};
+use crate::util::z_pos;
 use crate::util::size::battle::BOMB_RANGE;
-use crate::util::size::tile_to_f32;
-use crate::util::tweening::{BOMB_EXPLODED, SHOT_DESPAWNED};
+use crate::util::tweening::{BOMB_EXPLODED, SHOT_DESPAWN};
 
 #[derive(Component, Copy, Clone)]
 pub struct Shot {
@@ -94,7 +92,7 @@ pub fn remove_shots(
     mut commands: Commands,
 ) {
     for event in tween_completed.iter() {
-        if event.user_data == SHOT_DESPAWNED {
+        if event.user_data == SHOT_DESPAWN {
             if let Some(entity_commands) = commands.get_entity(event.entity) {
                 entity_commands.despawn_recursive();
             }

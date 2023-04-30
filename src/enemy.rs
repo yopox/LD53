@@ -1,11 +1,18 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
+use bevy_text_mode::TextModeTextureAtlasSprite;
+use bevy_tweening::{Animator, Delay, EaseFunction, Tween, TweenCompleted};
+use bevy_tweening::lens::TransformPositionLens;
 use strum_macros::EnumIter;
 
 use crate::{graphics, util};
 use crate::collision::{body_size, BodyType, Contact, HitBox};
+use crate::graphics::animation::Wiggle;
 use crate::graphics::sprites::{DroneModels, TILE};
+use crate::graphics::tween;
 use crate::shot::{Bomb, Shot, Shots, spawn_bomb};
-use crate::util::size::f32_tile_to_f32;
+use crate::util::size::{f32_tile_to_f32, tile_to_f32};
 
 #[derive(Debug, Clone)]
 pub struct EnemyStats {
@@ -86,7 +93,8 @@ pub fn update_drones(
 pub fn drones_dead(
     mut event_reader: EventReader<Contact>,
     mut commands: Commands,
-    mut enemies: Query<&mut Enemy>,
+    mut enemies: Query<(&mut Enemy, &Transform)>,
+    children: Query<&Children>,
     shots: Query<(&Shot, &Transform)>,
 ) {
     for event in event_reader.iter() {
@@ -95,11 +103,12 @@ pub fn drones_dead(
             Contact((BodyType::ShipShot, e_shot), (BodyType::Enemy, e_enemy))
             => {
                 if let Ok((&shot, &t_shot)) = shots.get(*e_shot) {
+                    // Despawn shot
                     if let Some(mut entity_commands) = commands.get_entity(*e_shot) {
                         entity_commands.despawn_recursive()
                     }
 
-                    if let Ok(mut enemy) = enemies.get_mut(*e_enemy) {
+                    if let Ok((mut enemy, e_pos)) = enemies.get_mut(*e_enemy) {
                         if shot.class == Shots::Bomb {
                             spawn_bomb(Bomb::from_shot_translation(shot, t_shot.translation), &mut commands);
                         } else {
@@ -107,9 +116,32 @@ pub fn drones_dead(
                             if enemy.stats.hp <= 0. {
                                 enemy.stats.hp = 0.;
 
-                                if let Some(entity_commands) = commands.get_entity(*e_enemy) {
-                                    entity_commands.despawn_recursive();
+                                // Enemy death animation
+                                if let Some(mut entity_commands) = commands.get_entity(*e_enemy) {
+                                    entity_commands
+                                        .remove::<HitBox>()
+                                        .remove::<Enemy>()
+                                        .remove::<Wiggle>()
+                                        .insert(Animator::new(Delay::<Transform>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE)).then(Tween::new(
+                                            EaseFunction::CubicOut,
+                                            Duration::from_millis(util::tweening::DRONE_DEATH_POS),
+                                            TransformPositionLens {
+                                                start: e_pos.translation,
+                                                end: Vec3::new(e_pos.translation.x, e_pos.translation.y + tile_to_f32(1), e_pos.translation.z),
+                                            },
+                                        ).with_completed_event(util::tweening::DRONE_DESPAWN)
+                                        )));
                                 }
+
+                                children
+                                    .iter_descendants(*e_enemy)
+                                    .for_each(|child_id| {
+                                        commands
+                                            .entity(child_id)
+                                            .insert(Animator::new(Delay::<TextModeTextureAtlasSprite>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE)).then(
+                                                tween::tween_text_mode_sprite_opacity(util::tweening::DRONE_DEATH_ALPHA, false)
+                                            )));
+                                    })
                             }
                         }
                     }
@@ -117,5 +149,15 @@ pub fn drones_dead(
             }
             _ => {}
         }
+    }
+}
+
+pub fn despawn_drone(
+    mut commands: Commands,
+    mut tween_completed: EventReader<TweenCompleted>,
+) {
+    for TweenCompleted { entity, user_data } in tween_completed.iter() {
+        if *user_data != util::tweening::DRONE_DESPAWN { continue }
+        commands.entity(*entity).despawn_recursive();
     }
 }

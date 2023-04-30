@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy_text_mode::{TextModeSpriteSheetBundle, TextModeTextureAtlasSprite};
-use bevy_tweening::TweeningPlugin;
+use bevy_tweening::{component_animator_system, TweeningPlugin};
 
 use crate::graphics::animation::AnimationPlugin;
 use crate::graphics::grid::GridPlugin;
@@ -23,6 +23,7 @@ pub mod sprites;
 pub mod grid;
 pub mod package;
 pub mod gui;
+pub mod tween;
 
 #[derive(Bundle, Debug, Default)]
 pub struct MainBundle {
@@ -117,7 +118,9 @@ pub struct GraphicsPlugin;
 
 impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(TextPlugin)
+        app
+            .add_system(component_animator_system::<TextModeTextureAtlasSprite>)
+            .add_plugin(TextPlugin)
             .add_plugin(LoadingPlugin)
             .add_plugin(TransitionPlugin)
             .add_plugin(AnimationPlugin)

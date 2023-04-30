@@ -16,7 +16,7 @@ use crate::shot::Shots;
 use crate::util;
 use crate::util::{with_z, z_pos};
 use crate::util::size::tile_to_f32;
-use crate::util::tweening::SHOT_DESPAWNED;
+use crate::util::tweening::SHOT_DESPAWN;
 
 #[derive(Component, Clone)]
 pub struct Tower {
@@ -175,7 +175,7 @@ pub fn tower_fire(
                             shot_translation + (enemy_position - shot_translation) * tower.radius / distance,
                             z_pos::SHOT),
                     },
-                ).with_completed_event(SHOT_DESPAWNED)))
+                ).with_completed_event(SHOT_DESPAWN)))
                 .with_children(|builder|
                     sprite_from_tile(builder, &[tower.shot.get_tile()], &textures.tileset, 0.)
                 )
