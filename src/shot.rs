@@ -36,7 +36,7 @@ impl Shots {
     }
 
     pub fn instantiate(&self) -> (Shot, HitBox) {
-        let body_size = body_size(self.get_tiles());
+        let body_size = body_size(&[self.get_tile()]);
         let solid_body = HitBox {
             body_type: BodyType::ShipShot,
             width: body_size.x,
@@ -48,15 +48,8 @@ impl Shots {
 
     pub const fn get_tile(&self) -> TILE {
         match &self {
-            Shots::Basic =>
-                (877, 1, 222, 16, 15, false, 0)
+            Shots::Basic => (0, 0, 65, 16, 8, false, 0)
         }
-    }
-
-    pub fn get_tiles(&self) -> &[TILE] {
-        &[
-            (877, 1, 222, 16, 15, false, 0),
-        ]
     }
 
     pub fn get_speed(&self) -> f32 {

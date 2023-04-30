@@ -6,13 +6,14 @@ use bevy_tweening::EaseMethod::Linear;
 use bevy_tweening::lens::TransformPositionLens;
 use strum_macros::EnumIter;
 
-use crate::enemy::{Enemies, Enemy};
+use crate::enemy::Enemy;
 use crate::graphics::{MainBundle, sprite_from_tile, sprites};
 use crate::graphics::loading::Textures;
 use crate::graphics::sprites::TILE;
 use crate::playing::PlayingUI;
 use crate::shot::Shots;
 use crate::util::{with_z, z_pos};
+use crate::util::size::tile_to_f32;
 use crate::util::tweening::SHOT_DESPAWNED;
 
 #[derive(Component)]
@@ -50,8 +51,8 @@ impl Towers {
             Towers::Basic => Tower {
                 class: *self,
                 reloading_delay: 10.,
-                range: 120.,
-                radius: 120.,
+                range: tile_to_f32(5),
+                radius: tile_to_f32(5),
                 shot: Shots::Basic,
             }
         }
@@ -87,21 +88,23 @@ pub fn tower_fire(
         }
 
         if let Some((enemy_position, distance)) = chosen_enemy {
+            let mut shot_translation = t_tower.translation.clone();
+            shot_translation.y += tile_to_f32(1);
             commands
                 .spawn(tower.shot.instantiate())
-                .insert(MainBundle::from_xyz(t_tower.translation.x, t_tower.translation.y, z_pos::SHOT))
+                .insert(MainBundle::from_xyz(shot_translation.x, shot_translation.y, z_pos::SHOT))
                 .insert(Animator::new(Tween::new(
                     Linear,
                     Duration::from_secs_f32(tower.radius / tower.shot.get_speed()),
                     TransformPositionLens {
-                        start: with_z(t_tower.translation, z_pos::SHOT),
+                        start: with_z(shot_translation, z_pos::SHOT),
                         end: with_z(
-                            t_tower.translation + (enemy_position - t_tower.translation) * tower.radius / distance,
+                            shot_translation + (enemy_position - shot_translation) * tower.radius / distance,
                             z_pos::SHOT),
                     },
                 ).with_completed_event(SHOT_DESPAWNED)))
                 .with_children(|builder|
-                    sprite_from_tile(builder, Enemies::Drone.get_tiles(), &textures.tileset, 0.)
+                    sprite_from_tile(builder, &[tower.shot.get_tile()], &textures.tileset, 0.)
                 )
                 .insert(PlayingUI)
             ;
