@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{GameState, tower, util};
+use crate::{GameState, util};
 use crate::enemy::{drones_dead, Enemies, update_drones};
 use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::Wiggle;
@@ -30,10 +30,20 @@ impl Plugin for PlayingPlugin {
 #[derive(Component)]
 pub struct PlayingUI;
 
-fn setup_playing (
+#[derive(Resource, PartialEq)]
+pub enum CursorState {
+    /// Default state
+    Select,
+    /// Place a tower
+    Build(Towers),
+}
+
+fn setup_playing(
     mut commands: Commands,
     textures: Res<Textures>,
 ) {
+    commands.insert_resource(CursorState::Select);
+
     let atlas = &textures.tileset;
 
     // TODO: Move drones spawn logic out of playing
@@ -47,8 +57,6 @@ fn setup_playing (
             package::spawn(builder, Enemies::Drone.get_model().package_offset(), atlas);
         })
         .insert(PlayingUI);
-
-    tower::place_tower(6, 8, &mut commands, Towers::Basic, &textures.tileset);
 }
 
 fn exit_playing (

@@ -57,6 +57,7 @@ pub mod tweening {
 
 pub mod misc {
     pub const ANIMATION_INTERVAL: usize = 80;
+    pub const TRANSPARENT_TOWER_ALPHA: f32 = 0.5;
 }
 
 pub const fn with_z(Vec3 { x, y, .. }: Vec3, z: f32) -> Vec3 {

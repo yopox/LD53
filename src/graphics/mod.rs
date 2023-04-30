@@ -91,17 +91,25 @@ pub fn sprite_from_tile(
     atlas: &Handle<TextureAtlas>,
     z: f32,
 ) {
+    sprite_from_tile_with_alpha(builder, tiles, atlas, z, 1.0);
+}
+
+pub fn sprite_from_tile_with_alpha(
+    builder: &mut ChildBuilder,
+    tiles: &[TILE],
+    atlas: &Handle<TextureAtlas>,
+    z: f32,
+    alpha: f32,
+) {
     for &(x, y, i, bg, fg, flip, rotation) in tiles {
-        builder.spawn(
-            sprite(
-                i, x, y, z,
-                bg.into(),
-                fg.into(),
-                flip,
-                rotation,
-                atlas.clone(),
-            )
+        let mut bundle = sprite(
+            i, x, y, z,
+            bg.into(), fg.into(),
+            flip, rotation,
+            atlas.clone(),
         );
+        bundle.sprite.alpha = alpha;
+        builder.spawn(bundle);
     }
 }
 

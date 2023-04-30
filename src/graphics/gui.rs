@@ -1,13 +1,16 @@
 use bevy::app::App;
 use bevy::prelude::*;
+use bevy_text_mode::TextModeTextureAtlasSprite;
 
-use crate::{GameState, util};
-use crate::graphics::{grid, MainBundle, sprite, sprite_f32, text};
+use crate::{GameState, tower, util};
+use crate::collision::body_size;
+use crate::graphics::{grid, MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, text};
 use crate::graphics::grid::Grid;
 use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
 use crate::graphics::text::TextStyles;
-use crate::playing::PlayingUI;
+use crate::playing::{CursorState, PlayingUI};
+use crate::tower::Towers;
 use crate::util::size::{f32_tile_to_f32, is_oob, tile_to_f32};
 
 pub struct GuiPlugin;
@@ -16,15 +19,19 @@ impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system(setup.in_schedule(OnEnter(GameState::Main)))
-            .add_systems((update_cursor, update_popup).in_set(OnUpdate(GameState::Main)))
+            .add_systems((update_cursor, update_popup, update_tower_button, place_tower).in_set(OnUpdate(GameState::Main)))
         ;
     }
 }
 
 #[derive(Component)]
-struct Cursor {
-    hover_pos: Option<(usize, usize)>,
-}
+struct Cursor;
+
+#[derive(Resource)]
+struct HoveredPos(pub (usize, usize));
+
+#[derive(Component)]
+struct TowerButton(Towers);
 
 fn setup(
     mut commands: Commands,
@@ -64,20 +71,27 @@ fn setup(
             Palette::Transparent, Palette::B,
             false, 0, textures.tileset.clone(),
         ))
-        .insert(Cursor { hover_pos: None })
+        .insert(Cursor)
     ;
+
+    // Tower buttons
+    commands
+        .spawn(TowerButton(Towers::Basic))
+        .insert(MainBundle::from_xyz(tile_to_f32(8), f32_tile_to_f32(0.5), util::z_pos::GUI_FG))
+        .with_children(|builder| {
+            sprite_from_tile_with_alpha(builder, Towers::Basic.get_tiles(), &textures.tileset, 0., util::misc::TRANSPARENT_TOWER_ALPHA);
+        });
 }
 
 fn update_cursor(
+    mut commands: Commands,
     grid: Option<Res<Grid>>,
     windows: Query<&Window>,
-    mut cursor: Query<(&mut Transform, &mut Visibility, &mut Cursor)>,
+    mut cursor: Query<(&mut Transform, &mut Visibility), With<Cursor>>,
 ) {
-    let Ok((mut pos,
-               mut vis,
-               mut cursor)) = cursor.get_single_mut() else { return; };
+    commands.remove_resource::<HoveredPos>();
+    let Ok((mut pos, mut vis)) = cursor.get_single_mut() else { return; };
     vis.set_if_neq(Visibility::Hidden);
-    cursor.hover_pos = None;
 
     let Some(grid) = grid else { return; };
     let grid = &grid.0;
@@ -93,7 +107,7 @@ fn update_cursor(
 
     if grid[y as usize][x as usize] == grid::RoadElement::Rock {
         vis.set_if_neq(Visibility::Inherited);
-        cursor.hover_pos = Some((x as usize, y as usize));
+        commands.insert_resource(HoveredPos((x as usize, y as usize)));
         pos.translation.x = tile_to_f32(x as usize);
         pos.translation.y = tile_to_f32(y as usize + util::size::GUI_HEIGHT);
     }
@@ -128,7 +142,7 @@ impl HoverPopup {
     }
 }
 
-/// A 4*3 information popup showed on [Information] hover
+/// A 6*3 information popup showed on [Information] hover
 #[derive(Component)]
 struct Popup(Entity);
 
@@ -234,4 +248,96 @@ fn spawn_popup(
                 }
             }
         });
+}
+
+fn update_tower_button(
+    cursor_state: Option<ResMut<CursorState>>,
+    buttons: Query<(&TowerButton, &Transform, Entity)>,
+    children: Query<&Children>,
+    mut sprites: Query<&mut TextModeTextureAtlasSprite>,
+    windows: Query<&Window>,
+    mouse: Res<Input<MouseButton>>,
+) {
+    let Some(mut cursor_state) = cursor_state else { return; };
+    let mut cursor_state = cursor_state;
+    let Some(cursor_pos) = util::cursor_pos(windows) else { return; };
+    let clicked = mouse.just_pressed(MouseButton::Left);
+
+    for (button, pos, id) in &buttons {
+        let mut transparent = true;
+        if let CursorState::Build(t) = cursor_state.as_ref() {
+            transparent = *t != button.0;
+        } else {
+            // Check button hover
+            let size = body_size(button.0.get_tiles());
+            let (x, y) = (pos.translation.x, pos.translation.y);
+            let hover = cursor_pos.x >= x && cursor_pos.x <= x + size.x && cursor_pos.y >= y && cursor_pos.y <= y + size.y;
+            transparent = !hover;
+            if hover && clicked { cursor_state.set_if_neq(CursorState::Build(button.0)); }
+        }
+
+        for id in children.iter_descendants(id) {
+            let Ok(mut sprite) = sprites.get_mut(id) else { continue };
+            sprite.alpha = if transparent { util::misc::TRANSPARENT_TOWER_ALPHA } else { 1.0 };
+        }
+    }
+}
+
+#[derive(Component)]
+struct TransparentTower;
+
+fn place_tower(
+    mut commands: Commands,
+    mut state: Option<ResMut<CursorState>>,
+    cursor: Option<Res<HoveredPos>>,
+    mut transparent_tower: Query<(&mut Transform, Entity), With<TransparentTower>>,
+    textures: Res<Textures>,
+    mouse: Res<Input<MouseButton>>,
+    keys: Res<Input<KeyCode>>,
+) {
+    let Some(mut state) = state else { return; };
+    let cursor: Option<(usize, usize)> = match cursor {
+        Some(_) => Some(cursor.unwrap().0),
+        _ => None,
+    };
+
+    // Escape [CursorState::Build]
+    if mouse.just_pressed(MouseButton::Right) || keys.just_pressed(KeyCode::Escape) {
+        state.set_if_neq(CursorState::Select);
+    }
+    let state = state.as_ref();
+
+    if let Ok((mut pos, id)) = transparent_tower.get_single_mut() {
+        // The transparent tower exists
+        match (state, cursor) {
+            (CursorState::Build(t), Some((x, y))) => {
+                // Update its position
+                pos.translation.x = tile_to_f32(x);
+                pos.translation.y = tile_to_f32(y + util::size::GUI_HEIGHT);
+
+                if mouse.just_pressed(MouseButton::Left) {
+                    // Build the tower
+                    // TODO: Check money
+                    tower::place_tower(x, y, &mut commands, *t, &textures.tileset);
+                    commands.insert_resource(CursorState::Select);
+                    return;
+                }
+            }
+            _ => {
+                // Delete the tower :(
+                commands.entity(id).despawn_recursive();
+            }
+        }
+    } else {
+        // There is no transparent tower
+        if let CursorState::Build(t) = state {
+            let Some((x, y)) = cursor else { return; };
+            commands
+                .spawn(TransparentTower)
+                .insert(MainBundle::from_xyz(tile_to_f32(x), tile_to_f32(y + util::size::GUI_HEIGHT), util::z_pos::TOWERS))
+                .with_children(|builder| {
+                    sprite_from_tile_with_alpha(builder, t.get_tiles(), &textures.tileset, 0., 0.85);
+                });
+        }
+    }
 }

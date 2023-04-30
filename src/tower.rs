@@ -27,7 +27,7 @@ pub struct Tower {
     shot: Shots,
 }
 
-#[derive(Debug, Copy, Clone, EnumIter)]
+#[derive(Debug, Copy, Clone, EnumIter, PartialEq)]
 pub enum Towers {
     Basic,
 }
@@ -66,6 +66,7 @@ impl Towers {
     }
 }
 
+/// Place a tower on (x, y) in grid coordinates.
 pub fn place_tower(
     x: usize, y: usize,
     commands: &mut Commands,
@@ -73,12 +74,12 @@ pub fn place_tower(
 ) {
     commands.spawn(tower.instantiate())
         .insert(
-            MainBundle::from_xyz(tile_to_f32(x), tile_to_f32(y), util::z_pos::TOWERS)
+            MainBundle::from_xyz(tile_to_f32(x), tile_to_f32(y + util::size::GUI_HEIGHT), util::z_pos::TOWERS)
         )
         .with_children(|builder|
             sprite_from_tile(builder, tower.get_tiles(), atlas, 0.)
         )
-        .insert(gui::HoverPopup::new("Lightning tower", "Level 1", Some(("Damage", 1)), Some(("Range", 3)), 8., 16.))
+        .insert(gui::HoverPopup::new("Lightning tower", "Level 1", Some(("Damage", 1)), Some(("Speed", 4)), 8., 16.))
         .insert(PlayingUI)
     ;
 }
