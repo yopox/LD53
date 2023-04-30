@@ -23,18 +23,32 @@ pub mod size {
     pub fn is_oob(x: isize, y: isize) -> bool {
         x < 0 || y < 0 || x >= WIDTH as isize || y >= GRID_HEIGHT as isize
     }
+
+    pub mod battle {
+        use crate::util::size::TILE_SIZE;
+
+        pub const BOMB_RANGE: f32 = 2. * TILE_SIZE as f32;
+    }
 }
 
 pub mod z_pos {
+    // Background
     pub const BACKGROUND: f32 = 0.;
     pub const TITLE_TEXT: f32 = 1.;
     pub const GRID: f32 = 2.;
     pub const ROAD: f32 = 3.;
+
     pub const CURSOR: f32 = 3.5;
+
+    // Battle elements
     pub const TOWERS: f32 = 4.;
     pub const PACKAGES: f32 = 5.99;
     pub const ENEMIES: f32 = 6.;
     pub const SHOT: f32 = 7.;
+    pub const BOMB: f32 = 7.1;
+    pub const EXPLOSION: f32 = 9.;
+
+    // GUI
     pub const TRANSITION: f32 = 10.;
     pub const GUI_BG: f32 = 11.;
     pub const GUI_FG: f32 = 12.;
@@ -52,6 +66,7 @@ pub mod transition {
 pub mod tweening {
     pub const TRANSITION_OVER: u64 = 1;
     pub const SHOT_DESPAWNED: u64 = 2;
+    pub const BOMB_EXPLODED: u64 = 3;
     pub const DELAY: u64 = 200;
 }
 

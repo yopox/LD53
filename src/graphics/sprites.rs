@@ -71,3 +71,13 @@ pub const TOWER_1: &'static [TILE] = &[
     (0, 1, 64, 16, 8, false, 0),
     (0, 0, 96, 16, 10, false, 0),
 ];
+
+pub const TOWER_2: &'static [TILE] = &[
+    (0, 1, 64, 16, 7, false, 0),
+    (0, 0, 96, 16, 9, false, 0),
+];
+
+pub const TOWER_3: &'static [TILE] = &[
+    (0, 1, 64, 16, 6, false, 0),
+    (0, 0, 96, 16, 8, false, 0),
+];

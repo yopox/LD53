@@ -2,9 +2,10 @@ use bevy::app::App;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy_text_mode::TextModeTextureAtlasSprite;
+use strum::IntoEnumIterator;
 
 use crate::{GameState, tower, util};
-use crate::battle::{CursorState, Money, PlayingUI};
+use crate::battle::{BattleUI, CursorState, Money};
 use crate::collision::body_size;
 use crate::graphics::{grid, MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, text};
 use crate::graphics::grid::Grid;
@@ -89,19 +90,20 @@ fn setup(
     ;
 
     // Tower buttons
-    let tower = Towers::Lightning;
-    commands
-        .spawn(TowerButton(tower))
-        .insert(MainBundle::from_xyz(tile_to_f32(8), f32_tile_to_f32(0.9), util::z_pos::GUI_FG))
-        .with_children(|builder| {
-            sprite_from_tile_with_alpha(builder, tower.get_tiles(), &textures.tileset, 0., ButtonState::CanBuild.get_alpha());
-            builder.spawn(text::ttf_anchor(
-                f32_tile_to_f32(0.5), f32_tile_to_f32(0.25), util::z_pos::GUI_FG,
-                &format!("€{}", tower.get_cost()),
-                TextStyles::Heading, &fonts, Palette::D,
-                Anchor::TopCenter,
-            ));
-        });
+    for (i, tower) in Towers::iter().enumerate() {
+        commands
+            .spawn(TowerButton(tower))
+            .insert(MainBundle::from_xyz(tile_to_f32(8 + i), f32_tile_to_f32(0.9), util::z_pos::GUI_FG))
+            .with_children(|builder| {
+                sprite_from_tile_with_alpha(builder, tower.get_tiles(), &textures.tileset, 0., ButtonState::CanBuild.get_alpha());
+                builder.spawn(text::ttf_anchor(
+                    f32_tile_to_f32(0.5), f32_tile_to_f32(0.25), util::z_pos::GUI_FG,
+                    &format!("€{}", tower.get_cost()),
+                    TextStyles::Heading, &fonts, Palette::D,
+                    Anchor::TopCenter,
+                ));
+            });
+    }
 }
 
 fn update_money(
@@ -251,7 +253,7 @@ fn spawn_popup(
             util::z_pos::POPUP_BG,
         ))
         .insert(Popup(owner_id))
-        .insert(PlayingUI)
+        .insert(BattleUI)
         .with_children(|builder| {
             for (i, x, y, r) in [
                 (34, 0, 2, 0), (35, 1, 2, 0), (35, 2, 2, 0), (35, 3, 2, 0), (35, 4, 2, 0), (34, 5, 2, 1),

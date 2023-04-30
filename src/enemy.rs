@@ -4,7 +4,7 @@ use strum_macros::EnumIter;
 use crate::{graphics, util};
 use crate::collision::{body_size, BodyType, Contact, HitBox};
 use crate::graphics::sprites::{DroneModels, TILE};
-use crate::shot::Shot;
+use crate::shot::{Bomb, Shot, Shots, spawn_bomb};
 use crate::util::size::f32_tile_to_f32;
 
 #[derive(Debug, Clone)]
@@ -87,25 +87,29 @@ pub fn drones_dead(
     mut event_reader: EventReader<Contact>,
     mut commands: Commands,
     mut enemies: Query<&mut Enemy>,
-    shots: Query<&Shot>,
+    shots: Query<(&Shot, &Transform)>,
 ) {
     for event in event_reader.iter() {
         match event {
             Contact((BodyType::Enemy, e_enemy), (BodyType::ShipShot, e_shot)) |
             Contact((BodyType::ShipShot, e_shot), (BodyType::Enemy, e_enemy))
             => {
-                if let Some(mut entity_commands) = commands.get_entity(*e_shot) {
-                    entity_commands.despawn_recursive()
-                }
+                if let Ok((&shot, &t_shot)) = shots.get(*e_shot) {
+                    if let Some(mut entity_commands) = commands.get_entity(*e_shot) {
+                        entity_commands.despawn_recursive()
+                    }
 
-                if let Ok(mut enemy) = enemies.get_mut(*e_enemy) {
-                    if let Ok(&shot) = shots.get(*e_shot) {
-                        enemy.stats.hp -= shot.damages;
-                        if enemy.stats.hp <= 0. {
-                            enemy.stats.hp = 0.;
+                    if let Ok(mut enemy) = enemies.get_mut(*e_enemy) {
+                        if shot.class == Shots::Bomb {
+                            spawn_bomb(Bomb::from_shot_translation(shot, t_shot.translation), &mut commands);
+                        } else {
+                            enemy.stats.hp -= shot.damages;
+                            if enemy.stats.hp <= 0. {
+                                enemy.stats.hp = 0.;
 
-                            if let Some(entity_commands) = commands.get_entity(*e_enemy) {
-                                entity_commands.despawn_recursive();
+                                if let Some(entity_commands) = commands.get_entity(*e_enemy) {
+                                    entity_commands.despawn_recursive();
+                                }
                             }
                         }
                     }

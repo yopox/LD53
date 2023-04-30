@@ -5,7 +5,7 @@ use crate::enemy::{drones_dead, Enemies, update_drones};
 use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::Wiggle;
 use crate::graphics::loading::Textures;
-use crate::shot::remove_shots;
+use crate::shot::{bomb_exploded, bomb_exploding, make_bomb_explode, remove_shots};
 use crate::tower::{tower_fire, Towers, update_just_fired};
 
 pub struct BattlePlugin;
@@ -20,7 +20,8 @@ impl Plugin for BattlePlugin {
                 cleanup.in_schedule(OnExit(GameState::Main))
             )
             .add_systems(
-                (update_just_fired, tower_fire, update_drones, remove_shots, drones_dead)
+                (update_just_fired, tower_fire, update_drones, remove_shots, drones_dead,
+                 bomb_exploding, make_bomb_explode, bomb_exploded)
                     .in_set(OnUpdate(GameState::Main))
             )
         ;
@@ -28,7 +29,7 @@ impl Plugin for BattlePlugin {
 }
 
 #[derive(Component)]
-pub struct PlayingUI;
+pub struct BattleUI;
 
 #[derive(Resource)]
 pub struct Money(pub u16);
@@ -60,11 +61,11 @@ fn setup(
             sprite_from_tile(builder, Enemies::Drone.get_tiles(), atlas, 0.);
             package::spawn(builder, Enemies::Drone.get_model().package_offset(), atlas);
         })
-        .insert(PlayingUI);
+        .insert(BattleUI);
 }
 
 fn cleanup(
-    query: Query<Entity, With<PlayingUI>>,
+    query: Query<Entity, With<BattleUI>>,
     mut commands: Commands,
 ) {
     for e in &query {

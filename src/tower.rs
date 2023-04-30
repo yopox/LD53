@@ -6,12 +6,12 @@ use bevy_tweening::EaseMethod::Linear;
 use bevy_tweening::lens::TransformPositionLens;
 use strum_macros::EnumIter;
 
-use crate::battle::PlayingUI;
+use crate::battle::BattleUI;
 use crate::enemy::Enemy;
 use crate::graphics::{gui, MainBundle, sprite_from_tile, sprites};
 use crate::graphics::loading::Textures;
 use crate::graphics::sprites::TILE;
-use crate::shot::Shots;
+use crate::shot::{Shot, Shots};
 use crate::util;
 use crate::util::{with_z, z_pos};
 use crate::util::size::tile_to_f32;
@@ -30,6 +30,7 @@ pub struct Tower {
 #[derive(Debug, Copy, Clone, EnumIter, PartialEq)]
 pub enum Towers {
     Lightning,
+    PaintBomb,
 }
 
 #[derive(Component)]
@@ -55,6 +56,13 @@ impl Towers {
                 range: tile_to_f32(5),
                 radius: tile_to_f32(5),
                 shot: Shots::Basic,
+            },
+            Towers::PaintBomb => Tower {
+                class: *self,
+                reloading_delay: 15.,
+                range: tile_to_f32(8),
+                radius: tile_to_f32(9),
+                shot: Shots::Bomb,
             }
         }
     }
@@ -62,6 +70,7 @@ impl Towers {
     pub const fn get_tiles(&self) -> &[TILE] {
         match &self {
             Towers::Lightning => &sprites::TOWER_1,
+            Towers::PaintBomb => &sprites::TOWER_3,
         }
     }
 
@@ -73,6 +82,7 @@ impl Towers {
     pub const fn get_cost(&self) -> u16 {
         match self {
             Towers::Lightning => 40,
+            Towers::PaintBomb => 60,
         }
     }
 }
@@ -93,7 +103,7 @@ pub fn place_tower(
         )
         .insert(JustFired::new(time, tower.initial_delay()))
         .insert(gui::HoverPopup::new("Lightning tower", "Tier 1 (up: €80)", Some(("Damage", 1)), Some(("Speed", 4)), 8., 16.))
-        .insert(PlayingUI)
+        .insert(BattleUI)
     ;
 }
 
@@ -138,7 +148,7 @@ pub fn tower_fire(
                 .with_children(|builder|
                     sprite_from_tile(builder, &[tower.shot.get_tile()], &textures.tileset, 0.)
                 )
-                .insert(PlayingUI)
+                .insert(BattleUI)
             ;
 
             if let Some(mut entity_commands) = commands.get_entity(e_tower) {
