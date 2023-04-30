@@ -1,5 +1,4 @@
-use bevy::math::Vec2;
-use bevy::prelude::{Query, Vec3, Window};
+use bevy::prelude::*;
 
 pub mod size {
     /// Tile size from the tileset
@@ -78,6 +77,8 @@ pub mod tweening {
 
 pub mod misc {
     pub const ANIMATION_INTERVAL: usize = 80;
+
+    pub const SLOW_DOWN_DELAY: f32 = 10.;
 }
 
 pub const fn with_z(Vec3 { x, y, .. }: Vec3, z: f32) -> Vec3 {

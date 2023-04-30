@@ -6,7 +6,7 @@ use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::{Wiggle, wiggle};
 use crate::graphics::loading::Textures;
 use crate::shot::{bomb_exploded, bomb_exploding, make_bomb_explode, remove_shots};
-use crate::tower::{tower_fire, Towers, update_just_fired};
+use crate::tower::{remove_slow_down, tower_fire, Towers, update_just_fired};
 
 pub struct BattlePlugin;
 
@@ -22,7 +22,7 @@ impl Plugin for BattlePlugin {
             .add_systems(
                 (update_just_fired, tower_fire, update_drones, remove_shots,
                  bomb_exploding, make_bomb_explode, bomb_exploded, despawn_drone,
-                 drones_dead.after(wiggle))
+                 drones_dead.after(wiggle), remove_slow_down)
                     .in_set(OnUpdate(GameState::Main))
             )
         ;

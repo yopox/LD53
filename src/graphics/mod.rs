@@ -33,11 +33,16 @@ pub struct MainBundle {
 }
 
 impl MainBundle {
+    pub fn from_transform(transform: Transform) -> Self {
+        MainBundle { transform, ..default() }
+    }
+
+    pub fn from_translation(translation: Vec3) -> Self {
+        MainBundle::from_transform(Transform::from_translation(translation))
+    }
+
     pub fn from_xyz(x: f32, y: f32, z: f32) -> Self {
-        MainBundle {
-            transform: Transform::from_xyz(x, y, z),
-            ..default()
-        }
+        MainBundle::from_transform(Transform::from_xyz(x, y, z))
     }
 
     pub fn from_tiles(x: usize, y: usize, z: f32) -> Self {

@@ -15,6 +15,7 @@ use crate::graphics::loading::Textures;
 use crate::graphics::package::{ClickablePackage, Package};
 use crate::graphics::sprites::{DroneModels, TILE};
 use crate::shot::{Bomb, Shot, Shots, spawn_bomb};
+use crate::tower::Slow;
 use crate::util::size::{f32_tile_to_f32, tile_to_f32};
 
 #[derive(Debug, Clone)]
@@ -75,13 +76,18 @@ impl Enemies {
 }
 
 pub fn update_drones(
-    mut drones: Query<(&mut Transform, &mut Enemy)>,
-    path: Option<Res<graphics::grid::CurrentPath>>,
+    mut drones: Query<(&mut Transform, &mut Enemy, Option<&Slow>)>,
+    path: Option<Res<CurrentPath>>,
     time: Res<Time>,
 ) {
     let Some(path) = path else { return; };
-    for (mut pos, mut drone) in drones.iter_mut() {
-        drone.advance += drone.stats.speed * time.delta_seconds();
+    for (mut pos, mut drone, slowed) in drones.iter_mut() {
+        let speed_modulator = match slowed {
+            | Some(slow) => slow.to_f32(),
+            | None => 1.,
+        };
+
+        drone.advance += speed_modulator * drone.stats.speed * time.delta_seconds();
 
         let Some(progress) = path.0.pos(drone.advance) else { continue; };
 

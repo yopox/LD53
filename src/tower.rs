@@ -1,5 +1,7 @@
 use std::time::Duration;
 
+use bevy::ecs::system::EntityCommands;
+use bevy::math::{vec3, Vec3Swizzles};
 use bevy::prelude::*;
 use bevy_tweening::{Animator, Tween};
 use bevy_tweening::EaseMethod::Linear;
@@ -15,6 +17,7 @@ use crate::graphics::sprites::TILE;
 use crate::shot::Shots;
 use crate::util;
 use crate::util::{with_z, z_pos};
+use crate::util::misc::SLOW_DOWN_DELAY;
 use crate::util::size::tile_to_f32;
 use crate::util::tweening::SHOT_DESPAWN;
 
@@ -25,7 +28,7 @@ pub struct Tower {
     reloading_delay: f32,
     range: f32,
     radius: f32,
-    shot: Shots,
+    shot: Option<Shots>,
     rank: u8,
 }
 
@@ -42,6 +45,7 @@ impl Tower {
         match self.model {
             Towers::Lightning => "Lightning Tower",
             Towers::PaintBomb => "Paint Bomb",
+            Towers::Scrambler => "Scrambler",
         }
     }
 
@@ -57,6 +61,7 @@ impl Tower {
 pub enum Towers {
     Lightning,
     PaintBomb,
+    Scrambler,
 }
 
 #[derive(Component)]
@@ -81,7 +86,7 @@ impl Towers {
                 reloading_delay: 10.,
                 range: tile_to_f32(5),
                 radius: tile_to_f32(5),
-                shot: Shots::Basic,
+                shot: Some(Shots::Basic),
                 rank: 1,
             },
             Towers::PaintBomb => Tower {
@@ -89,8 +94,16 @@ impl Towers {
                 reloading_delay: 15.,
                 range: tile_to_f32(8),
                 radius: tile_to_f32(9),
-                shot: Shots::Bomb,
+                shot: Some(Shots::Bomb),
                 rank: 1,
+            },
+            Towers::Scrambler => Tower {
+                model: *self,
+                reloading_delay: 2.,
+                range: tile_to_f32(3),
+                radius: tile_to_f32(4),
+                shot: None,
+                rank: 2,
             }
         }
     }
@@ -98,6 +111,7 @@ impl Towers {
     pub const fn get_tiles(&self) -> &[TILE] {
         match &self {
             Towers::Lightning => &sprites::TOWER_1,
+            Towers::Scrambler => &sprites::TOWER_2,
             Towers::PaintBomb => &sprites::TOWER_3,
         }
     }
@@ -111,6 +125,7 @@ impl Towers {
         match self {
             Towers::Lightning => 40,
             Towers::PaintBomb => 60,
+            Towers::Scrambler => 50,
         }
     }
 }
@@ -140,53 +155,65 @@ pub fn place_tower(
 
 pub fn tower_fire(
     towers: Query<(Entity, &Transform, &Tower), Without<JustFired>>,
-    mut enemies: ParamSet<(
-        Query<(Entity, &Transform, &Enemy)>,
-        Query<&mut Enemy>,
-    )>,
+    enemies: Query<(Entity, &Transform, &Enemy)>,
     mut commands: Commands,
     time: Res<Time>,
     textures: Res<Textures>,
 ) {
     for (e_tower, &t_tower, tower) in towers.iter() {
-        let mut chosen_enemy: Option<(Vec3, f32)> = None;
-        let mut max_advance: f32 = -1.;
-        for (_e_enemy, t_enemy, enemy) in enemies.p0().iter() {
-            let advance = enemy.advance;
-            let distance = t_tower.translation.distance(t_enemy.translation);
-            if advance >= max_advance && distance <= tower.range {
-                chosen_enemy = Some((t_enemy.translation, distance));
-                max_advance = advance;
+        match tower.model {
+            Towers::Lightning | Towers::PaintBomb => {
+                let chosen_enemy = enemies.iter()
+                    .filter(|(_, t, _)| t.translation.xy().distance(t_tower.translation.xy()) <= tower.range)
+                    .max_by_key(|(_, _, enemy)| (enemy.advance * 4096.) as usize);
+
+                if let Some((_, t_enemy, _)) = chosen_enemy {
+                    shoot(&mut commands, &textures, t_tower, tower, t_enemy.translation);
+                }
+            }
+            Towers::Scrambler => {
+                enemies.iter()
+                    .filter(|(_, t, _)| t.translation.xy().distance(t_tower.translation.xy()) <= tower.range)
+                    .for_each(|(e, _, _)| {
+                        if let Some(mut entity_commands) = commands.get_entity(e) {
+                            entity_commands.insert(Slow {
+                                index: SlowIndex::Level0,
+                                t_final: time.elapsed() + Duration::from_secs_f32(SLOW_DOWN_DELAY),
+                            });
+                        }
+                    })
+                ;
             }
         }
 
-        if let Some((enemy_position, distance)) = chosen_enemy {
-            let mut shot_translation = t_tower.translation.clone();
-            shot_translation.y += tile_to_f32(1);
-            commands
-                .spawn(tower.shot.instantiate())
-                .insert(MainBundle::from_xyz(shot_translation.x, shot_translation.y, z_pos::SHOT))
-                .insert(Animator::new(Tween::new(
-                    Linear,
-                    Duration::from_secs_f32(tower.radius / tower.shot.get_speed()),
-                    TransformPositionLens {
-                        start: with_z(shot_translation, z_pos::SHOT),
-                        end: with_z(
-                            shot_translation + (enemy_position - shot_translation) * tower.radius / distance,
-                            z_pos::SHOT),
-                    },
-                ).with_completed_event(SHOT_DESPAWN)))
-                .with_children(|builder|
-                    sprite_from_tile(builder, &[tower.shot.get_tile()], &textures.tileset, 0.)
-                )
-                .insert(BattleUI)
-            ;
-
-            if let Some(mut entity_commands) = commands.get_entity(e_tower) {
-                entity_commands.insert(JustFired::new(&time, tower.reloading_delay));
-            }
+        if let Some(mut entity_commands) = commands.get_entity(e_tower) {
+            entity_commands.insert(JustFired::new(&time, tower.reloading_delay));
         }
     }
+}
+
+fn shoot(commands: &mut Commands, textures: &Res<Textures>, t_tower: Transform, tower: &Tower, enemy_position: Vec3) {
+    let distance = t_tower.translation.distance(enemy_position);
+    let shot_translation = vec3(t_tower.translation.x, t_tower.translation.y + 1., z_pos::SHOT);
+    let shot = tower.shot.expect("For shooting something.");
+    commands
+        .spawn(shot.instantiate())
+        .insert(MainBundle::from_translation(shot_translation))
+        .insert(Animator::new(Tween::new(
+            Linear,
+            Duration::from_secs_f32(tower.radius / shot.get_speed()),
+            TransformPositionLens {
+                start: shot_translation,
+                end: with_z(
+                    shot_translation + (enemy_position - shot_translation) * tower.radius / distance,
+                    z_pos::SHOT),
+            },
+        ).with_completed_event(SHOT_DESPAWN)))
+        .with_children(|builder|
+            sprite_from_tile(builder, &[shot.get_tile()], &textures.tileset, 0.)
+        )
+        .insert(BattleUI)
+    ;
 }
 
 pub fn update_just_fired(
@@ -198,6 +225,49 @@ pub fn update_just_fired(
         if just_fired.t0 + just_fired.delay <= time.elapsed() {
             if let Some(mut entity_commands) = commands.get_entity(e) {
                 entity_commands.remove::<JustFired>();
+            }
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum SlowIndex {
+    Level0 = 0,
+    Level1,
+    Level2,
+}
+
+impl SlowIndex {
+    pub fn to_f32(&self) -> f32 {
+        match &self {
+            SlowIndex::Level0 => 0.66,
+            SlowIndex::Level1 => 0.5,
+            SlowIndex::Level2 => 0.33,
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct Slow {
+    index: SlowIndex,
+    t_final: Duration,
+}
+
+impl Slow {
+    pub fn to_f32(&self) -> f32 {
+        self.index.to_f32()
+    }
+}
+
+pub fn remove_slow_down(
+    slown_down: Query<(Entity, &Slow)>,
+    mut commands: Commands,
+    time: Res<Time>,
+) {
+    for (e, &Slow { t_final, .. }) in slown_down.iter() {
+        if t_final <= time.elapsed() {
+            if let Some(mut entity_commands) = commands.get_entity(e) {
+                entity_commands.remove::<Slow>();
             }
         }
     }
