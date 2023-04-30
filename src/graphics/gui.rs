@@ -88,14 +88,24 @@ fn update_cursor(
     grid: Option<Res<Grid>>,
     windows: Query<&Window>,
     mut cursor: Query<(&mut Transform, &mut Visibility), With<Cursor>>,
+    hovered: Option<ResMut<HoveredPos>>,
 ) {
-    commands.remove_resource::<HoveredPos>();
-    let Ok((mut pos, mut vis)) = cursor.get_single_mut() else { return; };
+    let mut clean = || commands.remove_resource::<HoveredPos>();
+    let Ok((mut pos, mut vis)) = cursor.get_single_mut() else {
+        clean();
+        return;
+    };
     vis.set_if_neq(Visibility::Hidden);
 
-    let Some(grid) = grid else { return; };
+    let Some(grid) = grid else {
+        clean();
+        return;
+    };
     let grid = &grid.0;
-    let Some(cursor_pos) = util::cursor_pos(windows) else { return; };
+    let Some(cursor_pos) = util::cursor_pos(windows) else {
+        clean();
+        return;
+    };
 
     // Get hovered tile
     let tile_size = tile_to_f32(1);
@@ -107,9 +117,16 @@ fn update_cursor(
 
     if grid[y as usize][x as usize] == grid::RoadElement::Rock {
         vis.set_if_neq(Visibility::Inherited);
-        commands.insert_resource(HoveredPos((x as usize, y as usize)));
+        let new_hovered = (x as usize, y as usize);
+        match hovered {
+            Some(mut res) if res.0.0 != new_hovered.0 || res.0.1 != new_hovered.1 => res.0 = new_hovered,
+            Some(_) => {},
+            None => commands.insert_resource(HoveredPos(new_hovered)),
+        }
         pos.translation.x = tile_to_f32(x as usize);
         pos.translation.y = tile_to_f32(y as usize + util::size::GUI_HEIGHT);
+    } else {
+        clean();
     }
 }
 
@@ -297,6 +314,10 @@ fn place_tower(
     time: Res<Time>,
 ) {
     let Some(mut state) = state else { return; };
+    let cursor_changed = match cursor {
+        Some(ref res) => res.is_changed(),
+        _ => false,
+    };
     let cursor: Option<(usize, usize)> = match cursor {
         Some(_) => Some(cursor.unwrap().0),
         _ => None,
@@ -312,9 +333,11 @@ fn place_tower(
         // The transparent tower exists
         match (state, cursor) {
             (CursorState::Build(t), Some((x, y))) => {
-                // Update its position
-                pos.translation.x = tile_to_f32(x);
-                pos.translation.y = tile_to_f32(y + util::size::GUI_HEIGHT);
+                if cursor_changed {
+                    // Update its position
+                    pos.translation.x = tile_to_f32(x);
+                    pos.translation.y = tile_to_f32(y + util::size::GUI_HEIGHT);
+                }
 
                 if mouse.just_pressed(MouseButton::Left) {
                     // Build the tower
