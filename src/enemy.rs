@@ -6,7 +6,7 @@ use bevy_tweening::{Animator, Delay, EaseFunction, Tween, TweenCompleted};
 use bevy_tweening::lens::TransformPositionLens;
 use strum_macros::EnumIter;
 
-use crate::{graphics, util};
+use crate::util;
 use crate::collision::{body_size, BodyType, Contact, HitBox};
 use crate::graphics::{sprite_f32, tween};
 use crate::graphics::animation::Wiggle;
@@ -175,9 +175,8 @@ fn kill_drone(
             match package.get(child_id) {
                 Ok(package) => {
                     // Despawn drone package
-                    commands
-                        .entity(child_id)
-                        .despawn();
+                    commands.entity(*e_enemy).remove_children(&[child_id]);
+                    commands.entity(child_id).despawn();
 
                     // Respawn the package and make it fall on the road
                     let (_, _, i, bg, fg, f, r) = package.tile();
