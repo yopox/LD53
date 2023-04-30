@@ -4,8 +4,7 @@ use bevy::prelude::*;
 use bevy_tweening::TweenCompleted;
 use strum_macros::EnumIter;
 
-use crate::collision::{body_size, BodyType, HitBox, SolidBody};
-use crate::graphics::palette::{Palette, TRANSPARENT};
+use crate::collision::{body_size, BodyType, HitBox};
 use crate::graphics::sprites::TILE;
 use crate::util::tweening::SHOT_DESPAWNED;
 
@@ -36,9 +35,9 @@ impl Shots {
         }
     }
 
-    pub fn instantiate(&self) -> (Shot, SolidBody) {
+    pub fn instantiate(&self) -> (Shot, HitBox) {
         let body_size = body_size(self.get_tiles());
-        let solid_body = SolidBody {
+        let solid_body = HitBox {
             body_type: BodyType::ShipShot,
             width: body_size.x,
             height: body_size.y,

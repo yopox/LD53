@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use strum_macros::EnumIter;
 
 use crate::{graphics, util};
-use crate::collision::{body_size, BodyType, Contact, SolidBody};
+use crate::collision::{body_size, BodyType, Contact, HitBox};
 use crate::graphics::sprites::{DroneModels, TILE};
 use crate::shot::Shot;
 use crate::util::size::f32_tile_to_f32;
@@ -35,14 +35,14 @@ impl Enemies {
         }
     }
 
-    pub fn instantiate(&self) -> (Enemy, SolidBody) {
+    pub fn instantiate(&self) -> (Enemy, HitBox) {
         (Enemy {
             class: *self,
             stats: self.get_default_stats().clone(),
             advance: 0.,
         }, {
              let body_size = body_size(self.get_tiles());
-             SolidBody {
+             HitBox {
                  body_type: BodyType::Enemy,
                  width: body_size.x,
                  height: body_size.y,
