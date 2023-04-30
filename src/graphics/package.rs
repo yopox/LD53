@@ -1,13 +1,16 @@
 use bevy::asset::Handle;
-use bevy::hierarchy::ChildBuilder;
+use bevy::hierarchy::{ChildBuilder, DespawnRecursiveExt};
+use bevy::input::Input;
 use bevy::math::Vec2;
-use bevy::prelude::Component;
+use bevy::prelude::{Commands, Component, Entity, MouseButton, Query, Res, ResMut, Transform, Window};
 use bevy::sprite::TextureAtlas;
 use enum_derived::Rand;
 use rand::RngCore;
 
 use crate::{graphics, util};
+use crate::battle::Money;
 use crate::graphics::sprites::TILE;
+use crate::util::size::tile_to_f32;
 
 #[derive(Component)]
 pub struct ClickablePackage;
@@ -16,7 +19,7 @@ pub struct ClickablePackage;
 pub enum PackageKind {
     #[weight(20)]
     Common,
-    #[weight(10)]
+    #[weight(2)]
     Money,
     #[weight(2)]
     Coffee,
@@ -62,4 +65,30 @@ pub fn spawn(builder: &mut ChildBuilder, offset: Vec2, atlas: &Handle<TextureAtl
         ))
         .insert(package)
     ;
+}
+
+pub fn collect_package(
+    mut commands: Commands,
+    packages: Query<(&Package, &Transform, Entity)>,
+    windows: Query<&Window>,
+    mouse: Res<Input<MouseButton>>,
+    mut money: ResMut<Money>,
+) {
+    let Some(cursor_pos) = util::cursor_pos(windows) else { return; };
+    if !mouse.just_pressed(MouseButton::Left) { return; }
+    for (p, t, id) in &packages {
+        let (x, y) = (t.translation.x, t.translation.y);
+        let (cx, cy) = (cursor_pos.x, cursor_pos.y);
+        // Click on package
+        if cx >= x && cx <= x + tile_to_f32(1) && cy >= y && cy <= y + tile_to_f32(1) {
+            commands.entity(id).despawn_recursive();
+            match p.kind {
+                PackageKind::Common => { money.0 += util::package::MONEY_SMALL; }
+                PackageKind::Money => { money.0 += util::package::MONEY_BIG; }
+                PackageKind::Coffee => {}
+                PackageKind::Cursed => {}
+                PackageKind::Omega => {}
+            }
+        }
+    }
 }

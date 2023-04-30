@@ -75,6 +75,11 @@ pub mod tweening {
     pub const PACKAGE_DROP: u64 = 800;
 }
 
+pub mod package {
+    pub const MONEY_SMALL: u16 = 10;
+    pub const MONEY_BIG: u16 = 50;
+}
+
 pub mod misc {
     pub const ANIMATION_INTERVAL: usize = 80;
 
