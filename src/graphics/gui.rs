@@ -1,5 +1,6 @@
 use bevy::app::App;
 use bevy::prelude::*;
+use bevy::sprite::Anchor;
 use bevy_text_mode::TextModeTextureAtlasSprite;
 
 use crate::{GameState, tower, util};
@@ -88,11 +89,18 @@ fn setup(
     ;
 
     // Tower buttons
+    let tower = Towers::Lightning;
     commands
-        .spawn(TowerButton(Towers::Basic))
-        .insert(MainBundle::from_xyz(tile_to_f32(8), f32_tile_to_f32(0.5), util::z_pos::GUI_FG))
+        .spawn(TowerButton(tower))
+        .insert(MainBundle::from_xyz(tile_to_f32(8), f32_tile_to_f32(0.9), util::z_pos::GUI_FG))
         .with_children(|builder| {
-            sprite_from_tile_with_alpha(builder, Towers::Basic.get_tiles(), &textures.tileset, 0., util::misc::TRANSPARENT_TOWER_ALPHA);
+            sprite_from_tile_with_alpha(builder, tower.get_tiles(), &textures.tileset, 0., ButtonState::CanBuild.get_alpha());
+            builder.spawn(text::ttf_anchor(
+                f32_tile_to_f32(0.5), f32_tile_to_f32(0.25), util::z_pos::GUI_FG,
+                &format!("€{}", tower.get_cost()),
+                TextStyles::Heading, &fonts, Palette::D,
+                Anchor::TopCenter,
+            ));
         });
 }
 
@@ -290,6 +298,22 @@ fn spawn_popup(
         });
 }
 
+enum ButtonState {
+    CantBuild,
+    CanBuild,
+    Selected,
+}
+
+impl ButtonState {
+    fn get_alpha(&self) -> f32 {
+        match self {
+            ButtonState::CantBuild => 0.1,
+            ButtonState::CanBuild => 0.5,
+            ButtonState::Selected => 1.,
+        }
+    }
+}
+
 fn update_tower_button(
     cursor_state: Option<ResMut<CursorState>>,
     buttons: Query<(&TowerButton, &Transform, Entity)>,
@@ -297,6 +321,7 @@ fn update_tower_button(
     mut sprites: Query<&mut TextModeTextureAtlasSprite>,
     windows: Query<&Window>,
     mouse: Res<Input<MouseButton>>,
+    money: Res<Money>,
 ) {
     let Some(mut cursor_state) = cursor_state else { return; };
     let mut cursor_state = cursor_state;
@@ -304,21 +329,21 @@ fn update_tower_button(
     let clicked = mouse.just_pressed(MouseButton::Left);
 
     for (button, pos, id) in &buttons {
-        let mut transparent = true;
-        if let CursorState::Build(t) = cursor_state.as_ref() {
-            transparent = *t != button.0;
+        let mut button_state = ButtonState::CanBuild;
+        if money.0 < button.0.get_cost() { button_state = ButtonState::CantBuild; } else if let CursorState::Build(t) = cursor_state.as_ref() {
+            button_state = if *t == button.0 { ButtonState::Selected } else { ButtonState::CanBuild };
         } else {
             // Check button hover
             let size = body_size(button.0.get_tiles());
             let (x, y) = (pos.translation.x, pos.translation.y);
             let hover = cursor_pos.x >= x && cursor_pos.x <= x + size.x && cursor_pos.y >= y && cursor_pos.y <= y + size.y;
-            transparent = !hover;
+            button_state = if hover { ButtonState::Selected } else { ButtonState::CanBuild };
             if hover && clicked { cursor_state.set_if_neq(CursorState::Build(button.0)); }
         }
 
         for id in children.iter_descendants(id) {
             let Ok(mut sprite) = sprites.get_mut(id) else { continue };
-            sprite.alpha = if transparent { util::misc::TRANSPARENT_TOWER_ALPHA } else { 1.0 };
+            sprite.alpha = button_state.get_alpha();
         }
     }
 }
@@ -335,6 +360,7 @@ fn place_tower(
     mouse: Res<Input<MouseButton>>,
     keys: Res<Input<KeyCode>>,
     time: Res<Time>,
+    mut money: ResMut<Money>,
 ) {
     let Some(mut state) = state else { return; };
     let cursor_changed = match cursor {
@@ -364,8 +390,10 @@ fn place_tower(
 
                 if mouse.just_pressed(MouseButton::Left) {
                     // Build the tower
-                    // TODO: Check money
-                    tower::place_tower(x, y, &mut commands, *t, &textures.tileset, &time);
+                    if money.0 >= t.get_cost() {
+                        money.0 -= t.get_cost();
+                        tower::place_tower(x, y, &mut commands, *t, &textures.tileset, &time);
+                    }
                     commands.insert_resource(CursorState::Select);
                     return;
                 }

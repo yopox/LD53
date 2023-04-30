@@ -29,7 +29,7 @@ pub struct Tower {
 
 #[derive(Debug, Copy, Clone, EnumIter, PartialEq)]
 pub enum Towers {
-    Basic,
+    Lightning,
 }
 
 #[derive(Component)]
@@ -49,7 +49,7 @@ impl JustFired {
 impl Towers {
     pub const fn instantiate(&self) -> Tower {
         match &self {
-            Towers::Basic => Tower {
+            Towers::Lightning => Tower {
                 class: *self,
                 reloading_delay: 10.,
                 range: tile_to_f32(5),
@@ -61,13 +61,19 @@ impl Towers {
 
     pub const fn get_tiles(&self) -> &[TILE] {
         match &self {
-            Towers::Basic => &sprites::TOWER_1,
+            Towers::Lightning => &sprites::TOWER_1,
         }
     }
 
     /// Returns the delay on tower construction
     pub const fn initial_delay(&self) -> f32 {
         5.
+    }
+
+    pub const fn get_cost(&self) -> u16 {
+        match self {
+            Towers::Lightning => 40,
+        }
     }
 }
 
@@ -86,7 +92,7 @@ pub fn place_tower(
             sprite_from_tile(builder, tower.get_tiles(), atlas, 0.)
         )
         .insert(JustFired::new(time, tower.initial_delay()))
-        .insert(gui::HoverPopup::new("Lightning tower", "Level 1", Some(("Damage", 1)), Some(("Speed", 4)), 8., 16.))
+        .insert(gui::HoverPopup::new("Lightning tower", "Tier 1 (up: €80)", Some(("Damage", 1)), Some(("Speed", 4)), 8., 16.))
         .insert(PlayingUI)
     ;
 }

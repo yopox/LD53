@@ -123,6 +123,10 @@ impl TextStyles {
 }
 
 pub fn ttf(x: f32, y: f32, z: f32, text: &str, style: TextStyles, fonts: &Fonts, color: Palette) -> Text2dBundle {
+    ttf_anchor(x, y, z, text, style, fonts, color, Anchor::BottomLeft)
+}
+
+pub fn ttf_anchor(x: f32, y: f32, z: f32, text: &str, style: TextStyles, fonts: &Fonts, color: Palette, text_anchor: Anchor) -> Text2dBundle {
     Text2dBundle {
         text: bevy::text::Text {
             sections: vec![
@@ -130,7 +134,7 @@ pub fn ttf(x: f32, y: f32, z: f32, text: &str, style: TextStyles, fonts: &Fonts,
             ],
             ..default()
         },
-        text_anchor: Anchor::BottomLeft,
+        text_anchor,
         transform: Transform::from_xyz(x, y, z),
         ..default()
     }
