@@ -20,7 +20,7 @@ bevy = { version = "0.10", default-features = false, features = ["bevy_asset", "
 bevy_asset_loader = { version = "0.16", default-features = false, features = ["2d"] }
 bevy_common_assets = { version = "0.6", features = ["ron"] }
 bevy_text_mode = "0.1.1"
-bevy_tweening = "0.7"
+bevy_tweening = { version = "0.7", features = ["bevy_sprite"] }
 bevy_kira_audio = "0.15.0"
 
 lazy_static = "1.4"

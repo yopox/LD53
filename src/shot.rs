@@ -1,18 +1,19 @@
 use std::time::Duration;
 
 use bevy::ecs::system::EntityCommands;
-use bevy::math::{vec2, vec3, Vec3Swizzles};
+use bevy::math::{vec2, Vec3Swizzles};
 use bevy::prelude::*;
-use bevy::sprite::MaterialMesh2dBundle;
-use bevy_tweening::{Animator, Tween, TweenCompleted};
-use bevy_tweening::EaseFunction::ElasticIn;
-use bevy_tweening::lens::TransformScaleLens;
+use bevy_tweening::{AssetAnimator, Tween, TweenCompleted};
+use bevy_tweening::EaseFunction::CubicOut;
+use bevy_tweening::lens::ColorMaterialColorLens;
 use strum_macros::EnumIter;
 
 use crate::battle::BattleUI;
 use crate::collision::{BodyType, HitBox};
 use crate::drones::Enemy;
-use crate::graphics::MainBundle;
+use crate::graphics::{circle, MainBundle};
+use crate::graphics::circle::CircleColor;
+use crate::graphics::palette::Palette;
 use crate::graphics::sprites::TILE;
 use crate::tower::Tower;
 use crate::util::size::battle::BOMB_RANGE;
@@ -57,14 +58,14 @@ impl Shots {
     pub const fn is_single_hit(&self) -> bool {
         match self {
             Shots::Electricity => true,
-            _ => false,
+            Shots::Bomb => true,
         }
     }
 
     pub const fn get_tile(&self) -> TILE {
         match self {
             Shots::Electricity => (0, 0, 35, 16, 8, false, 0),
-            Shots::Bomb => (0, 0, 32, 16, 7, false, 0),
+            Shots::Bomb => (0, 0, 32, 16, 10, false, 0),
         }
     }
 
@@ -114,7 +115,7 @@ pub fn remove_shots(
 pub struct Bomb {
     x: f32,
     y: f32,
-    range: f32,
+    radius: f32,
     damages: f32,
 }
 
@@ -127,7 +128,7 @@ impl Bomb {
         Bomb {
             x: tr.x,
             y: tr.y,
-            range: shot.get_bomb_range(),
+            radius: shot.get_bomb_range(),
             damages: shot.damage,
         }
     }
@@ -148,7 +149,7 @@ pub fn bomb_exploding(
 ) {
     for bomb in bombs.iter() {
         for (e_enemy, mut enemy, t_enemy) in enemies.iter_mut() {
-            if t_enemy.translation.xy().distance_squared(bomb.position()) <= bomb.range * bomb.range {
+            if t_enemy.translation.xy().distance_squared(bomb.position()) <= bomb.radius * bomb.radius {
                 enemy.stats.hp -= bomb.damages;
 
                 if enemy.stats.hp <= 0. {
@@ -161,32 +162,34 @@ pub fn bomb_exploding(
 }
 
 pub fn make_bomb_explode(
-    bombs: Query<(Entity, &Bomb), Added<Bomb>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
     mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    bombs: Query<(Entity, &Bomb), Added<Bomb>>,
+    circles: Res<circle::Circles>,
 ) {
     for (e, bomb) in bombs.iter() {
         if let Some(mut entity_commands) = commands.get_entity(e) {
-            entity_commands.insert(MaterialMesh2dBundle {
-                mesh: meshes.add(shape::Circle::new(bomb.range).into()).into(),
-                material: materials.add(ColorMaterial::from(Color::ORANGE_RED)),
-                transform: Transform {
-                    translation: vec3(bomb.x, bomb.y, z_pos::EXPLOSION),
-                    scale: Vec3::ZERO,
-                    ..default()
-                },
-                ..default()
-            })
-                .insert(Animator::new(
+            let mut color: Color = Palette::K.into();
+            color.set_a(0.25);
+            let material = materials.add(color.into());
+            let mut end_color = color;
+            end_color.set_a(0.0);
+            entity_commands
+                .insert(circle::mesh(
+                    &circles, &material, bomb.radius,
+                    bomb.x, bomb.y, z_pos::EXPLOSION,
+                ))
+                .insert(AssetAnimator::<ColorMaterial>::new(
+                    material,
                     Tween::new(
-                        ElasticIn,
+                        CubicOut,
                         Duration::from_secs_f32(0.5),
-                        TransformScaleLens {
-                            start: Vec3::ZERO,
-                            end: Vec3::ONE,
-                        }).with_completed_event(BOMB_EXPLODED)
-                ));
+                        ColorMaterialColorLens {
+                            start: color,
+                            end: end_color,
+                        }).with_completed_event(BOMB_EXPLODED),
+                ))
+            ;
         }
     }
 }

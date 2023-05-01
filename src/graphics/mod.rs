@@ -24,6 +24,7 @@ pub mod grid;
 pub mod package;
 pub mod gui;
 pub mod tween;
+pub mod circle;
 
 #[derive(Bundle, Debug, Default)]
 pub struct MainBundle {
@@ -143,6 +144,7 @@ impl Plugin for GraphicsPlugin {
             .add_plugin(TweeningPlugin)
             .add_plugin(GridPlugin)
             .add_plugin(GuiPlugin)
+            .add_startup_system(circle::setup)
         ;
     }
 }

@@ -1,8 +1,9 @@
 use bevy::prelude::Color;
 use lazy_static::lazy_static;
+use strum_macros::EnumIter;
 
 #[repr(u8)]
-#[derive(Copy, Clone, Eq, Hash, PartialEq)]
+#[derive(Copy, Clone, Eq, Hash, PartialEq, EnumIter)]
 pub enum Palette {
     A = 0,
     B,
