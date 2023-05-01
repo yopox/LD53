@@ -2,6 +2,7 @@ use bevy::math::vec3;
 use bevy::prelude::*;
 
 use crate::collision::body_size;
+use crate::drones::Drones;
 use crate::tower::Towers;
 use crate::util::size::{f32_tile_to_f32, tile_to_f32};
 
@@ -133,4 +134,12 @@ pub fn grid_to_tower_pos(x: usize, y: usize, t: Towers) -> Vec2 {
 /// Returns true if [p] is in the rectangle with [o] bottom-left origin and [size] dimensions.
 pub fn is_in(p: Vec2, o: Vec2, size: Vec2) -> bool {
     p.x >= o.x && p.x <= o.x + size.x && p.y >= o.y && p.y <= o.y + size.y
+}
+
+pub fn tower_to_enemy_distance(t_tower: &Transform, tower: Towers, t_enemy: &Transform, enemy: Drones) -> f32 {
+    let enemy_size = body_size(enemy.get_tiles());
+    let tower_size = body_size(tower.get_tiles());
+    let enemy_center = Vec2::new(t_enemy.translation.x + enemy_size.x / 2., t_enemy.translation.y + enemy_size.y / 2.);
+    let tower_center = Vec2::new(t_tower.translation.x + tower_size.x / 2., t_tower.translation.y + tower_size.y / 2.);
+    tower_center.distance(enemy_center)
 }
