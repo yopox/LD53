@@ -72,6 +72,7 @@ impl Drones {
                  width: body_size.x,
                  height: body_size.y,
                  bottom_right_anchor: false,
+                 single_hit: false,
              }
          })
     }

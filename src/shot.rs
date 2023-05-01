@@ -43,13 +43,22 @@ impl Shots {
 
     pub fn instantiate(&self, tower: &Tower) -> (Shot, HitBox) {
         let body_size = body_size(&[self.get_tile()]);
+        let shot = self.get_shot(tower);
         let solid_body = HitBox {
             body_type: BodyType::ShipShot,
             width: body_size.x,
             height: body_size.y,
             bottom_right_anchor: false,
+            single_hit: self.is_single_hit(),
         };
-        (self.get_shot(tower), solid_body)
+        (shot, solid_body)
+    }
+
+    pub const fn is_single_hit(&self) -> bool {
+        match self {
+            Shots::Electricity => true,
+            _ => false,
+        }
     }
 
     pub const fn get_tile(&self) -> TILE {

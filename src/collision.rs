@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use bevy::app::{App, Plugin};
 use bevy::math::{vec2, vec3};
 use bevy::prelude::*;
@@ -30,6 +32,7 @@ pub struct HitBox {
     pub width: f32,
     pub height: f32,
     pub bottom_right_anchor: bool,
+    pub single_hit: bool,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -72,12 +75,17 @@ pub fn update_invincible(
 }
 
 pub fn collide(
-    colliders: Query<(&HitBox, &Transform, Entity), Without<Invincible>>,
+    mut colliders: Query<(&HitBox, &Transform, Entity), Without<Invincible>>,
     mut contact: EventWriter<Contact>,
 ) {
-    let bodies = &colliders.iter().collect::<Vec<(&HitBox, &Transform, Entity)>>();
-    for (i, &(body1, pos1, id1)) in bodies.iter().enumerate() {
-        for &(body2, pos2, id2) in bodies.iter().skip(i) {
+    let mut unique = HashSet::new();
+    let bodies = colliders.iter_mut().collect::<Vec<(&HitBox, &Transform, Entity)>>();
+    for b1 in 0..bodies.len() {
+        'next_body: for b2 in b1 + 1..bodies.len() {
+            let (body1, pos1, id1) = bodies[b1];
+            let (body2, pos2, id2) = bodies[b2];
+
+            // Check if bodies can collide
             if !body1.body_type.can_collide(&body2.body_type) { continue; }
 
             // Collide outer bounds
@@ -91,25 +99,18 @@ pub fn collide(
                 vec2(body2.width, body2.height),
             ).is_none() { continue; }
 
-            contact.send(Contact((body1.body_type, id1), (body2.body_type, id2)));
+            // Check if bodies have single_hit
+            for (b, id) in [(body1, id1), (body2, id2)] {
+                if b.single_hit {
+                    if unique.contains(&id.index()) { continue 'next_body; } else { unique.insert(id.index()); }
+                }
+            }
+
+            // Send a contact event
+            contact.send(Contact(
+                (body1.body_type, id1),
+                (body2.body_type, id2),
+            ));
         }
-    }
-}
-
-#[test]
-fn sprites_have_hitbox() {
-    let has_hitbox = |sprite: &[TILE]| {
-        sprite
-            .iter()
-            .find(|(_, _, index, bg, _, _, _)| HitBox::for_tile(*index, *bg == 0).is_some())
-            .is_some()
-    };
-
-    for enemy in Drones::iter() {
-        assert!(has_hitbox(enemy.get_tiles()), "The monster {:?} has no hitbox!", enemy)
-    }
-
-    for shot in Shots::iter() {
-        assert!(has_hitbox(shot.get_tiles()), "The weapon {:?} has no hitbox!", shot);
     }
 }

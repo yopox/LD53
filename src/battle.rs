@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use strum::IntoEnumIterator;
 
+use crate::{collision, GameState};
 use crate::drones::{despawn_drone, Drones, drones_dead, update_drones};
-use crate::GameState;
 use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::{Wiggle, wiggle};
 use crate::graphics::grid::{GridElement, update_z};
@@ -27,7 +27,7 @@ impl Plugin for BattlePlugin {
             .add_systems(
                 (update_just_fired, remove_shots, tower_fire,
                  sell_tower, upgrade_tower,
-                 update_drones, despawn_drone, drones_dead.after(wiggle),
+                 update_drones, despawn_drone, drones_dead.after(collision::collide).after(wiggle),
                  bomb_exploding, make_bomb_explode, bomb_exploded,
                  remove_slow_down, collect_package, reset_state, update_z)
                     .in_set(OnUpdate(GameState::Main))
