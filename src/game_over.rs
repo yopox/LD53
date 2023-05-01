@@ -48,7 +48,7 @@ fn setup(
         if stats.survived > 5 {
             texts.push((format!("Try harder next time..."), 5));
         } else {
-            texts.push((format!("Nice job! See you at next level..."), 5));
+            texts.push((format!("Nice job! Can you survive next level?"), 5));
         }
     }
 

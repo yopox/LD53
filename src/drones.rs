@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use bevy::ecs::system::EntityCommands;
+use bevy::math::{vec3, Vec3Swizzles};
 use bevy::prelude::*;
 use bevy_text_mode::TextModeTextureAtlasSprite;
 use bevy_tweening::{Animator, Delay, EaseFunction, Tween, TweenCompleted};
@@ -19,8 +20,8 @@ use crate::music::{PlaySfxEvent, SFX};
 use crate::shot::{Bomb, Shot, Shots, spawn_bomb};
 use crate::tower::Slow;
 use crate::util;
+use crate::util::{vec2_with_battle_z, vec3_with_battle_z};
 use crate::util::size::{f32_tile_to_f32, tile_to_f32};
-use crate::util::vec3_with_battle_z;
 
 #[derive(Debug, Clone)]
 pub struct Stats {
@@ -126,12 +127,8 @@ pub fn drones_dead(
     mut commands: Commands,
     mut sfx: EventWriter<PlaySfxEvent>,
     mut event_reader: EventReader<Contact>,
-    mut enemies: Query<(&mut Enemy, &Transform)>,
-    children: Query<&Children>,
+    mut enemies: Query<&mut Enemy>,
     shots: Query<(&Shot, &Transform)>,
-    package: Query<&Package>,
-    path: Res<CurrentPath>,
-    textures: Res<Textures>,
 ) {
     for event in event_reader.iter() {
         match event {
@@ -149,19 +146,10 @@ pub fn drones_dead(
                     entity_commands.despawn_recursive()
                 }
 
-                let Ok((mut enemy, e_pos)) = enemies.get_mut(*e_enemy) else { continue };
+                let Ok(mut enemy) = enemies.get_mut(*e_enemy) else { continue };
                 match shot.class {
-                    Shots::Bomb => {
-                        spawn_bomb(Bomb::from_shot_translation(shot, t_shot.translation), &mut commands);
-                    }
-                    Shots::Electricity => {
-                        enemy.stats.hp -= shot.damage;
-                        if enemy.stats.hp > 0. { continue; }
-                        enemy.stats.hp = 0.;
-
-                        // Enemy death animation
-                        kill_drone(&mut commands, &children, enemy.as_ref(), e_enemy, e_pos, &package, &path, &textures);
-                    }
+                    Shots::Bomb => spawn_bomb(Bomb::from_shot_translation(shot, t_shot.translation), &mut commands),
+                    Shots::Electricity => enemy.stats.hp = (enemy.stats.hp - shot.damage).max(0.),
                 }
             }
             _ => {}
@@ -169,90 +157,108 @@ pub fn drones_dead(
     }
 }
 
-fn kill_drone(
-    commands: &mut Commands,
-    children: &Query<&Children>,
-    enemy: &Enemy,
-    e_enemy: &Entity,
-    e_pos: &Transform,
-    package: &Query<&Package>,
-    path: &Res<CurrentPath>,
-    textures: &Res<Textures>,
+pub fn kill_drone(
+    enemies: Query<(Entity, &Enemy, &Transform), Changed<Enemy>>,
+    children: Query<&Children>,
+    package: Query<&Package>,
+    path: Res<CurrentPath>,
+    textures: Res<Textures>,
+    mut stats: ResMut<DronesStats>,
+    mut commands: Commands,
 ) {
-    let (x, y) = (e_pos.translation.x, e_pos.translation.y);
+    for (e_enemy, enemy, t_enemy) in enemies.iter().filter(|(_, e, _)| e.stats.hp <= 0.) {
+        if let Some(mut entity_commands) = commands.get_entity(e_enemy) {
+            let start = t_enemy.translation;
+            let end = start + vec3(0., tile_to_f32(1), 0.);
 
-    if let Some(mut entity_commands) = commands.get_entity(*e_enemy) {
-        entity_commands
-            .remove::<HitBox>()
-            .remove::<Enemy>()
-            .remove::<Wiggle>()
-            .insert(Animator::new(Delay::<Transform>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE)).then(Tween::new(
+            let tween = Tween::new(
                 EaseFunction::CubicOut,
                 Duration::from_millis(util::tweening::DRONE_DEATH_POS),
-                TransformPositionLens {
-                    start: e_pos.translation,
-                    end: Vec3::new(x, y + tile_to_f32(1), e_pos.translation.z),
-                },
-            ).with_completed_event(util::tweening::DRONE_DESPAWN)
-            )));
+                TransformPositionLens { start, end },
+            );
+
+            entity_commands
+                .remove::<HitBox>()
+                .remove::<Enemy>()
+                .remove::<Wiggle>()
+                .insert(
+                    Animator::new(
+                        Delay::<Transform>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE))
+                            .then(tween.with_completed_event(util::tweening::DRONE_DESPAWN))
+                    )
+                )
+            ;
+        }
+
+        children
+            .iter_descendants(e_enemy)
+            .for_each(|child_id| {
+                match package.get(child_id) {
+                    Ok(package) => {
+                        // Despawn drone package
+                        commands.entity(e_enemy).remove_children(&[child_id]);
+                        commands.entity(child_id).despawn();
+
+                        drop_package(&path, &textures, &mut commands, enemy, t_enemy.translation.xy(), package);
+                    }
+                    Err(_) => {
+                        // Regular tile -> animate alpha
+                        commands
+                            .entity(child_id)
+                            .insert(Animator::new(Delay::<TextModeTextureAtlasSprite>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE)).then(
+                                tween::tween_text_mode_sprite_opacity(util::tweening::DRONE_DEATH_ALPHA, false)
+                            )));
+                    }
+                }
+            });
+
+        stats.killed += 1;
     }
+}
 
-    children
-        .iter_descendants(*e_enemy)
-        .for_each(|child_id| {
-            match package.get(child_id) {
-                Ok(package) => {
-                    // Despawn drone package
-                    commands.entity(*e_enemy).remove_children(&[child_id]);
-                    commands.entity(child_id).despawn();
+fn drop_package(
+    path: &Res<CurrentPath>,
+    textures: &Res<Textures>,
+    commands: &mut Commands,
+    enemy: &Enemy,
+    starting_pos: Vec2,
+    package: &Package)
+{
+    // Respawn the package and make it fall on the road
+    let (_, _, i, bg, fg, f, r) = package.tile();
+    let progress = path.0.pos(enemy.advance).unwrap();
+    let offset = enemy.class.get_model().package_offset();
+    let start = vec2_with_battle_z(starting_pos + offset);
+    let end = vec3_with_battle_z(
+        f32_tile_to_f32(progress.x * 2. + 0.5),
+        f32_tile_to_f32(progress.y * 2. + util::size::GUI_HEIGHT as f32 + 0.5),
+    );
 
-                    // Respawn the package and make it fall on the road
-                    let (_, _, i, bg, fg, f, r) = package.tile();
-                    let progress = path.0.pos(enemy.advance).unwrap();
-                    let offset = enemy.class.get_model().package_offset();
-                    let start = vec3_with_battle_z(x + offset.x, y + offset.y);
-                    let end = vec3_with_battle_z(
-                        f32_tile_to_f32(progress.x * 2. + 0.5),
-                        f32_tile_to_f32(progress.y * 2. + util::size::GUI_HEIGHT as f32 + 0.5),
-                    );
-
-                    commands
-                        .spawn(sprite_f32(
-                            i, start.x, start.y, start.z,
-                            bg.into(), fg.into(), f, r,
-                            textures.tileset.clone(),
-                        ))
-                        .insert(package.clone())
-                        .insert(ClickablePackage)
-                        .insert(GridElement)
-                        .insert(Animator::new(Tween::new(
-                            EaseFunction::CubicOut,
-                            Duration::from_millis(util::tweening::PACKAGE_DROP),
-                            TransformPositionLens { start, end },
-                        )))
-                    ;
-                }
-                Err(_) => {
-                    // Regular tile -> animate alpha
-                    commands
-                        .entity(child_id)
-                        .insert(Animator::new(Delay::<TextModeTextureAtlasSprite>::new(Duration::from_millis(util::tweening::DRONE_DEATH_FREEZE)).then(
-                            tween::tween_text_mode_sprite_opacity(util::tweening::DRONE_DEATH_ALPHA, false)
-                        )));
-                }
-            }
-        })
+    commands
+        .spawn(sprite_f32(
+            i, start.x, start.y, start.z,
+            bg.into(), fg.into(), f, r,
+            textures.tileset.clone(),
+        ))
+        .insert(package.clone())
+        .insert(ClickablePackage)
+        .insert(GridElement)
+        .insert(Animator::new(Tween::new(
+            EaseFunction::CubicOut,
+            Duration::from_millis(util::tweening::PACKAGE_DROP),
+            TransformPositionLens { start, end },
+        )))
+    ;
 }
 
 pub fn despawn_drone(
     mut commands: Commands,
-    mut stats: ResMut<DronesStats>,
     mut tween_completed: EventReader<TweenCompleted>,
 ) {
     for TweenCompleted { entity, user_data } in tween_completed.iter() {
-        if *user_data != util::tweening::DRONE_DESPAWN { continue }
-        stats.killed += 1;
-        commands.entity(*entity).despawn_recursive();
+        if *user_data == util::tweening::DRONE_DESPAWN {
+            commands.entity(*entity).despawn_recursive();
+        }
     }
 }
 

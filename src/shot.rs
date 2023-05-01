@@ -143,18 +143,12 @@ pub fn spawn_bomb(bomb: Bomb, commands: &mut Commands) {
 
 pub fn bomb_exploding(
     bombs: Query<&Bomb, Added<Bomb>>,
-    mut enemies: Query<(Entity, &mut Enemy, &Transform)>,
-    mut commands: Commands,
+    mut enemies: Query<(&mut Enemy, &Transform)>,
 ) {
     for bomb in bombs.iter() {
-        for (e_enemy, mut enemy, t_enemy) in enemies.iter_mut() {
+        for (mut enemy, t_enemy) in enemies.iter_mut() {
             if t_enemy.translation.xy().distance_squared(bomb.position()) <= bomb.radius * bomb.radius {
-                enemy.stats.hp -= bomb.damages;
-
-                if enemy.stats.hp <= 0. {
-                    enemy.stats.hp = 0.;
-                    commands.get_entity(e_enemy).map(EntityCommands::despawn_recursive);
-                }
+                enemy.stats.hp = (enemy.stats.hp - bomb.damages).max(0.);
             }
         }
     }

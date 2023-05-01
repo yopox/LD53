@@ -44,10 +44,6 @@ impl MainBundle {
     pub fn from_xyz(x: f32, y: f32, z: f32) -> Self {
         MainBundle::from_transform(Transform::from_xyz(x, y, z))
     }
-
-    pub fn from_tiles(x: usize, y: usize, z: f32) -> Self {
-        Self::from_xyz(tile_to_f32(x), tile_to_f32(y), z)
-    }
 }
 
 pub fn sprite(
