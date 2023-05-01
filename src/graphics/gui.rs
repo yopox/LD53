@@ -8,7 +8,7 @@ use crate::{GameState, tower, util};
 use crate::battle::{BattleUI, CursorState, Money};
 use crate::collision::body_size;
 use crate::graphics::{grid, MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, text};
-use crate::graphics::grid::Grid;
+use crate::graphics::grid::{Grid, RoadElement};
 use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
 use crate::graphics::text::TextStyles;
@@ -140,7 +140,6 @@ fn update_cursor(
         clean();
         return;
     };
-    let grid = &grid.0;
     let Some(cursor_pos) = util::cursor_pos(windows) else {
         clean();
         return;
@@ -155,7 +154,7 @@ fn update_cursor(
     /// Set visibility and position on [grid::RoadElement::Rock] hover.
     if is_oob(x, y) { return; }
 
-    if grid[y as usize][x as usize] == grid::RoadElement::Rock {
+    if grid.elements[y as usize][x as usize] == RoadElement::Rock {
         vis.set_if_neq(Visibility::Inherited);
         let new_hovered = (x as usize, y as usize);
         match hovered {
@@ -374,9 +373,11 @@ fn place_tower(
     mouse: Res<Input<MouseButton>>,
     keys: Res<Input<KeyCode>>,
     time: Res<Time>,
+    mut grid: Option<ResMut<Grid>>,
     mut money: ResMut<Money>,
 ) {
     let Some(mut state) = state else { return; };
+    let Some(mut grid) = grid else { return; };
     let cursor_changed = match cursor {
         Some(ref res) => res.is_changed(),
         _ => false,
@@ -403,10 +404,11 @@ fn place_tower(
                     pos.translation.y = tower_pos.y;
                 }
 
-                if mouse.just_pressed(MouseButton::Left) {
+                if mouse.just_pressed(MouseButton::Left) && !grid.towers.contains(&(x, y)) {
                     // Build the tower
                     if money.0 >= t.get_cost() {
                         money.0 -= t.get_cost();
+                        grid.towers.insert((x, y));
                         tower::place_tower(x, y, &mut commands, *t, &textures.tileset, &time);
                     }
                     commands.insert_resource(CursorState::Select);

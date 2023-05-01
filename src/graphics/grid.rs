@@ -1,4 +1,5 @@
 use std::cmp::{max, min};
+use std::collections::HashSet;
 
 use bevy::prelude::*;
 use enum_derived::Rand;
@@ -33,7 +34,10 @@ pub struct CurrentPath(pub logic::path::Path);
 
 /// BE CAREFUL THERE IS A FACTOR 2 BETWEEN GRID AND TILES, `GRID[.][.]` = 4 TILES
 #[derive(Resource)]
-pub struct Grid(pub Vec<Vec<RoadElement>>);
+pub struct Grid {
+    pub elements: Vec<Vec<RoadElement>>,
+    pub towers: HashSet<(usize, usize)>,
+}
 
 /// Add this to entities on the grid to set their z dynamically
 #[derive(Component)]
@@ -102,7 +106,7 @@ fn setup(
     }
 
     draw_road_tiles(&grid, &mut commands, &textures.tileset);
-    commands.insert_resource(Grid(grid));
+    commands.insert_resource(Grid { elements: grid, towers: HashSet::new() });
 }
 
 #[derive(Rand, Copy, Clone, PartialEq)]
