@@ -367,12 +367,11 @@ struct TransparentTower;
 
 fn place_tower(
     mut commands: Commands,
-    mut state: Option<ResMut<CursorState>>,
+    mut state: Option<Res<CursorState>>,
     cursor: Option<Res<HoveredPos>>,
     mut transparent_tower: Query<(&mut Transform, Entity), With<TransparentTower>>,
     textures: Res<Textures>,
     mouse: Res<Input<MouseButton>>,
-    keys: Res<Input<KeyCode>>,
     time: Res<Time>,
     mut grid: Option<ResMut<Grid>>,
     mut money: ResMut<Money>,
@@ -388,10 +387,6 @@ fn place_tower(
         _ => None,
     };
 
-    // Escape [CursorState::Build]
-    if mouse.just_pressed(MouseButton::Right) || keys.just_pressed(KeyCode::Escape) {
-        state.set_if_neq(CursorState::Select);
-    }
     let state = state.as_ref();
 
     if let Ok((mut pos, id)) = transparent_tower.get_single_mut() {

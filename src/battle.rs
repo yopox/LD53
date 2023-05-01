@@ -24,7 +24,8 @@ impl Plugin for BattlePlugin {
             .add_systems(
                 (update_just_fired, tower_fire, update_drones, remove_shots,
                  bomb_exploding, make_bomb_explode, bomb_exploded, despawn_drone,
-                 drones_dead.after(wiggle), remove_slow_down, collect_package)
+                 drones_dead.after(wiggle), remove_slow_down, collect_package,
+                 reset_state)
                     .in_set(OnUpdate(GameState::Main))
             )
         ;
@@ -43,6 +44,10 @@ pub enum CursorState {
     Select,
     /// Place a tower
     Build(Towers),
+    /// Sell a tower
+    Sell,
+    /// Upgrade a tower
+    Upgrade,
 }
 
 fn setup(
@@ -69,6 +74,18 @@ fn setup(
                 package::spawn(builder, d.get_model().package_offset(), atlas);
             })
             .insert(BattleUI);
+    }
+}
+
+fn reset_state(
+    mouse: Res<Input<MouseButton>>,
+    keys: Res<Input<KeyCode>>,
+    state: Option<ResMut<CursorState>>,
+) {
+    let Some(mut state) = state else { return; };
+    /// Return to [CursorState::Select]
+    if mouse.just_pressed(MouseButton::Right) || keys.just_pressed(KeyCode::Escape) {
+        state.set_if_neq(CursorState::Select);
     }
 }
 
