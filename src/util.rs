@@ -66,7 +66,7 @@ pub mod z_pos {
 pub mod transition {
     use crate::util::size::HEIGHT;
 
-    pub const HALF_HEIGHT: usize = HEIGHT / 2 + 1;
+    pub const HALF_HEIGHT: usize = HEIGHT / 2;
     pub const SPEED: u64 = 800;
 }
 

@@ -39,11 +39,14 @@ fn setup_title(
 }
 
 fn exit_title (
-    keys: Res<Input<KeyCode>>,
     mut commands: Commands,
+    keys: Res<Input<KeyCode>>,
+    transition: Option<Res<Transition>>,
 ) {
-    for _ in keys.get_just_released() {
-        commands.insert_resource(Transition::to(GameState::Battle))
+    if transition.is_none() {
+        for _ in keys.get_just_pressed() {
+            commands.insert_resource(Transition::to(GameState::Battle))
+        }
     }
 }
 

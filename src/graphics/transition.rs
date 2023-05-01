@@ -7,7 +7,6 @@ use bevy_tweening::lens::TransformPositionLens;
 use crate::{GameState, util};
 use crate::graphics::{MainBundle, sprite};
 use crate::graphics::loading::Textures;
-use crate::graphics::palette::Palette;
 use crate::util::size::{tile_to_f32, WIDTH};
 
 pub struct TransitionPlugin;
@@ -64,8 +63,8 @@ pub(in crate::graphics) fn start_transition(
         );
 
         // Spawn tiles
-        let mut left_end_y = 3.;
-        let mut left_start_y = left_end_y - tile_to_f32(util::transition::HALF_HEIGHT);
+        let mut left_end_y = 0.;
+        let mut left_start_y = -tile_to_f32(util::transition::HALF_HEIGHT);
         if open { (left_end_y, left_start_y) = (left_start_y, left_end_y); }
         commands
             .spawn(MainBundle::from_xyz(0., left_start_y, util::z_pos::TRANSITION))
@@ -78,23 +77,24 @@ pub(in crate::graphics) fn start_transition(
             ))
             .with_children(|builder| {
                 let last_y = util::transition::HALF_HEIGHT;
-                for y in 0..=last_y {
+                for y in 0..last_y {
                     for x in 0..WIDTH {
-                        let (index, flip) = match (x, y) {
-                            (_, y) if y == last_y => (158, x % 2 == 1),
-                            _ => (1023, false),
+                        let (index, bg, fg, rotation) = match (x, y) {
+                            (_, y) if y == last_y - 1 => (23, 15, 3, 3),
+                            (_, y) if y == last_y - 2 => (0, 15, 16, 0),
+                            _ => (0, 9, 16, 0),
                         };
                         builder.spawn(sprite(
                             index, x, y, 0.,
-                            Palette::Transparent, Palette::B,
-                            flip, 0, textures.tileset.clone(),
+                            bg.into(), fg.into(),
+                            false, rotation, textures.tileset.clone(),
                         ));
                     }
                 }
             });
 
-        let mut right_end_y = tile_to_f32(util::transition::HALF_HEIGHT) - 3.;
-        let mut right_start_y = right_end_y + tile_to_f32(util::transition::HALF_HEIGHT);
+        let mut right_end_y = tile_to_f32(util::transition::HALF_HEIGHT);
+        let mut right_start_y = tile_to_f32(util::transition::HALF_HEIGHT * 2);
         if open { (right_end_y, right_start_y) = (right_start_y, right_end_y); }
         commands
             .spawn(MainBundle::from_xyz(0., right_start_y, util::z_pos::TRANSITION))
@@ -103,14 +103,15 @@ pub(in crate::graphics) fn start_transition(
             .with_children(|builder| {
                 for y in 0..util::transition::HALF_HEIGHT {
                     for x in 0..WIDTH {
-                        let (index, flip) = match (x, y) {
-                            (_, 0) => (158, x % 2 == 1),
-                            _ => (1023, false),
+                        let (index, bg, fg, rotation) = match (x, y) {
+                            (_, 0) => (23, 15, 3, 1),
+                            (_, 1) => (0, 15, 16, 0),
+                            _ => (0, 9, 16, 0),
                         };
                         builder.spawn(sprite(
                             index, x, y, 0.,
-                            Palette::Transparent, Palette::B,
-                            flip, 2, textures.tileset.clone(),
+                            bg.into(), fg.into(),
+                            false, rotation, textures.tileset.clone(),
                         ));
                     }
                 }
