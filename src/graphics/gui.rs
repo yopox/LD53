@@ -236,6 +236,7 @@ fn update_popup(
             }
 
             if recreate_popup { spawn_popup(&mut commands, pos, id, info, &textures, &fonts); }
+            return;
         }
     }
 
