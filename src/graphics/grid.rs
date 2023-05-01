@@ -221,16 +221,16 @@ impl RoadElement {
                 }
             }
             RoadElement::Road => {
-                if is(w, RoadElement::Road) && is(s, RoadElement::Road) {
+                if is(w, RoadElement::Road) && is(s, RoadElement::Road) && is(n, RoadElement::Rock) && is(e, RoadElement::Rock) {
                     tiles[1] = (1, 1, 323, 4, 3, true, 1);
                     tiles[3] = (1, 0, 291, 4, 3, true, 1);
-                } else if is(w, RoadElement::Road) && is(n, RoadElement::Road) {
+                } else if is(w, RoadElement::Road) && is(n, RoadElement::Road) && is(s, RoadElement::Rock) && is(e, RoadElement::Rock) {
                     tiles[1] = (1, 1, 291, 4, 3, false, 3);
                     tiles[3] = (1, 0, 323, 4, 3, false, 3);
-                } else if is(e, RoadElement::Road) && is(s, RoadElement::Road) {
+                } else if is(e, RoadElement::Road) && is(s, RoadElement::Road) && is(n, RoadElement::Rock) && is(w, RoadElement::Rock) {
                     tiles[0] = (0, 1, 323, 4, 3, false, 1);
                     tiles[2] = (0, 0, 291, 4, 3, false, 1);
-                } else if is(e, RoadElement::Road) && is(n, RoadElement::Road) {
+                } else if is(e, RoadElement::Road) && is(n, RoadElement::Road) && is(s, RoadElement::Rock) && is(w, RoadElement::Rock) {
                     tiles[0] = (0, 1, 291, 4, 3, true, 3);
                     tiles[2] = (0, 0, 323, 4, 3, true, 3);
                 }
