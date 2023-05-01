@@ -109,3 +109,8 @@ pub fn grid_to_tower_pos(x: usize, y: usize, t: Towers) -> Vec2 {
     let y = tile_to_f32(2 * y + size::GUI_HEIGHT) + f32_tile_to_f32(0.5);
     return Vec2::new(x, y);
 }
+
+/// Returns true if [p] is in the rect with [o] bottom-left origin and [size] dimensions.
+pub fn is_in(p: Vec2, o: Vec2, size: Vec2) -> bool {
+    p.x >= o.x && p.x <= o.x + size.x && p.y >= o.y && p.y <= o.y + size.y
+}

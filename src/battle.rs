@@ -7,6 +7,7 @@ use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::{Wiggle, wiggle};
 use crate::graphics::loading::Textures;
 use crate::graphics::package::collect_package;
+use crate::graphics::palette::Palette;
 use crate::shot::{bomb_exploded, bomb_exploding, make_bomb_explode, remove_shots};
 use crate::tower::{remove_slow_down, tower_fire, Towers, update_just_fired};
 
@@ -48,6 +49,17 @@ pub enum CursorState {
     Sell,
     /// Upgrade a tower
     Upgrade,
+}
+
+impl CursorState {
+    pub fn get_color(&self) -> Palette {
+        match self {
+            CursorState::Select => Palette::B,
+            CursorState::Build(_) => Palette::C,
+            CursorState::Sell => Palette::K,
+            CursorState::Upgrade => Palette::G,
+        }
+    }
 }
 
 fn setup(

@@ -40,7 +40,7 @@ pub struct TransitionPane;
 
 pub(in crate::graphics) fn start_transition(
     mut commands: Commands,
-    mut transition: Option<ResMut<Transition>>,
+    transition: Option<ResMut<Transition>>,
     textures: Option<Res<Textures>>,
     panes: Query<Entity, With<TransitionPane>>,
 ) {

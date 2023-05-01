@@ -1,4 +1,5 @@
 use bevy::app::App;
+use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 use bevy_text_mode::TextModeTextureAtlasSprite;
@@ -13,6 +14,7 @@ use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
 use crate::graphics::text::TextStyles;
 use crate::tower::Towers;
+use crate::util::is_in;
 use crate::util::size::{f32_tile_to_f32, is_oob, tile_to_f32};
 
 pub struct GuiPlugin;
@@ -21,7 +23,7 @@ impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system(setup.in_schedule(OnEnter(GameState::Main)))
-            .add_systems((update_money, update_cursor, update_popup, update_tower_button, place_tower).in_set(OnUpdate(GameState::Main)))
+            .add_systems((update_money, update_cursor, update_popup, update_tower_button, update_text_button, place_tower).in_set(OnUpdate(GameState::Main)))
         ;
     }
 }
@@ -34,6 +36,35 @@ struct HoveredPos(pub (usize, usize));
 
 #[derive(Component)]
 struct TowerButton(Towers);
+
+#[derive(Component, Clone, PartialEq)]
+enum TextButton {
+    Upgrade,
+    Sell,
+    X2,
+    Pause,
+}
+
+impl TextButton {
+    fn get_text(&self) -> &str {
+        // Change get_size after changing strings as width is hardcoded :(
+        match self {
+            TextButton::Upgrade => "Upgrade",
+            TextButton::Sell => "Sell",
+            TextButton::X2 => "Turbo",
+            TextButton::Pause => "Pause",
+        }
+    }
+
+    fn get_size(&self) -> Vec2 {
+        match self {
+            TextButton::Upgrade => Vec2::new(f32_tile_to_f32(5.75), f32_tile_to_f32(1.25)),
+            TextButton::Sell => Vec2::new(f32_tile_to_f32(2.5), f32_tile_to_f32(1.25)),
+            TextButton::X2 => Vec2::new(f32_tile_to_f32(3.3), f32_tile_to_f32(1.25)),
+            TextButton::Pause => Vec2::new(f32_tile_to_f32(3.3), f32_tile_to_f32(1.25)),
+        }
+    }
+}
 
 #[derive(Component)]
 struct MoneyText;
@@ -110,6 +141,23 @@ fn setup(
                 ));
             });
     }
+
+    // Text buttons
+    for (x, y, b) in [
+        (util::size::WIDTH as f32 - 2., 4.75, TextButton::Upgrade),
+        (util::size::WIDTH as f32 - 2., 3.0, TextButton::Sell),
+        (util::size::WIDTH as f32 - 6., 1.25, TextButton::Pause),
+        (util::size::WIDTH as f32 - 2., 1.25, TextButton::X2),
+    ] {
+        commands
+            .spawn(text::ttf_anchor(
+                f32_tile_to_f32(x), f32_tile_to_f32(y), util::z_pos::GUI_FG,
+                b.get_text(), TextStyles::Heading, &fonts, Palette::D,
+                Anchor::CenterRight,
+            ))
+            .insert(b.clone())
+        ;
+    }
 }
 
 fn update_money(
@@ -126,11 +174,14 @@ fn update_cursor(
     mut commands: Commands,
     grid: Option<Res<Grid>>,
     windows: Query<&Window>,
-    mut cursor: Query<(&mut Transform, &mut Visibility), With<Cursor>>,
+    mut cursor: Query<(&mut Transform, &mut Visibility, Entity), With<Cursor>>,
+    children: Query<&Children>,
+    mut tile: Query<&mut TextModeTextureAtlasSprite>,
     hovered: Option<ResMut<HoveredPos>>,
+    cursor_state: Option<Res<CursorState>>,
 ) {
     let mut clean = || commands.remove_resource::<HoveredPos>();
-    let Ok((mut pos, mut vis)) = cursor.get_single_mut() else {
+    let Ok((mut pos, mut vis, id)) = cursor.get_single_mut() else {
         clean();
         return;
     };
@@ -144,6 +195,16 @@ fn update_cursor(
         clean();
         return;
     };
+
+    // Update cursor color
+    if let Some(cursor_state) = cursor_state {
+        if cursor_state.is_changed() {
+            for child in children.iter_descendants(id) {
+                let Ok(mut sprite) = tile.get_mut(child) else { continue; };
+                sprite.fg = cursor_state.get_color().into();
+            }
+        }
+    }
 
     // Get hovered tile
     let tile_size = tile_to_f32(1);
@@ -216,7 +277,7 @@ fn update_popup(
     for (pos, info, id) in hover_popup.iter() {
         let (x, y) = (pos.translation.x, pos.translation.y);
         let (w, h) = (info.width, info.height);
-        if cursor_pos.x >= x && cursor_pos.x <= x + w && cursor_pos.y >= y && cursor_pos.y <= y + h {
+        if is_in(cursor_pos, pos.translation.xy(), Vec2::new(info.width, info.height)) {
             let mut recreate_popup = false;
             delete_popup = false;
 
@@ -348,9 +409,7 @@ fn update_tower_button(
             button_state = if *t == button.0 { ButtonState::Selected } else { ButtonState::CanBuild };
         } else {
             // Check button hover
-            let size = body_size(button.0.get_tiles());
-            let (x, y) = (pos.translation.x, pos.translation.y);
-            let hover = cursor_pos.x >= x && cursor_pos.x <= x + size.x && cursor_pos.y >= y && cursor_pos.y <= y + size.y;
+            let hover = is_in(cursor_pos, pos.translation.xy(), body_size(button.0.get_tiles()));
             button_state = if hover { ButtonState::Selected } else { ButtonState::CanBuild };
             if hover && clicked { cursor_state.set_if_neq(CursorState::Build(button.0)); }
         }
@@ -373,7 +432,7 @@ fn place_tower(
     textures: Res<Textures>,
     mouse: Res<Input<MouseButton>>,
     time: Res<Time>,
-    mut grid: Option<ResMut<Grid>>,
+    grid: Option<ResMut<Grid>>,
     mut money: ResMut<Money>,
 ) {
     let Some(mut state) = state else { return; };
@@ -428,5 +487,37 @@ fn place_tower(
                     sprite_from_tile_with_alpha(builder, t.get_tiles(), &textures.tileset, 0., 0.85);
                 });
         }
+    }
+}
+
+fn update_text_button(
+    cursor_state: Option<ResMut<CursorState>>,
+    mut buttons: Query<(&TextButton, &Transform, &mut Text)>,
+    windows: Query<&Window>,
+    mouse: Res<Input<MouseButton>>,
+) {
+    let Some(mut cursor_state) = cursor_state else { return; };
+    let Some(cursor_pos) = util::cursor_pos(windows) else { return; };
+    let clicked = mouse.just_pressed(MouseButton::Left);
+
+    for (button, pos, mut text) in buttons.iter_mut() {
+        let size = button.get_size();
+        // TextButton-s have Anchor::CenterRight
+        let bottom_left = Vec2::new(pos.translation.x - size.x, pos.translation.y - size.y / 2. - f32_tile_to_f32(0.25));
+        let hovered = is_in(cursor_pos, bottom_left, size);
+        let mut highlight = hovered;
+
+        if *button == TextButton::Sell && cursor_state.eq(&CursorState::Sell) { highlight = true; } else if *button == TextButton::Upgrade && cursor_state.eq(&CursorState::Upgrade) { highlight = true; }
+
+        if clicked && hovered {
+            match button {
+                TextButton::Upgrade => { cursor_state.set_if_neq(CursorState::Upgrade); }
+                TextButton::Sell => { cursor_state.set_if_neq(CursorState::Sell); }
+                TextButton::X2 => {}
+                TextButton::Pause => {}
+            }
+        }
+
+        text.sections[0].style.color = if highlight { Palette::B.into() } else { Palette::D.into() };
     }
 }
