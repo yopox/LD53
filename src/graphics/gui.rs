@@ -8,7 +8,7 @@ use strum::IntoEnumIterator;
 use crate::{GameState, tower, util};
 use crate::battle::{BattleUI, CursorState, Money};
 use crate::collision::body_size;
-use crate::graphics::{grid, MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, text};
+use crate::graphics::{grid, MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, sprite_from_tile_with_alpha_and_x_offset, text};
 use crate::graphics::grid::{Grid, RoadElement};
 use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
@@ -128,11 +128,12 @@ fn setup(
 
     // Tower buttons
     for (i, tower) in Towers::iter().enumerate() {
+        let width = body_size(tower.get_tiles()).x;
         commands
             .spawn(TowerButton(tower))
             .insert(MainBundle::from_xyz(tile_to_f32(14 + 4 * i), f32_tile_to_f32(2.), util::z_pos::GUI_FG))
             .with_children(|builder| {
-                sprite_from_tile_with_alpha(builder, tower.get_tiles(), &textures.tileset, 0., ButtonState::CanBuild.get_alpha());
+                sprite_from_tile_with_alpha_and_x_offset(builder, tower.get_tiles(), &textures.tileset, 0., ButtonState::CanBuild.get_alpha(), (tile_to_f32(2) - width) / 2.);
                 builder.spawn(text::ttf_anchor(
                     f32_tile_to_f32(1.0), f32_tile_to_f32(0.3), util::z_pos::GUI_FG,
                     &format!("€{}", tower.get_cost()),
@@ -409,7 +410,7 @@ fn update_tower_button(
             button_state = if *t == button.0 { ButtonState::Selected } else { ButtonState::CanBuild };
         } else {
             // Check button hover
-            let hover = is_in(cursor_pos, pos.translation.xy(), body_size(button.0.get_tiles()));
+            let hover = is_in(cursor_pos, pos.translation.xy(), Vec2::new(tile_to_f32(2), tile_to_f32(3)));
             button_state = if hover { ButtonState::Selected } else { ButtonState::CanBuild };
             if hover && clicked { cursor_state.set_if_neq(CursorState::Build(button.0)); }
         }

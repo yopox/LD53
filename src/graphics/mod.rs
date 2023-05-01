@@ -107,9 +107,20 @@ pub fn sprite_from_tile_with_alpha(
     z: f32,
     alpha: f32,
 ) {
+    sprite_from_tile_with_alpha_and_x_offset(builder, tiles, atlas, z, 1.0, 0.0);
+}
+
+pub fn sprite_from_tile_with_alpha_and_x_offset(
+    builder: &mut ChildBuilder,
+    tiles: &[TILE],
+    atlas: &Handle<TextureAtlas>,
+    z: f32,
+    alpha: f32,
+    x_offset: f32,
+) {
     for &(x, y, i, bg, fg, flip, rotation) in tiles {
-        let mut bundle = sprite(
-            i, x, y, z,
+        let mut bundle = sprite_f32(
+            i, tile_to_f32(x) + x_offset, tile_to_f32(y), z,
             bg.into(), fg.into(),
             flip, rotation,
             atlas.clone(),
