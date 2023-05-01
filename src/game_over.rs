@@ -6,6 +6,7 @@ use crate::GameState;
 use crate::graphics::loading::Fonts;
 use crate::graphics::palette::Palette;
 use crate::graphics::text;
+use crate::graphics::transition::Transition;
 use crate::util::size::{tile_to_f32, WIDTH};
 use crate::util::z_pos;
 
@@ -22,6 +23,9 @@ impl Plugin for GameOverPlugin {
             )
             .add_system(
                 cleanup.in_schedule(OnExit(GameState::GameOver))
+            )
+            .add_system(
+                exit_game_over.in_set(OnUpdate(GameState::GameOver))
             )
         ;
     }
@@ -67,5 +71,14 @@ fn cleanup(
         if let Some(entity_commands) = commands.get_entity(e) {
             entity_commands.despawn_recursive();
         }
+    }
+}
+
+fn exit_game_over(
+    keys: Res<Input<KeyCode>>,
+    mut commands: Commands,
+) {
+    for _ in keys.get_just_released() {
+        commands.insert_resource(Transition::to(GameState::Battle))
     }
 }
