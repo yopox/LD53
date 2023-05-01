@@ -1,9 +1,11 @@
 use std::cmp::{max, min};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use bevy::prelude::*;
 use enum_derived::Rand;
 use rand::{RngCore, thread_rng};
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 
 use crate::{GameState, logic};
 use crate::graphics::loading::Textures;
@@ -121,36 +123,178 @@ pub enum RoadElement {
     Rock,
 }
 
+#[derive(PartialEq, EnumIter, Eq, Hash)]
+enum Direction {
+    N,
+    NE,
+    E,
+    SE,
+    S,
+    SW,
+    W,
+    NW,
+}
+
+impl Direction {
+    fn get_offset(&self) -> (isize, isize) {
+        match self {
+            Direction::N => (0, 1),
+            Direction::NE => (1, 1),
+            Direction::E => (1, 0),
+            Direction::SE => (1, -1),
+            Direction::S => (0, -1),
+            Direction::SW => (-1, -1),
+            Direction::W => (-1, 0),
+            Direction::NW => (-1, -1),
+        }
+    }
+}
+
 impl RoadElement {
     /// Returns tiles for a road element with horizontal orientation
-    fn get_tiles(&self) -> [TILE; 4] {
-        match self {
+    fn get_tiles(&self, adjacent: &HashMap<Direction, RoadElement>) -> [TILE; 4] {
+        let mut tiles = match self {
             RoadElement::Road => [
                 (0, 1, 416, 4, 16, false, 0),
                 (1, 1, 416, 4, 16, false, 0),
                 (0, 0, 416, 4, 16, false, 0),
                 (1, 0, 416, 4, 16, false, 0),
             ],
-            RoadElement::Plain => [
-                (0, 1, 64 + thread_rng().next_u32() as usize % 21, 0, 3, false, 0),
-                (1, 1, 64 + thread_rng().next_u32() as usize % 21, 0, 3, false, 0),
-                (0, 0, 64 + thread_rng().next_u32() as usize % 21, 0, 3, false, 0),
-                (1, 0, 64 + thread_rng().next_u32() as usize % 21, 0, 3, false, 0),
-            ],
-            RoadElement::Rock => [
-                (0, 1, 64 + thread_rng().next_u32() as usize % 21, 3, 4, false, 0),
-                (1, 1, 64 + thread_rng().next_u32() as usize % 21, 3, 4, false, 0),
-                (0, 0, 64 + thread_rng().next_u32() as usize % 21, 3, 4, false, 0),
-                (1, 0, 64 + thread_rng().next_u32() as usize % 21, 3, 4, false, 0),
-            ],
+            RoadElement::Plain => {
+                let index = || {
+                    match thread_rng().next_u32() % 3 {
+                        0 | 1 => 0,
+                        _ => 64 + thread_rng().next_u32() as usize % 21,
+                    }
+                };
+                [
+                    (0, 1, index(), 0, 3, false, 0),
+                    (1, 1, index(), 0, 3, false, 0),
+                    (0, 0, index(), 0, 3, false, 0),
+                    (1, 0, index(), 0, 3, false, 0),
+                ]
+            },
+            RoadElement::Rock => {
+                let index = || {
+                    match thread_rng().next_u32() % 3 {
+                        0 => 0,
+                        _ => 64 + thread_rng().next_u32() as usize % 21,
+                    }
+                };
+                [
+                    (0, 1, index(), 3, 4, false, 0),
+                    (1, 1, index(), 3, 4, false, 0),
+                    (0, 0, index(), 3, 4, false, 0),
+                    (1, 0, index(), 3, 4, false, 0),
+                ]
+            },
+        };
+
+        let is = |opt: Option<&RoadElement>, r: RoadElement| { opt.is_some() && *opt.unwrap() == r };
+
+        let n = adjacent.get(&Direction::N);
+        let e = adjacent.get(&Direction::E);
+        let s = adjacent.get(&Direction::S);
+        let w = adjacent.get(&Direction::W);
+
+        match self {
+            RoadElement::Plain => {
+                let (corner, bg, fg) = match thread_rng().next_u32() % 4 {
+                    0 => (321, 3, 0),
+                    _ => (322, 3, 0),
+                };
+
+                let mut corner_changed = false;
+
+                if is(w, RoadElement::Rock) && is(s, RoadElement::Rock) {
+                    corner_changed = true;
+                    tiles[2] = (0, 0, corner, bg, fg, true, 3);
+                } else if is(w, RoadElement::Rock) && is(n, RoadElement::Rock) {
+                    corner_changed = true;
+                    tiles[0] = (0, 1, corner, bg, fg, true, 2);
+                } else if is(e, RoadElement::Rock) && is(s, RoadElement::Rock) {
+                    corner_changed = true;
+                    tiles[3] = (1, 0, corner, bg, fg, true, 0);
+                } else if is(e, RoadElement::Rock) && is(n, RoadElement::Rock) {
+                    corner_changed = true;
+                    tiles[1] = (1, 1, corner, bg, fg, true, 1);
+                }
+
+                if !corner_changed && thread_rng().next_u32() % 5 == 0 {
+                    let tile = (130 + thread_rng().next_u32() % 4) as usize;
+                    tiles = [
+                        (0, 1, tile, 0, 3, false, 0),
+                        (1, 1, tile, 0, 3, false, 1),
+                        (0, 0, tile, 0, 3, false, 3),
+                        (1, 0, tile, 0, 3, false, 2),
+                    ];
+                }
+            }
+            RoadElement::Road => {
+                if is(w, RoadElement::Road) && is(s, RoadElement::Road) {
+                    tiles[1] = (1, 1, 323, 4, 3, true, 1);
+                    tiles[3] = (1, 0, 291, 4, 3, true, 1);
+                } else if is(w, RoadElement::Road) && is(n, RoadElement::Road) {
+                    tiles[1] = (1, 1, 291, 4, 3, false, 3);
+                    tiles[3] = (1, 0, 323, 4, 3, false, 3);
+                } else if is(e, RoadElement::Road) && is(s, RoadElement::Road) {
+                    tiles[0] = (0, 1, 323, 4, 3, false, 1);
+                    tiles[2] = (0, 0, 291, 4, 3, false, 1);
+                } else if is(e, RoadElement::Road) && is(n, RoadElement::Road) {
+                    tiles[0] = (0, 1, 291, 4, 3, true, 3);
+                    tiles[2] = (0, 0, 323, 4, 3, true, 3);
+                }
+            }
+            RoadElement::Rock => {
+                if is(w, RoadElement::Road) && is(s, RoadElement::Road) {
+                    tiles[2] = (0, 0, 321, 4, 3, true, 3);
+                } else if is(w, RoadElement::Road) && is(n, RoadElement::Road) {
+                    tiles[0] = (0, 1, 321, 4, 3, true, 2);
+                } else if is(e, RoadElement::Road) && is(s, RoadElement::Road) {
+                    tiles[3] = (1, 0, 321, 4, 3, true, 0);
+                } else if is(e, RoadElement::Road) && is(n, RoadElement::Road) {
+                    tiles[1] = (1, 1, 321, 4, 3, true, 1);
+                }
+
+                if adjacent.values().filter(|e| **e == RoadElement::Plain).count() >= 3 {
+                    for mut t in tiles.iter_mut() {
+                        if thread_rng().next_u32() % 10 < 7 { t.4 = 0; }
+                    }
+                }
+
+                let (corner, bg, fg, dr) = match thread_rng().next_u32() % 4 {
+                    0 => (320, 3, 0, 0),
+                    _ => (322, 3, 0, 2),
+                };
+                if is(w, RoadElement::Plain) && is(s, RoadElement::Plain) {
+                    tiles[2] = (0, 0, corner, bg, fg, true, (3 + dr) % 4);
+                } else if is(w, RoadElement::Plain) && is(n, RoadElement::Plain) {
+                    tiles[0] = (0, 1, corner, bg, fg, true, (2 + dr) % 4);
+                } else if is(e, RoadElement::Plain) && is(s, RoadElement::Plain) {
+                    tiles[3] = (1, 0, corner, bg, fg, true, (0 + dr) % 4);
+                } else if is(e, RoadElement::Plain) && is(n, RoadElement::Plain) {
+                    tiles[1] = (1, 1, corner, bg, fg, true, (1 + dr) % 4);
+                }
+            }
         }
+
+        tiles
     }
 }
 
 fn draw_road_tiles(grid: &Vec<Vec<RoadElement>>, commands: &mut Commands, atlas: &Handle<TextureAtlas>) {
     for y in 0..grid.len() {
         for x in 0..grid[y].len() {
-            for (dx, dy, i, bg, fg, f, r) in grid[y][x].get_tiles() {
+            let mut adjacent: HashMap<Direction, RoadElement> = HashMap::new();
+            for dir in Direction::iter() {
+                let (dx, dy) = dir.get_offset();
+                if x as isize + dx < 0 || y as isize + dy < 0 { continue }
+                let Some(vec) = grid.get((y as isize + dy) as usize) else { continue };
+                let Some(elem) = vec.get((x as isize + dx) as usize) else { continue };
+                adjacent.insert(dir, elem.clone());
+            }
+
+            for (dx, dy, i, bg, fg, f, r) in grid[y][x].get_tiles(&adjacent) {
                 let tile = sprite(
                     i, 2 * x + dx, 2 * y + dy + size::GUI_HEIGHT, z_pos::ROAD,
                     bg.into(), fg.into(), f, r, atlas.clone(),
