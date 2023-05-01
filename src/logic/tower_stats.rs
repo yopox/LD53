@@ -18,6 +18,10 @@ pub fn reload_delay(tower: &Tower) -> f32 {
     }
 }
 
+// Used to compute the reload delay indicator
+pub const MIN_RELOAD: f32 = 2.;
+pub const MAX_RELOAD: f32 = 6.;
+
 /// Radius of the circular range in zoomed pixels
 pub fn range(tower: &Tower) -> f32 {
     f32_tile_to_f32(match (tower.model, tower.rank) {
@@ -38,17 +42,21 @@ pub fn range(tower: &Tower) -> f32 {
 /// Damage of this tower's shots
 pub fn damage(tower: &Tower) -> f32 {
     match (tower.model, tower.rank) {
-        (Towers::Lightning, 1) => 3.0,
+        (Towers::Lightning, 1) => MIN_DAMAGE,
         (Towers::Lightning, 2) => 5.0,
         (Towers::Lightning, _) => 10.0,
 
         (Towers::PaintBomb, 1) => 8.0,
         (Towers::PaintBomb, 2) => 10.0,
-        (Towers::PaintBomb, _) => 12.0,
+        (Towers::PaintBomb, _) => MAX_DAMAGE,
 
         _ => 0.,
     }
 }
+
+// Used to compute the damage indicator
+pub const MIN_DAMAGE: f32 = 3.0;
+pub const MAX_DAMAGE: f32 = 12.0;
 
 /// Speed of this tower's shots
 pub fn shot_speed(tower: &Tower) -> f32 {

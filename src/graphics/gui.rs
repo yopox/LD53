@@ -235,27 +235,24 @@ fn update_cursor(
 #[derive(Component)]
 pub struct HoverPopup {
     name: String,
-    description: String,
-    attr1: Option<(String, u8)>,
-    attr2: Option<(String, u8)>,
+    pub description: String,
+    pub attr1: Option<(String, u8)>,
+    pub attr2: Option<(String, u8)>,
     width: f32,
     height: f32,
+    pub force_redraw: bool,
 }
 
 impl HoverPopup {
-    pub fn new(name: &str, description: &str, attr1: Option<(&str, u8)>, attr2: Option<(&str, u8)>, width: f32, height: f32) -> Self {
-        let unwrap = |opt: Option<(&str, u8)>| match opt {
-            Some((t, i)) => Some((t.to_string(), i)),
-            None => None,
-        };
-
+    pub fn new(name: &str, description: &str, attr1: Option<(String, u8)>, attr2: Option<(String, u8)>, width: f32, height: f32) -> Self {
         Self {
             name: name.to_string(),
             description: description.to_string(),
-            attr1: unwrap(attr1),
-            attr2: unwrap(attr2),
+            attr1,
+            attr2,
             width,
             height,
+            force_redraw: false,
         }
     }
 }
@@ -266,7 +263,7 @@ struct Popup(Entity);
 
 fn update_popup(
     mut commands: Commands,
-    hover_popup: Query<(&Transform, &HoverPopup, Entity), Without<Popup>>,
+    mut hover_popup: Query<(&Transform, &mut HoverPopup, Entity), Without<Popup>>,
     popup: Query<(&Popup, Entity), Without<HoverPopup>>,
     windows: Query<&Window>,
     textures: Res<Textures>,
@@ -275,16 +272,16 @@ fn update_popup(
     let Some(cursor_pos) = util::cursor_pos(windows) else { return; };
 
     let mut delete_popup = true;
-    for (pos, info, id) in hover_popup.iter() {
-        let (x, y) = (pos.translation.x, pos.translation.y);
-        let (w, h) = (info.width, info.height);
+    for (pos, mut info, id) in hover_popup.iter_mut() {
         if is_in(cursor_pos, pos.translation.xy(), Vec2::new(info.width, info.height)) {
-            let mut recreate_popup = false;
+            let mut recreate_popup = info.force_redraw;
+            info.force_redraw = false;
             delete_popup = false;
 
             match popup.get_single() {
-                Ok((p, _)) if p.0 == id => {
+                Ok((p, popup_id)) if p.0 == id => {
                     // Popup exists -> correct entity -> do nothing
+                    if recreate_popup { commands.entity(popup_id).despawn_recursive(); }
                 }
                 Ok((_, popup_id)) => {
                     // Popup exists -> wrong entity -> respawn popup
@@ -297,7 +294,7 @@ fn update_popup(
                 }
             }
 
-            if recreate_popup { spawn_popup(&mut commands, pos, id, info, &textures, &fonts); }
+            if recreate_popup { spawn_popup(&mut commands, pos, id, &info, &textures, &fonts); }
             return;
         }
     }

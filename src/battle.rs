@@ -10,7 +10,7 @@ use crate::graphics::loading::Textures;
 use crate::graphics::package::collect_package;
 use crate::graphics::palette::Palette;
 use crate::shot::{bomb_exploded, bomb_exploding, make_bomb_explode, remove_shots};
-use crate::tower::{remove_slow_down, sell_tower, tower_fire, Towers, update_just_fired};
+use crate::tower::{remove_slow_down, sell_tower, tower_fire, Towers, update_just_fired, upgrade_tower};
 use crate::util::battle_z_from_y;
 
 pub struct BattlePlugin;
@@ -25,7 +25,8 @@ impl Plugin for BattlePlugin {
                 cleanup.in_schedule(OnExit(GameState::Main))
             )
             .add_systems(
-                (update_just_fired, remove_shots, tower_fire, sell_tower,
+                (update_just_fired, remove_shots, tower_fire,
+                 sell_tower, upgrade_tower,
                  update_drones, despawn_drone, drones_dead.after(wiggle),
                  bomb_exploding, make_bomb_explode, bomb_exploded,
                  remove_slow_down,
@@ -71,7 +72,7 @@ fn setup(
     textures: Res<Textures>,
 ) {
     commands.insert_resource(CursorState::Select);
-    commands.insert_resource(Money(100));
+    commands.insert_resource(Money(200));
 
     let atlas = &textures.tileset;
 

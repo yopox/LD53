@@ -10,12 +10,13 @@ use strum_macros::EnumIter;
 use crate::battle::{BattleUI, CursorState, Money};
 use crate::collision::body_size;
 use crate::drones::Enemy;
-use crate::graphics::{gui, MainBundle, sprite_from_tile, sprites};
+use crate::graphics::{MainBundle, sprite_from_tile, sprites};
 use crate::graphics::grid::{Grid, GridElement};
-use crate::graphics::gui::HoveredPos;
+use crate::graphics::gui::{HoveredPos, HoverPopup};
 use crate::graphics::loading::Textures;
 use crate::graphics::sprites::TILE;
 use crate::logic::tower_stats;
+use crate::logic::tower_stats::{MAX_DAMAGE, MAX_RELOAD, MIN_DAMAGE, MIN_RELOAD};
 use crate::shot::Shots;
 use crate::util;
 use crate::util::{with_z, z_pos};
@@ -65,6 +66,26 @@ impl Tower {
             Some(n) => format!("Rank {} (up: €{})", self.rank, n),
             None => format!("Rank {} (rank max)", self.rank),
         }
+    }
+
+    pub fn get_attr1(&self) -> Option<(String, u8)> {
+        match self.model {
+            Towers::Lightning | Towers::PaintBomb => Some((
+                "Damage".to_string(),
+                ((self.damage() - MIN_DAMAGE) / (MAX_DAMAGE - MIN_DAMAGE) * 9.0) as u8 + 1,
+            )),
+            Towers::Scrambler => Some((
+                "Slowdown".to_string(),
+                self.rank * 3,
+            )),
+        }
+    }
+
+    pub fn get_attr2(&self) -> Option<(String, u8)> {
+        Some((
+            "Speed".to_string(),
+            ((1. / self.reload_delay() - 1. / MAX_RELOAD) / (1. / MIN_RELOAD - 1. / MAX_RELOAD) * 9.0) as u8 + 1,
+        ))
     }
 }
 
@@ -143,7 +164,12 @@ pub fn place_tower(
             sprite_from_tile(builder, tower.model.get_tiles(), atlas, 0.)
         )
         .insert(JustFired::new(time, tower.model.initial_delay()))
-        .insert(gui::HoverPopup::new(tower.get_name(), &tower.get_description(), Some(("Damage", 1)), Some(("Speed", 4)), size.x, size.y))
+        .insert(HoverPopup::new(
+            tower.get_name(),
+            &tower.get_description(),
+            tower.get_attr1(), tower.get_attr2(),
+            size.x, size.y,
+        ))
         .insert(BattleUI)
         .insert(GridElement)
     ;
@@ -178,6 +204,48 @@ pub fn sell_tower(
             commands.entity(id).despawn_recursive();
             cursor_state.set_if_neq(CursorState::Select);
             money.0 += t.sell_price();
+        }
+    }
+}
+
+pub fn upgrade_tower(
+    mut commands: Commands,
+    mut towers: Query<(&mut Tower, &mut HoverPopup)>,
+    mouse: Res<Input<MouseButton>>,
+    cursor_state: Option<ResMut<CursorState>>,
+    hovered: Option<ResMut<HoveredPos>>,
+    money: Option<ResMut<Money>>,
+) {
+    let Some(mut cursor_state) = cursor_state else { return; };
+
+    if !mouse.just_pressed(MouseButton::Left) { return; }
+    if cursor_state.ne(&CursorState::Upgrade) { return; }
+
+    let Some(mut hovered) = hovered else { return; };
+    let Some(mut money) = money else { return; };
+    let pos = &(hovered.0.0, hovered.0.1);
+
+    for (mut t, mut hp) in towers.iter_mut() {
+        if t.x == pos.0 && t.y == pos.1 {
+            match t.upgrade_cost() {
+                Some(cost) if cost <= money.0 => {
+                    // Actually upgrade tower
+                    money.0 -= cost;
+                    t.rank += 1;
+                    hp.description = t.get_description();
+                    hp.attr1 = t.get_attr1();
+                    hp.attr2 = t.get_attr2();
+                    hp.force_redraw = true;
+                }
+                Some(_) => {
+                    // Not enough money
+                }
+                None => {
+                    // Level max
+                }
+            }
+
+            return;
         }
     }
 }
