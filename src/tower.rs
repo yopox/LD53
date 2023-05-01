@@ -265,6 +265,7 @@ pub fn tower_fire(
     textures: Res<Textures>,
 ) {
     for (e_tower, &t_tower, tower) in towers.iter() {
+        let mut fired = false;
         match tower.model {
             Towers::Lightning | Towers::PaintBomb => {
                 let chosen_enemy = enemies.iter()
@@ -272,6 +273,7 @@ pub fn tower_fire(
                     .max_by_key(|(_, _, enemy)| (enemy.advance * 4096.) as usize);
 
                 if let Some((_, t_enemy, e)) = chosen_enemy {
+                    fired = true;
                     shoot(&mut commands, &textures, t_tower, tower, t_enemy.translation, body_size(e.class.get_tiles()));
                 }
             }
@@ -280,6 +282,7 @@ pub fn tower_fire(
                     .filter(|(_, t_enemy, enemy)| util::tower_to_enemy_distance(tower, *t_enemy, enemy.class) <= tower.range())
                     .for_each(|(e, _, _)| {
                         if let Some(mut entity_commands) = commands.get_entity(e) {
+                            fired = true;
                             entity_commands.insert(Slow {
                                 factor: tower.slow_factor(),
                                 t_final: time.elapsed() + Duration::from_secs_f32(SLOW_DOWN_DELAY),
@@ -290,8 +293,10 @@ pub fn tower_fire(
             }
         }
 
-        if let Some(mut entity_commands) = commands.get_entity(e_tower) {
-            entity_commands.insert(JustFired::new(&time, tower.reload_delay()));
+        if fired {
+            if let Some(mut entity_commands) = commands.get_entity(e_tower) {
+                entity_commands.insert(JustFired::new(&time, tower.reload_delay()));
+            }
         }
     }
 }

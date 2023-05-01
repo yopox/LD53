@@ -145,6 +145,5 @@ pub fn tower_to_enemy_distance(tower: &Tower, t_enemy: &Transform, enemy: Drones
     let enemy_size = body_size(enemy.get_tiles());
     let enemy_center = Vec2::new(t_enemy.translation.x + enemy_size.x / 2., t_enemy.translation.y + enemy_size.y / 2.);
     let tower_center = tower_center(tower.x, tower.y);
-    info!("Tower: ({};{}) - Enemy: ({};{})", tower_center.x, tower_center.y, enemy_center.x, enemy_center.y);
     tower_center.distance(enemy_center)
 }
