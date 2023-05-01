@@ -40,7 +40,7 @@ fn exit_title (
     mut commands: Commands,
 ) {
     for _ in keys.get_just_released() {
-        commands.insert_resource(Transition::to(GameState::Main))
+        commands.insert_resource(Transition::to(GameState::Battle))
     }
 }
 

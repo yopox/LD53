@@ -22,8 +22,8 @@ pub struct GuiPlugin;
 impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system(setup.in_schedule(OnEnter(GameState::Main)))
-            .add_systems((update_money, update_cursor, update_popup, update_tower_button, update_text_button, place_tower).in_set(OnUpdate(GameState::Main)))
+            .add_system(setup.in_schedule(OnEnter(GameState::Battle)))
+            .add_systems((update_money, update_cursor, update_popup, update_tower_button, update_text_button, place_tower).in_set(OnUpdate(GameState::Battle)))
         ;
     }
 }

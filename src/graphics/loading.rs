@@ -10,7 +10,7 @@ impl Plugin for LoadingPlugin {
         app
             .add_loading_state(
                 LoadingState::new(GameState::Loading)
-                    .continue_to_state(GameState::Main),
+                    .continue_to_state(GameState::Battle),
             )
             .add_collection_to_loading_state::<_, Textures>(GameState::Loading)
             .add_collection_to_loading_state::<_, Fonts>(GameState::Loading)

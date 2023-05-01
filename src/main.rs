@@ -25,7 +25,8 @@ pub enum GameState {
     #[default]
     Loading,
     Title,
-    Main,
+    Battle,
+    GameOver,
 }
 
 fn main() {

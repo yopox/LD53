@@ -18,13 +18,13 @@ impl Plugin for GridPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system(
-                setup.in_schedule(OnEnter(GameState::Main))
+                setup.in_schedule(OnEnter(GameState::Battle))
             )
             .add_system(
-                update_z.in_set(OnUpdate(GameState::Main))
+                update_z.in_set(OnUpdate(GameState::Battle))
             )
             .add_system(
-                cleanup.in_schedule(OnExit(GameState::Main))
+                cleanup.in_schedule(OnExit(GameState::Battle))
             )
         ;
     }

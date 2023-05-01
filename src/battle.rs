@@ -19,21 +19,21 @@ impl Plugin for BattlePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system(
-                setup.in_schedule(OnEnter(GameState::Main))
+                setup.in_schedule(OnEnter(GameState::Battle))
             )
             .add_system(
-                cleanup.in_schedule(OnExit(GameState::Main))
+                cleanup.in_schedule(OnExit(GameState::Battle))
             )
             .add_systems(
                 (update_just_fired, remove_shots, tower_fire,
                  sell_tower, upgrade_tower,
                  update_drones, despawn_drone, drones_dead.after(collision::collide).after(wiggle))
-                    .in_set(OnUpdate(GameState::Main))
+                    .in_set(OnUpdate(GameState::Battle))
             )
             .add_systems(
                 (bomb_exploding, make_bomb_explode, bomb_exploded, spawn_waves,
                  remove_slow_down, collect_package, reset_state, update_z)
-                    .in_set(OnUpdate(GameState::Main))
+                    .in_set(OnUpdate(GameState::Battle))
             )
         ;
     }
