@@ -32,7 +32,7 @@ impl Plugin for GuiPlugin {
 struct Cursor;
 
 #[derive(Resource)]
-struct HoveredPos(pub (usize, usize));
+pub struct HoveredPos(pub (usize, usize));
 
 #[derive(Component)]
 struct TowerButton(Towers);

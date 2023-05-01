@@ -9,7 +9,7 @@ use crate::graphics::loading::Textures;
 use crate::graphics::package::collect_package;
 use crate::graphics::palette::Palette;
 use crate::shot::{bomb_exploded, bomb_exploding, make_bomb_explode, remove_shots};
-use crate::tower::{remove_slow_down, tower_fire, Towers, update_just_fired};
+use crate::tower::{remove_slow_down, sell_tower, tower_fire, Towers, update_just_fired};
 
 pub struct BattlePlugin;
 
@@ -23,9 +23,11 @@ impl Plugin for BattlePlugin {
                 cleanup.in_schedule(OnExit(GameState::Main))
             )
             .add_systems(
-                (update_just_fired, tower_fire, update_drones, remove_shots,
-                 bomb_exploding, make_bomb_explode, bomb_exploded, despawn_drone,
-                 drones_dead.after(wiggle), remove_slow_down, collect_package,
+                (update_just_fired, remove_shots, tower_fire, sell_tower,
+                 update_drones, despawn_drone, drones_dead.after(wiggle),
+                 bomb_exploding, make_bomb_explode, bomb_exploded,
+                 remove_slow_down,
+                 collect_package,
                  reset_state)
                     .in_set(OnUpdate(GameState::Main))
             )

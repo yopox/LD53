@@ -7,10 +7,12 @@ use bevy_tweening::EaseMethod::Linear;
 use bevy_tweening::lens::TransformPositionLens;
 use strum_macros::EnumIter;
 
-use crate::battle::BattleUI;
+use crate::battle::{BattleUI, CursorState, Money};
 use crate::collision::body_size;
 use crate::drones::Enemy;
 use crate::graphics::{gui, MainBundle, sprite_from_tile, sprites};
+use crate::graphics::grid::Grid;
+use crate::graphics::gui::HoveredPos;
 use crate::graphics::loading::Textures;
 use crate::graphics::sprites::TILE;
 use crate::shot::Shots;
@@ -29,6 +31,8 @@ pub struct Tower {
     radius: f32,
     shot: Option<Shots>,
     rank: u8,
+    x: usize,
+    y: usize,
 }
 
 impl Tower {
@@ -37,6 +41,14 @@ impl Tower {
             1 => Some(2 * self.model.get_cost()),
             2 => Some(4 * self.model.get_cost()),
             _ => None,
+        }
+    }
+
+    pub fn sell_price(&self) -> u16 {
+        match self.rank {
+            1 => self.model.get_cost() / 2,
+            2 => self.model.get_cost() * 3 / 2,
+            _ => self.model.get_cost() * 7 / 2,
         }
     }
 
@@ -78,7 +90,7 @@ impl JustFired {
 }
 
 impl Towers {
-    pub const fn instantiate(&self) -> Tower {
+    pub const fn instantiate(&self, x: usize, y: usize) -> Tower {
         match &self {
             Towers::Lightning => Tower {
                 model: *self,
@@ -87,6 +99,8 @@ impl Towers {
                 radius: tile_to_f32(5),
                 shot: Some(Shots::Basic),
                 rank: 1,
+                x,
+                y,
             },
             Towers::PaintBomb => Tower {
                 model: *self,
@@ -95,6 +109,8 @@ impl Towers {
                 radius: tile_to_f32(9),
                 shot: Some(Shots::Bomb),
                 rank: 1,
+                x,
+                y,
             },
             Towers::Scrambler => Tower {
                 model: *self,
@@ -103,6 +119,8 @@ impl Towers {
                 radius: tile_to_f32(4),
                 shot: None,
                 rank: 2,
+                x,
+                y,
             }
         }
     }
@@ -136,7 +154,7 @@ pub fn place_tower(
     tower: Towers, atlas: &Handle<TextureAtlas>,
     time: &Time,
 ) {
-    let tower = tower.instantiate();
+    let tower = tower.instantiate(x, y);
     let size = body_size(tower.model.get_tiles());
     let tower_pos = util::grid_to_tower_pos(x, y, tower.model);
     commands
@@ -151,6 +169,39 @@ pub fn place_tower(
         .insert(gui::HoverPopup::new(tower.get_name(), &tower.get_description(), Some(("Damage", 1)), Some(("Speed", 4)), size.x, size.y))
         .insert(BattleUI)
     ;
+}
+
+pub fn sell_tower(
+    mut commands: Commands,
+    towers: Query<(&Tower, Entity)>,
+    mouse: Res<Input<MouseButton>>,
+    cursor_state: Option<ResMut<CursorState>>,
+    hovered: Option<ResMut<HoveredPos>>,
+    grid: Option<ResMut<Grid>>,
+    money: Option<ResMut<Money>>,
+) {
+    let Some(mut cursor_state) = cursor_state else { return; };
+
+    if !mouse.just_pressed(MouseButton::Left) { return; }
+    if cursor_state.ne(&CursorState::Sell) { return; }
+
+    let Some(mut hovered) = hovered else { return; };
+    let Some(mut grid) = grid else { return; };
+
+    let pos = &(hovered.0.0, hovered.0.1);
+    if !grid.towers.contains(pos) { return; }
+
+    let Some(mut money) = money else { return; };
+
+    for (t, id) in &towers {
+        if t.x == pos.0 && t.y == pos.1 {
+            // Actually sell tower
+            grid.towers.remove(pos);
+            commands.entity(id).despawn_recursive();
+            cursor_state.set_if_neq(CursorState::Select);
+            money.0 += t.sell_price();
+        }
+    }
 }
 
 pub fn tower_fire(
