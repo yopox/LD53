@@ -6,6 +6,7 @@ use graphics::palette::Palette;
 use crate::battle::BattlePlugin;
 use crate::collision::CollisionPlugin;
 use crate::graphics::GraphicsPlugin;
+use crate::music::MusicPlugin;
 use crate::title::TitlePlugin;
 use crate::util::size;
 use crate::util::size::tile_to_f32;
@@ -19,6 +20,7 @@ mod tower;
 mod shot;
 mod battle;
 mod collision;
+mod music;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
@@ -50,6 +52,7 @@ fn main() {
         )
         .add_state::<GameState>()
         .add_plugin(TextModePlugin)
+        .add_plugin(MusicPlugin)
         .add_plugin(TitlePlugin)
         .add_plugin(GraphicsPlugin)
         .add_plugin(BattlePlugin)

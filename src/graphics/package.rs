@@ -2,7 +2,7 @@ use bevy::asset::Handle;
 use bevy::hierarchy::{ChildBuilder, DespawnRecursiveExt};
 use bevy::input::Input;
 use bevy::math::{Vec2, Vec3Swizzles};
-use bevy::prelude::{Commands, Component, Entity, MouseButton, Query, Res, ResMut, Transform, Window};
+use bevy::prelude::{Commands, Component, Entity, EventWriter, MouseButton, Query, Res, ResMut, Transform, Window};
 use bevy::sprite::TextureAtlas;
 use enum_derived::Rand;
 use rand::RngCore;
@@ -10,6 +10,7 @@ use rand::RngCore;
 use crate::{graphics, util};
 use crate::battle::Money;
 use crate::graphics::sprites::TILE;
+use crate::music::{PlaySfxEvent, SFX};
 use crate::util::{is_in, z_pos};
 use crate::util::size::tile_to_f32;
 
@@ -70,6 +71,7 @@ pub fn spawn(builder: &mut ChildBuilder, offset: Vec2, atlas: &Handle<TextureAtl
 
 pub fn collect_package(
     mut commands: Commands,
+    mut sfx: EventWriter<PlaySfxEvent>,
     packages: Query<(&Package, &Transform, Entity)>,
     windows: Query<&Window>,
     mouse: Res<Input<MouseButton>>,
@@ -87,6 +89,11 @@ pub fn collect_package(
                 PackageKind::Coffee => {}
                 PackageKind::Cursed => {}
                 PackageKind::Omega => {}
+            }
+
+            match p.kind {
+                PackageKind::Cursed => sfx.send(PlaySfxEvent(SFX::PackageMalus)),
+                _ => sfx.send(PlaySfxEvent(SFX::PackageBonus)),
             }
         }
     }

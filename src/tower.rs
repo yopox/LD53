@@ -17,6 +17,7 @@ use crate::graphics::loading::Textures;
 use crate::graphics::sprites::TILE;
 use crate::logic::tower_stats;
 use crate::logic::tower_stats::{MAX_DAMAGE, MAX_RELOAD, MIN_DAMAGE, MIN_RELOAD};
+use crate::music::{PlaySfxEvent, SFX};
 use crate::shot::Shots;
 use crate::util;
 use crate::util::{vec2_with_battle_z, with_z, z_pos};
@@ -179,6 +180,7 @@ pub fn place_tower(
 
 pub fn sell_tower(
     mut commands: Commands,
+    mut sfx: EventWriter<PlaySfxEvent>,
     towers: Query<(&Tower, Entity)>,
     mouse: Res<Input<MouseButton>>,
     cursor_state: Option<ResMut<CursorState>>,
@@ -202,6 +204,7 @@ pub fn sell_tower(
     for (t, id) in &towers {
         if t.x == pos.0 && t.y == pos.1 {
             // Actually sell tower
+            sfx.send(PlaySfxEvent(SFX::SellTower));
             grid.towers.remove(pos);
             commands.entity(id).despawn_recursive();
             cursor_state.set_if_neq(CursorState::Select);
@@ -212,6 +215,7 @@ pub fn sell_tower(
 
 pub fn upgrade_tower(
     mut towers: Query<(&mut Tower, &mut HoverPopup)>,
+    mut sfx: EventWriter<PlaySfxEvent>,
     mouse: Res<Input<MouseButton>>,
     cursor_state: Option<ResMut<CursorState>>,
     hovered: Option<Res<HoveredPos>>,
@@ -231,6 +235,7 @@ pub fn upgrade_tower(
             match t.upgrade_cost() {
                 Some(cost) if cost <= money.0 => {
                     // Actually upgrade tower
+                    sfx.send(PlaySfxEvent(SFX::UpgradeTower));
                     money.0 -= cost;
                     t.rank += 1;
                     hp.description = t.get_description();

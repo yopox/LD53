@@ -13,6 +13,7 @@ use crate::graphics::grid::{Grid, RoadElement};
 use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
 use crate::graphics::text::TextStyles;
+use crate::music::{PlaySfxEvent, SFX};
 use crate::tower::Towers;
 use crate::util::{is_in, z_pos};
 use crate::util::size::{f32_tile_to_f32, is_oob, tile_to_f32};
@@ -419,6 +420,7 @@ struct TransparentTower;
 
 fn place_tower(
     mut commands: Commands,
+    mut sfx: EventWriter<PlaySfxEvent>,
     state: Option<ResMut<CursorState>>,
     cursor: Option<Res<HoveredPos>>,
     mut transparent_tower: Query<(&mut Transform, Entity), With<TransparentTower>>,
@@ -452,6 +454,7 @@ fn place_tower(
 
                 if mouse.just_pressed(MouseButton::Left) && !grid.towers.contains(&(x, y)) {
                     // Build the tower
+                    sfx.send(PlaySfxEvent(SFX::PlaceTower));
                     if money.0 >= t.get_cost() {
                         money.0 -= t.get_cost();
                         grid.towers.insert((x, y));

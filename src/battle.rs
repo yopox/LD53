@@ -8,6 +8,7 @@ use crate::graphics::grid::{GridElement, update_z};
 use crate::graphics::loading::Textures;
 use crate::graphics::package::collect_package;
 use crate::graphics::palette::Palette;
+use crate::music::{BGM, PlayBgmEvent};
 use crate::logic::waves::{WaveIterator, WaveIteratorElement};
 use crate::shot::{bomb_exploded, bomb_exploding, make_bomb_explode, remove_shots};
 use crate::tower::{remove_slow_down, sell_tower, tower_fire, Towers, update_just_fired, upgrade_tower};
@@ -70,7 +71,11 @@ impl CursorState {
 
 fn setup(
     mut commands: Commands,
+    textures: Res<Textures>,
+    mut bgm: EventWriter<PlayBgmEvent>,
 ) {
+    bgm.send(PlayBgmEvent(BGM::Theme));
+
     commands.insert_resource(CursorState::Select);
     commands.insert_resource(Money(200));
     commands.insert_resource(WaveIterator::get_static())

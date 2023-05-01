@@ -13,6 +13,7 @@ use crate::graphics::grid::{CurrentPath, GridElement};
 use crate::graphics::loading::Textures;
 use crate::graphics::package::{ClickablePackage, Package};
 use crate::graphics::sprites::{DroneModels, TILE};
+use crate::music::{PlaySfxEvent, SFX};
 use crate::shot::{Bomb, Shot, Shots, spawn_bomb};
 use crate::tower::Slow;
 use crate::util;
@@ -120,8 +121,9 @@ pub fn update_drones(
 }
 
 pub fn drones_dead(
-    mut event_reader: EventReader<Contact>,
     mut commands: Commands,
+    mut sfx: EventWriter<PlaySfxEvent>,
+    mut event_reader: EventReader<Contact>,
     mut enemies: Query<(&mut Enemy, &Transform)>,
     children: Query<&Children>,
     shots: Query<(&Shot, &Transform)>,
@@ -138,6 +140,10 @@ pub fn drones_dead(
 
                 // Despawn shot
                 if let Some(entity_commands) = commands.get_entity(*e_shot) {
+                    match shot.class {
+                        Shots::Bomb => sfx.send(PlaySfxEvent(SFX::TowerBomb)),
+                        Shots::Electricity => sfx.send(PlaySfxEvent(SFX::Hit)),
+                    }
                     entity_commands.despawn_recursive()
                 }
 
