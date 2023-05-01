@@ -36,11 +36,11 @@ pub enum PackageKind {
 impl PackageKind {
     fn get_tile(&self) -> usize {
         return match self {
-            PackageKind::Common => 897 + rand::thread_rng().next_u32() % 27,
-            PackageKind::Money => 938,
-            PackageKind::Coffee => 616,
-            PackageKind::Cursed => 355,
-            PackageKind::Omega => 987,
+            PackageKind::Common => 393,
+            PackageKind::Money => 395,
+            PackageKind::Coffee => 397,
+            PackageKind::Cursed => 399,
+            PackageKind::Omega => 401,
         } as usize;
     }
 }
