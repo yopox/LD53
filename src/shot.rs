@@ -12,7 +12,6 @@ use crate::battle::BattleUI;
 use crate::collision::{BodyType, HitBox};
 use crate::drones::Enemy;
 use crate::graphics::{circle, MainBundle};
-use crate::graphics::circle::CircleColor;
 use crate::graphics::palette::Palette;
 use crate::graphics::sprites::TILE;
 use crate::tower::Tower;

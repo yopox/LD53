@@ -271,8 +271,8 @@ pub fn tower_fire(
                     .filter(|(_, t, _)| t.translation.xy().distance(t_tower.translation.xy()) <= tower.range())
                     .max_by_key(|(_, _, enemy)| (enemy.advance * 4096.) as usize);
 
-                if let Some((_, t_enemy, _)) = chosen_enemy {
-                    shoot(&mut commands, &textures, t_tower, tower, t_enemy.translation);
+                if let Some((_, t_enemy, e)) = chosen_enemy {
+                    shoot(&mut commands, &textures, t_tower, tower, t_enemy.translation, body_size(e.class.get_tiles()));
                 }
             }
             Towers::Scrambler => {
@@ -296,7 +296,12 @@ pub fn tower_fire(
     }
 }
 
-fn shoot(commands: &mut Commands, textures: &Res<Textures>, t_tower: Transform, tower: &Tower, enemy_position: Vec3) {
+fn shoot(commands: &mut Commands, textures: &Res<Textures>, t_tower: Transform, tower: &Tower, enemy_position: Vec3, enemy_size: Vec2) {
+    let enemy_position = Vec3::new(
+        enemy_position.x + enemy_size.x / 2.,
+        enemy_position.y + enemy_size.y / 2.,
+        t_tower.translation.z,
+    );
     let distance = t_tower.translation.distance(enemy_position);
     let width = body_size(tower.model.get_tiles()).x;
     let shot_translation = vec3(
