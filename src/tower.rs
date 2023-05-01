@@ -15,27 +15,27 @@ use crate::graphics::grid::{Grid, GridElement};
 use crate::graphics::gui::HoveredPos;
 use crate::graphics::loading::Textures;
 use crate::graphics::sprites::TILE;
+use crate::logic::tower_stats;
 use crate::shot::Shots;
 use crate::util;
 use crate::util::{with_z, z_pos};
 use crate::util::misc::SLOW_DOWN_DELAY;
-use crate::util::size::tile_to_f32;
 use crate::util::tweening::SHOT_DESPAWN;
 
 #[derive(Component, Clone)]
 pub struct Tower {
-    model: Towers,
-    /// Time between two shots in seconds
-    reloading_delay: f32,
-    range: f32,
-    radius: f32,
-    shot: Option<Shots>,
-    rank: u8,
+    pub model: Towers,
+    pub rank: u8,
     x: usize,
     y: usize,
 }
 
 impl Tower {
+    pub fn reload_delay(&self) -> f32 { tower_stats::reload_delay(self) }
+    pub fn range(&self) -> f32 { tower_stats::range(self) }
+    pub fn damage(&self) -> f32 { tower_stats::damage(self) }
+    pub fn shot_speed(&self) -> f32 { tower_stats::shot_speed(self) }
+
     pub fn upgrade_cost(&self) -> Option<u16> {
         match self.rank {
             1 => Some(2 * self.model.get_cost()),
@@ -91,37 +91,14 @@ impl JustFired {
 
 impl Towers {
     pub const fn instantiate(&self, x: usize, y: usize) -> Tower {
-        match &self {
-            Towers::Lightning => Tower {
-                model: *self,
-                reloading_delay: 10.,
-                range: tile_to_f32(5),
-                radius: tile_to_f32(5),
-                shot: Some(Shots::Basic),
-                rank: 1,
-                x,
-                y,
-            },
-            Towers::PaintBomb => Tower {
-                model: *self,
-                reloading_delay: 15.,
-                range: tile_to_f32(8),
-                radius: tile_to_f32(9),
-                shot: Some(Shots::Bomb),
-                rank: 1,
-                x,
-                y,
-            },
-            Towers::Scrambler => Tower {
-                model: *self,
-                reloading_delay: 2.,
-                range: tile_to_f32(3),
-                radius: tile_to_f32(4),
-                shot: None,
-                rank: 2,
-                x,
-                y,
-            }
+        Tower { model: *self, rank: 1, x, y }
+    }
+
+    pub const fn get_shot(&self) -> Option<Shots> {
+        match self {
+            Towers::Lightning => Some(Shots::Electricity),
+            Towers::PaintBomb => Some(Shots::Bomb),
+            Towers::Scrambler => None,
         }
     }
 
@@ -135,7 +112,7 @@ impl Towers {
 
     /// Returns the delay on tower construction
     pub const fn initial_delay(&self) -> f32 {
-        5.
+        2.
     }
 
     pub const fn get_cost(&self) -> u16 {
@@ -216,7 +193,7 @@ pub fn tower_fire(
         match tower.model {
             Towers::Lightning | Towers::PaintBomb => {
                 let chosen_enemy = enemies.iter()
-                    .filter(|(_, t, _)| t.translation.xy().distance(t_tower.translation.xy()) <= tower.range)
+                    .filter(|(_, t, _)| t.translation.xy().distance(t_tower.translation.xy()) <= tower.range())
                     .max_by_key(|(_, _, enemy)| (enemy.advance * 4096.) as usize);
 
                 if let Some((_, t_enemy, _)) = chosen_enemy {
@@ -225,7 +202,7 @@ pub fn tower_fire(
             }
             Towers::Scrambler => {
                 enemies.iter()
-                    .filter(|(_, t, _)| t.translation.xy().distance(t_tower.translation.xy()) <= tower.range)
+                    .filter(|(_, t, _)| t.translation.xy().distance(t_tower.translation.xy()) <= tower.range())
                     .for_each(|(e, _, _)| {
                         if let Some(mut entity_commands) = commands.get_entity(e) {
                             entity_commands.insert(Slow {
@@ -239,7 +216,7 @@ pub fn tower_fire(
         }
 
         if let Some(mut entity_commands) = commands.get_entity(e_tower) {
-            entity_commands.insert(JustFired::new(&time, tower.reloading_delay));
+            entity_commands.insert(JustFired::new(&time, tower.reload_delay()));
         }
     }
 }
@@ -247,22 +224,23 @@ pub fn tower_fire(
 fn shoot(commands: &mut Commands, textures: &Res<Textures>, t_tower: Transform, tower: &Tower, enemy_position: Vec3) {
     let distance = t_tower.translation.distance(enemy_position);
     let shot_translation = vec3(t_tower.translation.x, t_tower.translation.y + 1., z_pos::SHOT);
-    let shot = tower.shot.expect("For shooting something.");
+    let shot_kind = tower.model.get_shot().expect("The tower can't shoot!");
+    let shot = shot_kind.instantiate(tower);
     commands
-        .spawn(shot.instantiate())
+        .spawn(shot.clone())
         .insert(MainBundle::from_translation(shot_translation))
         .insert(Animator::new(Tween::new(
             Linear,
-            Duration::from_secs_f32(tower.radius / shot.get_speed()),
+            Duration::from_secs_f32(tower.range() / shot.0.speed),
             TransformPositionLens {
                 start: shot_translation,
                 end: with_z(
-                    shot_translation + (enemy_position - shot_translation) * tower.radius / distance,
+                    shot_translation + (enemy_position - shot_translation) * tower.range() / distance,
                     z_pos::SHOT),
             },
         ).with_completed_event(SHOT_DESPAWN)))
         .with_children(|builder|
-            sprite_from_tile(builder, &[shot.get_tile()], &textures.tileset, 0.)
+            sprite_from_tile(builder, &[shot_kind.get_tile()], &textures.tileset, 0.)
         )
         .insert(BattleUI)
     ;

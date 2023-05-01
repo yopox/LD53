@@ -15,6 +15,7 @@ use crate::collision::{body_size, BodyType, HitBox};
 use crate::drones::Enemy;
 use crate::graphics::MainBundle;
 use crate::graphics::sprites::TILE;
+use crate::tower::Tower;
 use crate::util::size::battle::BOMB_RANGE;
 use crate::util::tweening::{BOMB_EXPLODED, SHOT_DESPAWN};
 use crate::util::z_pos;
@@ -22,33 +23,26 @@ use crate::util::z_pos;
 #[derive(Component, Copy, Clone)]
 pub struct Shot {
     pub class: Shots,
-    pub damages: f32,
+    pub damage: f32,
     pub speed: f32,
 }
 
 #[derive(Copy, Clone, EnumIter, Debug, PartialEq, Eq)]
 pub enum Shots {
-    Basic,
+    Electricity,
     Bomb,
 }
 
 impl Shots {
-    const fn get_shot(&self) -> Shot {
-        match &self {
-            Self::Basic => Shot {
-                class: *self,
-                damages: 6.,
-                speed: 120.,
-            },
-            Shots::Bomb => Shot {
-                class: *self,
-                damages: 10.,
-                speed: 120.,
-            }
+    fn get_shot(&self, tower: &Tower) -> Shot {
+        Shot {
+            class: *self,
+            damage: tower.damage(),
+            speed: tower.shot_speed(),
         }
     }
 
-    pub fn instantiate(&self) -> (Shot, HitBox) {
+    pub fn instantiate(&self, tower: &Tower) -> (Shot, HitBox) {
         let body_size = body_size(&[self.get_tile()]);
         let solid_body = HitBox {
             body_type: BodyType::ShipShot,
@@ -56,18 +50,14 @@ impl Shots {
             height: body_size.y,
             bottom_right_anchor: false,
         };
-        (self.get_shot(), solid_body)
+        (self.get_shot(tower), solid_body)
     }
 
     pub const fn get_tile(&self) -> TILE {
         match &self {
-            Shots::Basic => (0, 0, 65, 16, 8, false, 0),
+            Shots::Electricity => (0, 0, 65, 16, 8, false, 0),
             Shots::Bomb => (0, 0, 65, 16, 7, false, 0),
         }
-    }
-
-    pub fn get_speed(&self) -> f32 {
-        self.get_shot().speed
     }
 
     pub fn get_bomb_range(&self) -> f32 {
@@ -118,7 +108,7 @@ impl Bomb {
             x: tr.x,
             y: tr.y,
             range: shot.get_bomb_range(),
-            damages: shot.damages,
+            damages: shot.damage,
         }
     }
 }

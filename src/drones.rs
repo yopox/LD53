@@ -147,9 +147,9 @@ pub fn drones_dead(
                     Shots::Bomb => {
                         spawn_bomb(Bomb::from_shot_translation(shot, t_shot.translation), &mut commands);
                     }
-                    Shots::Basic => {
-                        enemy.stats.hp -= shot.damages;
-                        if enemy.stats.hp > 0. { continue }
+                    Shots::Electricity => {
+                        enemy.stats.hp -= shot.damage;
+                        if enemy.stats.hp > 0. { continue; }
                         enemy.stats.hp = 0.;
 
                         // Enemy death animation

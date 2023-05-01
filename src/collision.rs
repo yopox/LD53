@@ -27,7 +27,7 @@ impl Plugin for CollisionPlugin {
 
 /// Takes entity into account for collision detection.
 /// [body_type] is used to perform collision detection against the right bodies.
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct HitBox {
     pub body_type: BodyType,
     pub width: f32,
