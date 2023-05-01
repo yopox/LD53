@@ -1,5 +1,9 @@
 use bevy::prelude::*;
 
+use crate::collision::body_size;
+use crate::tower::Towers;
+use crate::util::size::{f32_tile_to_f32, tile_to_f32};
+
 pub mod size {
     /// Tile size from the tileset
     const TILE_SIZE: usize = 8;
@@ -96,4 +100,12 @@ pub fn cursor_pos(
     let window = windows.get_single().unwrap();
     let Some(cursor_pos) = window.cursor_position() else { return None; };
     return Some(Vec2::new(cursor_pos.x / size::SCALE, cursor_pos.y / size::SCALE));
+}
+
+pub fn grid_to_tower_pos(x: usize, y: usize, t: Towers) -> Vec2 {
+    let size = body_size(t.get_tiles());
+    let dx = (tile_to_f32(2) - size.x) / 2.;
+    let x = tile_to_f32(2 * x) + dx;
+    let y = tile_to_f32(2 * y + size::GUI_HEIGHT) + f32_tile_to_f32(0.5);
+    return Vec2::new(x, y);
 }

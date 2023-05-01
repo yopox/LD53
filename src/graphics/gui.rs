@@ -69,8 +69,8 @@ fn setup(
     for x in 0..util::size::WIDTH {
         for y in 0..util::size::GUI_HEIGHT {
             let (i, bg, fg) = match y {
-                5 => (32, Palette::E, Palette::D),
-                _ => (0, Palette::E, Palette::Transparent),
+                5 => (418, Palette::E, Palette::D),
+                _ => (416, Palette::E, Palette::Transparent),
             };
             commands.spawn(sprite(
                 i, x, y, util::z_pos::GUI_BG,
@@ -86,7 +86,7 @@ fn setup(
         .with_children(|builder| {
             for (x, y, r) in [(0, 1, 0), (1, 1, 1), (1, 0, 2), (0, 0, 3)] {
                 builder.spawn(sprite(
-                    33, x, y, 0.,
+                    417, x, y, 0.,
                     Palette::Transparent, Palette::B,
                     false, r, textures.tileset.clone(),
                 ));
@@ -265,11 +265,11 @@ fn spawn_popup(
             for y in 0..6 {
                 for x in 0..12 {
                     let (i, r) = match (x, y) {
-                        (0, 0) => (34, 3),
-                        (11, 0) => (34, 2),
-                        (11, 5) => (34, 1),
-                        (0, 5) => (34, 0),
-                        _ => (35, 0)
+                        (0, 0) => (420, 3),
+                        (11, 0) => (420, 2),
+                        (11, 5) => (420, 1),
+                        (0, 5) => (420, 0),
+                        _ => (421, 0)
                     };
                     let mut bundle = sprite(
                         i, x, y, 0.,
@@ -302,7 +302,7 @@ fn spawn_popup(
 
                     for x in 0..10 {
                         builder.spawn(sprite_f32(
-                            36, f32_tile_to_f32(x as f32 / 2. + 6.), f32_tile_to_f32(y + 7. / 16.), fg_z,
+                            419, f32_tile_to_f32(x as f32 / 2. + 6.), f32_tile_to_f32(y + 7. / 16.), fg_z,
                             Palette::Transparent, if x < *i { Palette::K } else { Palette::P },
                             false, 0, textures.tileset.clone(),
                         ));
@@ -398,8 +398,9 @@ fn place_tower(
             (CursorState::Build(t), Some((x, y))) => {
                 if cursor_changed {
                     // Update its position
-                    pos.translation.x = tile_to_f32(2 * x);
-                    pos.translation.y = tile_to_f32(2 * y + util::size::GUI_HEIGHT);
+                    let tower_pos = util::grid_to_tower_pos(x, y, *t);
+                    pos.translation.x = tower_pos.x;
+                    pos.translation.y = tower_pos.y;
                 }
 
                 if mouse.just_pressed(MouseButton::Left) {
@@ -421,9 +422,10 @@ fn place_tower(
         // There is no transparent tower
         if let CursorState::Build(t) = state {
             let Some((x, y)) = cursor else { return; };
+            let tower_pos = util::grid_to_tower_pos(x, y, *t);
             commands
                 .spawn(TransparentTower)
-                .insert(MainBundle::from_xyz(tile_to_f32(2 * x), tile_to_f32(2 * y + util::size::GUI_HEIGHT), util::z_pos::TOWERS))
+                .insert(MainBundle::from_xyz(tower_pos.x, tower_pos.y, util::z_pos::TOWERS))
                 .with_children(|builder| {
                     sprite_from_tile_with_alpha(builder, t.get_tiles(), &textures.tileset, 0., 0.85);
                 });

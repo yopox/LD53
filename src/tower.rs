@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use bevy::ecs::system::EntityCommands;
 use bevy::math::{vec3, Vec3Swizzles};
 use bevy::prelude::*;
 use bevy_tweening::{Animator, Tween};
@@ -10,7 +9,7 @@ use strum_macros::EnumIter;
 
 use crate::battle::BattleUI;
 use crate::collision::body_size;
-use crate::enemy::Enemy;
+use crate::drones::Enemy;
 use crate::graphics::{gui, MainBundle, sprite_from_tile, sprites};
 use crate::graphics::loading::Textures;
 use crate::graphics::sprites::TILE;
@@ -111,8 +110,8 @@ impl Towers {
     pub const fn get_tiles(&self) -> &[TILE] {
         match &self {
             Towers::Lightning => &sprites::TOWER_1,
-            Towers::Scrambler => &sprites::TOWER_2,
-            Towers::PaintBomb => &sprites::TOWER_3,
+            Towers::PaintBomb => &sprites::TOWER_2,
+            Towers::Scrambler => &sprites::TOWER_3,
         }
     }
 
@@ -139,10 +138,11 @@ pub fn place_tower(
 ) {
     let tower = tower.instantiate();
     let size = body_size(tower.model.get_tiles());
+    let tower_pos = util::grid_to_tower_pos(x, y, tower.model);
     commands
         .spawn(tower.clone())
         .insert(
-            MainBundle::from_xyz(tile_to_f32(2 * x), tile_to_f32(2 * y + util::size::GUI_HEIGHT), z_pos::TOWERS)
+            MainBundle::from_xyz(tower_pos.x, tower_pos.y, z_pos::TOWERS)
         )
         .with_children(|builder|
             sprite_from_tile(builder, tower.model.get_tiles(), atlas, 0.)

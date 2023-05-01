@@ -2,11 +2,11 @@ use std::cmp::{max, min};
 
 use bevy::prelude::*;
 use enum_derived::Rand;
-use rand::RngCore;
+use rand::{RngCore, thread_rng};
 
 use crate::{GameState, logic, util};
-use crate::graphics::sprite;
 use crate::graphics::loading::Textures;
+use crate::graphics::sprite;
 use crate::graphics::sprites::TILE;
 use crate::util::size::is_oob;
 
@@ -44,7 +44,7 @@ fn setup(
     textures: Res<Textures>,
 ) {
     let points = vec![
-        Vec2::new(-3., 5.),
+        Vec2::new(1., 5.),
         Vec2::new(3., 5.),
         Vec2::new(3., 3.),
         Vec2::new(8., 3.),
@@ -116,17 +116,23 @@ impl RoadElement {
     /// Returns tiles for a road element with horizontal orientation
     fn get_tiles(&self) -> [TILE; 4] {
         match self {
-            RoadElement::Plain | RoadElement::Road => [
-                (0, 1, 0, 4, 3, false, 0),
-                (1, 1, 0, 4, 3, false, 0),
-                (0, 0, 0, 4, 3, false, 0),
-                (1, 0, 0, 4, 3, false, 0),
+            RoadElement::Road => [
+                (0, 1, 416, 4, 16, false, 0),
+                (1, 1, 416, 4, 16, false, 0),
+                (0, 0, 416, 4, 16, false, 0),
+                (1, 0, 416, 4, 16, false, 0),
+            ],
+            RoadElement::Plain => [
+                (0, 1, 64 + thread_rng().next_u32() as usize % 21, 0, 3, false, 0),
+                (1, 1, 64 + thread_rng().next_u32() as usize % 21, 0, 3, false, 0),
+                (0, 0, 64 + thread_rng().next_u32() as usize % 21, 0, 3, false, 0),
+                (1, 0, 64 + thread_rng().next_u32() as usize % 21, 0, 3, false, 0),
             ],
             RoadElement::Rock => [
-                (0, 1, (1 + rand::thread_rng().next_u32() % 8) as usize, 4, 3, false, 0),
-                (1, 1, (1 + rand::thread_rng().next_u32() % 8) as usize, 4, 3, false, 0),
-                (0, 0, (1 + rand::thread_rng().next_u32() % 8) as usize, 4, 3, false, 0),
-                (1, 0, (1 + rand::thread_rng().next_u32() % 8) as usize, 4, 3, false, 0),
+                (0, 1, 64 + thread_rng().next_u32() as usize % 21, 3, 4, false, 0),
+                (1, 1, 64 + thread_rng().next_u32() as usize % 21, 3, 4, false, 0),
+                (0, 0, 64 + thread_rng().next_u32() as usize % 21, 3, 4, false, 0),
+                (1, 0, 64 + thread_rng().next_u32() as usize % 21, 3, 4, false, 0),
             ],
         }
     }

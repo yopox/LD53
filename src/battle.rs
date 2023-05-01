@@ -1,7 +1,8 @@
 use bevy::prelude::*;
+use strum::IntoEnumIterator;
 
 use crate::{GameState, util};
-use crate::enemy::{despawn_drone, drones_dead, Enemies, update_drones};
+use crate::drones::{despawn_drone, Drones, drones_dead, update_drones};
 use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::{Wiggle, wiggle};
 use crate::graphics::loading::Textures;
@@ -54,16 +55,21 @@ fn setup(
     let atlas = &textures.tileset;
 
     // TODO: Move drones spawn logic out of playing
-    commands.spawn(Enemies::Drone.instantiate())
-        .insert(
-            MainBundle::from_xyz(0., 0., util::z_pos::ENEMIES)
-        )
-        .insert(Wiggle::with_frequency(Wiggle::slow()))
-        .with_children(|builder| {
-            sprite_from_tile(builder, Enemies::Drone.get_tiles(), atlas, 0.);
-            package::spawn(builder, Enemies::Drone.get_model().package_offset(), atlas);
-        })
-        .insert(BattleUI);
+    for (i, d) in Drones::iter().enumerate() {
+        let (mut drone, hitbox) = d.instantiate();
+        drone.advance = i as f32 * 2.2;
+        commands
+            .spawn((drone, hitbox))
+            .insert(
+                MainBundle::from_xyz(0., 0., util::z_pos::ENEMIES)
+            )
+            .insert(Wiggle::with_frequency(Wiggle::slow()))
+            .with_children(|builder| {
+                sprite_from_tile(builder, d.get_tiles(), atlas, 0.);
+                package::spawn(builder, d.get_model().package_offset(), atlas);
+            })
+            .insert(BattleUI);
+    }
 }
 
 fn cleanup(

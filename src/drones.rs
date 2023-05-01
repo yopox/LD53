@@ -6,7 +6,6 @@ use bevy_tweening::{Animator, Delay, EaseFunction, Tween, TweenCompleted};
 use bevy_tweening::lens::TransformPositionLens;
 use strum_macros::EnumIter;
 
-use crate::util;
 use crate::collision::{body_size, BodyType, Contact, HitBox};
 use crate::graphics::{sprite_f32, tween};
 use crate::graphics::animation::Wiggle;
@@ -16,33 +15,44 @@ use crate::graphics::package::{ClickablePackage, Package};
 use crate::graphics::sprites::{DroneModels, TILE};
 use crate::shot::{Bomb, Shot, Shots, spawn_bomb};
 use crate::tower::Slow;
+use crate::util;
 use crate::util::size::{f32_tile_to_f32, tile_to_f32};
 
 #[derive(Debug, Clone)]
-pub struct EnemyStats {
+pub struct Stats {
     pub(crate) hp: f32,
     speed: f32,
 }
 
 #[derive(Debug, Clone, Copy, EnumIter)]
-pub enum Enemies {
-    Drone
+pub enum Drones {
+    Simple1,
+    Simple2,
+    Simple3,
+    Medium1,
+    Medium2,
+    Medium3,
+    Medium4,
+    Big1,
+    Big2,
 }
 
 #[derive(Component)]
 pub struct Enemy {
-    pub class: Enemies,
-    pub stats: EnemyStats,
+    pub class: Drones,
+    pub stats: Stats,
     pub advance: f32,
 }
 
-impl Enemies {
-    pub const fn get_default_stats(&self) -> EnemyStats {
+impl Drones {
+    pub const fn get_default_stats(&self) -> Stats {
         match self {
-            Self::Drone => EnemyStats {
-                hp: 10.,
-                speed: 0.5,
-            }
+            Drones::Simple1 | Drones::Simple2 | Drones::Simple3 =>
+                Stats { hp: 25., speed: 0.5 },
+            Drones::Medium1 | Drones::Medium2 | Drones::Medium3 | Drones::Medium4 =>
+                Stats { hp: 80., speed: 0.35 },
+            Drones::Big1 | Drones::Big2 =>
+                Stats { hp: 300., speed: 0.25 },
         }
     }
 
@@ -64,15 +74,19 @@ impl Enemies {
 
     pub fn get_model(&self) -> DroneModels {
         match self {
-            Self::Drone => DroneModels::Super,
+            Drones::Simple1 => DroneModels::Simple1,
+            Drones::Simple2 => DroneModels::Simple2,
+            Drones::Simple3 => DroneModels::Simple3,
+            Drones::Medium1 => DroneModels::Medium1,
+            Drones::Medium2 => DroneModels::Medium2,
+            Drones::Medium3 => DroneModels::Medium3,
+            Drones::Medium4 => DroneModels::Medium4,
+            Drones::Big1 => DroneModels::Big1,
+            Drones::Big2 => DroneModels::Big2,
         }
     }
 
-    pub fn get_tiles(&self) -> &'static [TILE] {
-        match self {
-            Self::Drone => self.get_model().get_tiles(),
-        }
-    }
+    pub fn get_tiles(&self) -> &'static [TILE] { self.get_model().get_tiles() }
 }
 
 pub fn update_drones(
@@ -91,7 +105,7 @@ pub fn update_drones(
 
         let Some(progress) = path.0.pos(drone.advance) else { continue; };
 
-        let size = drone.class.get_model().get_size();
+        let size = body_size(drone.class.get_model().get_tiles());
         pos.translation.x = f32_tile_to_f32(progress.x * 2.)
             - size.x / 2. + f32_tile_to_f32(1.); // Center sprite
         pos.translation.y = f32_tile_to_f32(progress.y * 2. + util::size::GUI_HEIGHT as f32)

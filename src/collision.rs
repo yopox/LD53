@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy::sprite::collide_aabb;
 use strum::IntoEnumIterator;
 
-use crate::enemy::Enemies;
+use crate::drones::Drones;
 use crate::graphics::sprites::TILE;
 use crate::shot::Shots;
 use crate::util::size;
@@ -108,7 +108,7 @@ fn sprites_have_hitbox() {
             .is_some()
     };
 
-    for enemy in Enemies::iter() {
+    for enemy in Drones::iter() {
         assert!(has_hitbox(enemy.get_tiles()), "The monster {:?} has no hitbox!", enemy)
     }
 

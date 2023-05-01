@@ -14,7 +14,7 @@ mod util;
 mod title;
 mod graphics;
 mod logic;
-mod enemy;
+mod drones;
 mod tower;
 mod shot;
 mod battle;

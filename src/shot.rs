@@ -12,12 +12,12 @@ use strum_macros::EnumIter;
 
 use crate::battle::BattleUI;
 use crate::collision::{body_size, BodyType, HitBox};
-use crate::enemy::Enemy;
+use crate::drones::Enemy;
 use crate::graphics::MainBundle;
 use crate::graphics::sprites::TILE;
-use crate::util::z_pos;
 use crate::util::size::battle::BOMB_RANGE;
 use crate::util::tweening::{BOMB_EXPLODED, SHOT_DESPAWN};
+use crate::util::z_pos;
 
 #[derive(Component, Copy, Clone)]
 pub struct Shot {
