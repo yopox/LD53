@@ -4,9 +4,9 @@ use crate::util::size::f32_tile_to_f32;
 /// Time between two shots in seconds
 pub fn reload_delay(tower: &Tower) -> f32 {
     match (tower.model, tower.rank) {
-        (Towers::Lightning, 1) => 4.,
-        (Towers::Lightning, 2) => 3.,
-        (Towers::Lightning, _) => 2.,
+        (Towers::Lightning, 1) => 3.,
+        (Towers::Lightning, 2) => 2.,
+        (Towers::Lightning, _) => 1.,
 
         (Towers::PaintBomb, 1) => 6.,
         (Towers::PaintBomb, 2) => 5.,

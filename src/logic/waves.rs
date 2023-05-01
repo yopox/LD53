@@ -44,7 +44,7 @@ pub struct WaveIterator {
 }
 
 impl WaveIterator {
-    fn from_waves(waves: Vec<Wave>) -> WaveIterator {
+    fn from_waves(waves: &Vec<Wave>) -> WaveIterator {
         let mut result = Vec::new();
         for wave in waves.iter() {
             let mut prev: Option<(Drones, f32)> = None;
@@ -72,7 +72,16 @@ impl WaveIterator {
     }
 
     pub fn get_static() -> WaveIterator {
-        WaveIterator::from_waves(WAVES.to_vec())
+        WaveIterator::from_waves(&WAVES)
+    }
+
+    pub fn from_level(level: u8) -> WaveIterator {
+        WaveIterator::from_waves(
+            match level {
+                0 => &WAVES_0,
+                _ => &WAVES,
+            }
+        )
     }
 }
 
@@ -148,6 +157,71 @@ lazy_static! {
         ].into(),
         [
             (0., Drones::Invader),
+        ].into(),
+    ];
+
+static ref WAVES_0: Vec<Wave> = vec![
+        [
+            (0.0, Drones::Simple1),
+            (2.0, Drones::Simple1),
+        ].into(),
+        [
+            (0.0, Drones::Simple1),
+            (4.0, Drones::Simple2),
+            (6.0, Drones::Simple2),
+        ].into(),
+        [
+            (0., Drones::Simple2),
+            (2., Drones::Simple1),
+            (4., Drones::Simple3),
+            (6., Drones::Simple1),
+        ].into(),
+        [
+            (0., Drones::Simple2),
+            (2.0, Drones::Simple1),
+            (4.0, Drones::Simple3),
+            (6.0, Drones::Simple1),
+            (8.0, Drones::Simple3),
+            (10., Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Simple1),
+            (2.0, Drones::Simple1),
+            (4.0, Drones::Simple2),
+            (6.0, Drones::Simple2),
+            (8.0, Drones::Simple3),
+            (10., Drones::Simple3),
+            (12., Drones::Simple1),
+            (14., Drones::Simple1),
+            (16., Drones::Simple2),
+            (18., Drones::Simple2),
+        ].into(),
+        [
+            (0., Drones::Medium1),
+        ].into(),
+        [
+            (0., Drones::Medium1),
+            (8., Drones::Simple2),
+            (10., Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Medium3),
+            (8.0, Drones::Simple2),
+            (10., Drones::Simple3),
+            (12., Drones::Simple1),
+        ].into(),
+        [
+            (0.0, Drones::Medium1),
+            (3.0, Drones::Medium2),
+            (8.0, Drones::Simple2),
+            (10., Drones::Simple3),
+            (12., Drones::Simple1),
+        ].into(),
+        [
+            (0., Drones::Medium1),
+            (3., Drones::Medium2),
+            (6., Drones::Medium3),
+            (9., Drones::Medium3),
         ].into(),
     ];
 }

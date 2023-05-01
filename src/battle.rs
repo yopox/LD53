@@ -83,10 +83,12 @@ fn setup(
 ) {
     bgm.send(PlayBgmEvent(BGM::Theme));
 
+    let level = 0;
+
     commands.insert_resource(CursorState::Select);
     commands.insert_resource(Money(200));
     commands.insert_resource(DronesStats::default());
-    commands.insert_resource(WaveIterator::get_static());
+    commands.insert_resource(WaveIterator::from_level(level));
 }
 
 fn reset_state(
