@@ -64,11 +64,10 @@ impl SFX {
     fn handle(&self, ost: &Res<Ost>) -> Handle<AudioSource> {
         match self {
             SFX::Hit => {
-                match thread_rng().next_u32() % 4 {
+                match thread_rng().next_u32() % 3 {
                     1 => ost.sfx_hit1.clone(),
                     2 => ost.sfx_hit2.clone(),
-                    3 => ost.sfx_hit3.clone(),
-                    _ => ost.sfx_hit4.clone(),
+                    _ => ost.sfx_hit3.clone(),
                 }
             }
             SFX::PackageMalus => ost.sfx_package_malus.clone(),

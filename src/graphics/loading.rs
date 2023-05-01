@@ -56,8 +56,6 @@ pub struct Ost {
     pub sfx_hit2: Handle<AudioSource>,
     #[asset(path = "sfx/base damage/sfx hit base 3.ogg")]
     pub sfx_hit3: Handle<AudioSource>,
-    #[asset(path = "sfx/base damage/sfx hit base 4.ogg")]
-    pub sfx_hit4: Handle<AudioSource>,
 
     #[asset(path = "sfx/packages interactions/sfx MALUS.ogg")]
     pub sfx_package_malus: Handle<AudioSource>,
