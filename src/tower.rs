@@ -29,8 +29,8 @@ use crate::util::tweening::SHOT_DESPAWN;
 pub struct Tower {
     pub model: Towers,
     pub rank: u8,
-    x: usize,
-    y: usize,
+    pub x: usize,
+    pub y: usize,
 }
 
 impl Tower {
@@ -136,7 +136,7 @@ impl Towers {
 
     /// Returns the delay on tower construction
     pub const fn initial_delay(&self) -> f32 {
-        2.
+        0.
     }
 
     pub const fn get_cost(&self) -> u16 {
@@ -268,7 +268,7 @@ pub fn tower_fire(
         match tower.model {
             Towers::Lightning | Towers::PaintBomb => {
                 let chosen_enemy = enemies.iter()
-                    .filter(|(_, t_enemy, enemy)| util::tower_to_enemy_distance(&t_tower, tower.model, *t_enemy, enemy.class) <= tower.range())
+                    .filter(|(_, t_enemy, enemy)| util::tower_to_enemy_distance(tower, *t_enemy, enemy.class) <= tower.range())
                     .max_by_key(|(_, _, enemy)| (enemy.advance * 4096.) as usize);
 
                 if let Some((_, t_enemy, e)) = chosen_enemy {
@@ -277,7 +277,7 @@ pub fn tower_fire(
             }
             Towers::Scrambler => {
                 enemies.iter()
-                    .filter(|(_, t_enemy, enemy)| util::tower_to_enemy_distance(&t_tower, tower.model, *t_enemy, enemy.class) <= tower.range())
+                    .filter(|(_, t_enemy, enemy)| util::tower_to_enemy_distance(tower, *t_enemy, enemy.class) <= tower.range())
                     .for_each(|(e, _, _)| {
                         if let Some(mut entity_commands) = commands.get_entity(e) {
                             entity_commands.insert(Slow {

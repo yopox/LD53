@@ -162,8 +162,7 @@ pub fn make_bomb_explode(
 ) {
     for (e, bomb) in bombs.iter() {
         if let Some(mut entity_commands) = commands.get_entity(e) {
-            let mut color: Color = Palette::K.into();
-            color.set_a(0.25);
+            let mut color: Color = Palette::K.transparent(0.25);
             let material = materials.add(color.into());
             let mut end_color = color;
             end_color.set_a(0.0);

@@ -8,13 +8,14 @@ use strum::IntoEnumIterator;
 use crate::{GameState, tower, util};
 use crate::battle::{BattleUI, CursorState, Money};
 use crate::collision::body_size;
-use crate::graphics::{MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, sprite_from_tile_with_alpha_and_x_offset, text};
+use crate::graphics::{circle, MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, sprite_from_tile_with_alpha_and_x_offset, text};
+use crate::graphics::circle::Circles;
 use crate::graphics::grid::{Grid, RoadElement};
 use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
 use crate::graphics::text::TextStyles;
 use crate::music::{PlaySfxEvent, SFX};
-use crate::tower::Towers;
+use crate::tower::{Tower, Towers};
 use crate::util::{is_in, z_pos};
 use crate::util::size::{f32_tile_to_f32, is_oob, tile_to_f32};
 
@@ -26,7 +27,7 @@ impl Plugin for GuiPlugin {
             .add_system(setup.in_schedule(OnEnter(GameState::Battle)))
             .add_systems(
                 (update_money, update_cursor, update_popup, update_tower_button,
-                 update_text_button, place_tower)
+                 update_text_button, place_tower, show_radius)
                     .in_set(OnUpdate(GameState::Battle)))
         ;
     }
@@ -374,6 +375,69 @@ fn spawn_popup(
                 }
             }
         });
+}
+
+#[derive(Component)]
+struct RadiusInfo(usize, usize);
+
+fn show_radius(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    hovered_pos: Option<Res<HoveredPos>>,
+    radius: Query<(&RadiusInfo, Entity)>,
+    towers: Query<&Tower>,
+    circles: Res<Circles>,
+) {
+    if let Ok((info, id)) = radius.get_single() {
+        // Radius is already displayed
+        if let Some(hovered_pos) = hovered_pos {
+            let (x, y) = (hovered_pos.0.0, hovered_pos.0.1);
+            if info.0 == x && info.1 == y {
+                // Hover on the same tile: OK
+            } else {
+                // Hover on a different tile
+                // Delete existing radius
+                commands.entity(id).despawn_recursive();
+
+                // Spawn new radius if needed
+                for tower in &towers {
+                    if tower.x == x && tower.y == y {
+                        // Show this tower radius
+                        spawn_radius(&mut commands, &mut materials, &circles, x, y, tower);
+                        return;
+                    }
+                }
+            }
+        } else {
+            // Delete existing radius
+            commands.entity(id).despawn_recursive();
+        }
+    } else {
+        // Radius isn't displayed
+        let Some(hovered_pos) = hovered_pos else { return; };
+        let (x, y) = (hovered_pos.0.0, hovered_pos.0.1);
+        for tower in &towers {
+            if tower.x == x && tower.y == y {
+                // Show this tower radius
+                spawn_radius(&mut commands, &mut materials, &circles, x, y, tower);
+                return;
+            }
+        }
+    }
+}
+
+fn spawn_radius(commands: &mut Commands, materials: &mut ResMut<Assets<ColorMaterial>>, circles: &Res<Circles>, x: usize, y: usize, tower: &Tower) {
+    let radius_f32 = tower.range();
+    let handle = materials.add(Palette::B.transparent(0.1).into());
+    let tower_center = util::tower_center(x, y);
+    commands
+        .spawn(circle::mesh(
+            &circles, &handle,
+            radius_f32,
+            tower_center.x, tower_center.y, z_pos::TOWER_RADIUS,
+        ))
+        .insert(RadiusInfo(x, y))
+    ;
 }
 
 enum ButtonState {

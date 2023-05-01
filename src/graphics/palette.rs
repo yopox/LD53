@@ -54,6 +54,14 @@ impl Into<Palette> for u8 {
     }
 }
 
+impl Palette {
+    pub fn transparent(&self, alpha: f32) -> Color {
+        let mut color: Color = (*self).into();
+        color.set_a(alpha);
+        color
+    }
+}
+
 pub const TRANSPARENT: Color = Color::Rgba {
     red: 0.0,
     green: 0.0,
