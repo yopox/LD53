@@ -1,6 +1,7 @@
 use bevy::app::{App, Plugin};
 use bevy::asset::Handle;
-use bevy::prelude::{Commands, EventReader, Res, Resource};
+use bevy::input::Input;
+use bevy::prelude::{Commands, EventReader, EventWriter, KeyCode, Res, Resource};
 use bevy_kira_audio::{AudioApp, AudioChannel, AudioControl, AudioSource};
 use rand::{RngCore, thread_rng};
 
@@ -14,9 +15,11 @@ impl Plugin for MusicPlugin {
             .add_plugin(bevy_kira_audio::AudioPlugin)
             .add_event::<PlayBgmEvent>()
             .add_event::<PlaySfxEvent>()
+            .add_event::<MuteEvent>()
             .add_audio_channel::<BgmChannel>()
             .add_audio_channel::<SfxChannel>()
-            .add_system(update)
+            .add_startup_system(setup)
+            .add_systems((update, mute))
         ;
     }
 }
@@ -92,8 +95,44 @@ pub struct PlayBgmEvent(pub BGM);
 
 pub struct PlaySfxEvent(pub SFX);
 
+pub struct MuteEvent;
+
 #[derive(Resource)]
 struct CurrentBGM(BGM);
+
+#[derive(Resource)]
+struct Mute;
+
+fn setup(
+    bgm_channel: Res<AudioChannel<BgmChannel>>,
+    sfx_channel: Res<AudioChannel<SfxChannel>>,
+) {
+    bgm_channel.set_volume(0.6);
+    sfx_channel.set_volume(0.3);
+}
+
+fn mute(
+    mut commands: Commands,
+    mut event: EventReader<MuteEvent>,
+    mute: Option<Res<Mute>>,
+    bgm_channel: Res<AudioChannel<BgmChannel>>,
+    sfx_channel: Res<AudioChannel<SfxChannel>>,
+) {
+    for _ in event.iter() {
+        match mute {
+            Some(_) => {
+                bgm_channel.set_volume(0.6);
+                sfx_channel.set_volume(0.2);
+                commands.remove_resource::<Mute>();
+            }
+            None => {
+                bgm_channel.set_volume(0.0);
+                sfx_channel.set_volume(0.0);
+                commands.insert_resource(Mute);
+            }
+        }
+    }
+}
 
 fn update(
     mut commands: Commands,
@@ -103,8 +142,13 @@ fn update(
     bgm_channel: Res<AudioChannel<BgmChannel>>,
     sfx_channel: Res<AudioChannel<SfxChannel>>,
     current: Option<Res<CurrentBGM>>,
+    keys: Res<Input<KeyCode>>,
+    mut mute: EventWriter<MuteEvent>,
 ) {
     let Some(ost) = ost else { return; };
+
+    // Mute
+    if keys.just_pressed(KeyCode::M) { mute.send(MuteEvent); }
 
     // Play BGMs
     for PlayBgmEvent(bgm) in bgm_events.iter() {
@@ -114,7 +158,7 @@ fn update(
 
         commands.insert_resource(CurrentBGM(*bgm));
         bgm_channel.stop();
-        bgm_channel.set_volume(0.6);
+
         bgm_channel
             .play(bgm.handle(&ost))
             .looped();
@@ -124,7 +168,6 @@ fn update(
 
     // Play SFXs
     for PlaySfxEvent(sfx) in sfx_events.iter() {
-        sfx_channel.set_volume(0.3);
         sfx_channel.play(sfx.handle(&ost));
     }
 }
