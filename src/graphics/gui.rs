@@ -1,7 +1,7 @@
 use bevy::app::App;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
-use bevy::sprite::Anchor;
+use bevy::sprite::{Anchor, MaterialMesh2dBundle};
 use bevy_text_mode::TextModeTextureAtlasSprite;
 use strum::IntoEnumIterator;
 
@@ -383,6 +383,7 @@ struct RadiusInfo(usize, usize);
 fn show_radius(
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    mut sfx: EventReader<PlaySfxEvent>,
     hovered_pos: Option<Res<HoveredPos>>,
     radius: Query<(&RadiusInfo, Entity)>,
     towers: Query<&Tower>,
@@ -392,18 +393,29 @@ fn show_radius(
         // Radius is already displayed
         if let Some(hovered_pos) = hovered_pos {
             let (x, y) = (hovered_pos.0.0, hovered_pos.0.1);
+            let mut redraw = false;
             if info.0 == x && info.1 == y {
-                // Hover on the same tile: OK
+                // Hover on the same tile: redraw if updated
+                for PlaySfxEvent(sfx) in sfx.iter() {
+                    if *sfx == SFX::UpgradeTower { redraw = true; }
+                }
             } else {
                 // Hover on a different tile
                 // Delete existing radius
+                redraw = true;
+            }
+            // Spawn new radius if needed
+            if redraw {
                 commands.entity(id).despawn_recursive();
 
-                // Spawn new radius if needed
                 for tower in &towers {
                     if tower.x == x && tower.y == y {
                         // Show this tower radius
-                        spawn_radius(&mut commands, &mut materials, &circles, x, y, tower);
+                        let mesh = spawn_radius(&mut materials, &circles, x, y, tower);
+                        commands
+                            .spawn(mesh)
+                            .insert(RadiusInfo(x, y))
+                        ;
                         return;
                     }
                 }
@@ -419,25 +431,32 @@ fn show_radius(
         for tower in &towers {
             if tower.x == x && tower.y == y {
                 // Show this tower radius
-                spawn_radius(&mut commands, &mut materials, &circles, x, y, tower);
+                let mesh = spawn_radius(&mut materials, &circles, x, y, tower);
+                commands
+                    .spawn(mesh)
+                    .insert(RadiusInfo(x, y))
+                ;
                 return;
             }
         }
     }
 }
 
-fn spawn_radius(commands: &mut Commands, materials: &mut ResMut<Assets<ColorMaterial>>, circles: &Res<Circles>, x: usize, y: usize, tower: &Tower) {
+fn spawn_radius(
+    materials: &mut ResMut<Assets<ColorMaterial>>,
+    circles: &Res<Circles>,
+    x: usize,
+    y: usize,
+    tower: &Tower,
+) -> MaterialMesh2dBundle<ColorMaterial> {
     let radius_f32 = tower.range();
     let handle = materials.add(Palette::B.transparent(0.1).into());
     let tower_center = util::tower_center(x, y);
-    commands
-        .spawn(circle::mesh(
-            &circles, &handle,
-            radius_f32,
-            tower_center.x, tower_center.y, z_pos::TOWER_RADIUS,
-        ))
-        .insert(RadiusInfo(x, y))
-    ;
+    circle::mesh(
+        &circles, &handle,
+        radius_f32,
+        tower_center.x, tower_center.y, z_pos::TOWER_RADIUS,
+    )
 }
 
 enum ButtonState {
@@ -498,10 +517,12 @@ struct TransparentTower;
 fn place_tower(
     mut commands: Commands,
     mut sfx: EventWriter<PlaySfxEvent>,
+    textures: Res<Textures>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    circles: Res<Circles>,
     state: Option<ResMut<CursorState>>,
     cursor: Option<Res<HoveredPos>>,
     mut transparent_tower: Query<(&mut Transform, Entity), With<TransparentTower>>,
-    textures: Res<Textures>,
     mouse: Res<Input<MouseButton>>,
     time: Res<Time>,
     grid: Option<ResMut<Grid>>,
@@ -551,11 +572,19 @@ fn place_tower(
         if let CursorState::Build(t) = state.as_ref() {
             let Some((x, y)) = cursor else { return; };
             let tower_pos = util::grid_to_tower_pos(x, y, *t);
+            let mut bundle = spawn_radius(
+                &mut materials, &circles, 0, 0, &Tower { model: *t, rank: 1, x: 0, y: 0 },
+            );
+            let tower_size = body_size(t.get_tiles());
+            bundle.transform.translation.x = tile_to_f32(1) - (tile_to_f32(2) - tower_size.x) / 2.;
+            bundle.transform.translation.y = tile_to_f32(1) - f32_tile_to_f32(0.5);
+
             commands
                 .spawn(TransparentTower)
                 .insert(MainBundle::from_xyz(tower_pos.x, tower_pos.y, z_pos::TRANSPARENT_TOWER))
                 .with_children(|builder| {
                     sprite_from_tile_with_alpha(builder, t.get_tiles(), &textures.tileset, 0., 0.85);
+                    builder.spawn(bundle);
                 });
         }
     }
