@@ -271,7 +271,6 @@ fn update_popup(
 ) {
     let Some(cursor_pos) = util::cursor_pos(windows) else { return; };
 
-    let mut delete_popup = true;
     for (pos, mut info, id) in hover_popup.iter_mut() {
         if is_in(cursor_pos, pos.translation.xy(), Vec2::new(info.width, info.height)) {
             let mut recreate_popup = info.force_redraw;
@@ -298,9 +297,7 @@ fn update_popup(
         }
     }
 
-    if delete_popup {
-        if let Ok((_, id)) = popup.get_single() { commands.entity(id).despawn_recursive(); }
-    }
+    if let Ok((_, id)) = popup.get_single() { commands.entity(id).despawn_recursive(); }
 }
 
 fn spawn_popup(
@@ -400,7 +397,7 @@ fn update_tower_button(
     let clicked = mouse.just_pressed(MouseButton::Left);
 
     for (button, pos, id) in &buttons {
-        let mut button_state: ButtonState;
+        let button_state: ButtonState;
         if money.0 < button.0.get_cost() { button_state = ButtonState::CantBuild; } else if let CursorState::Build(t) = cursor_state.as_ref() {
             button_state = if *t == button.0 { ButtonState::Selected } else { ButtonState::CanBuild };
         } else {

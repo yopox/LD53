@@ -2,11 +2,8 @@ use bevy::app::{App, Plugin};
 use bevy::math::{vec2, vec3};
 use bevy::prelude::*;
 use bevy::sprite::collide_aabb;
-use strum::IntoEnumIterator;
 
-use crate::drones::Drones;
 use crate::graphics::sprites::TILE;
-use crate::shot::Shots;
 use crate::util::size;
 
 /// Handles collisions.
