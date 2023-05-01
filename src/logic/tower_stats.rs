@@ -26,16 +26,16 @@ pub const MAX_RELOAD: f32 = 6.;
 pub fn range(tower: &Tower) -> f32 {
     f32_tile_to_f32(match (tower.model, tower.rank) {
         (Towers::Lightning, 1) => 5.0,
-        (Towers::Lightning, 2) => 5.5,
-        (Towers::Lightning, _) => 6.0,
+        (Towers::Lightning, 2) => 6.0,
+        (Towers::Lightning, _) => 7.0,
 
         (Towers::PaintBomb, 1) => 8.0,
         (Towers::PaintBomb, 2) => 9.0,
         (Towers::PaintBomb, _) => 10.,
 
-        (Towers::Scrambler, 1) => 3.0,
-        (Towers::Scrambler, 2) => 3.5,
-        (Towers::Scrambler, _) => 4.0,
+        (Towers::Scrambler, 1) => 4.0,
+        (Towers::Scrambler, 2) => 5.0,
+        (Towers::Scrambler, _) => 6.0,
     })
 }
 

@@ -85,8 +85,8 @@ pub mod tweening {
 }
 
 pub mod package {
-    pub const MONEY_SMALL: u16 = 10;
-    pub const MONEY_BIG: u16 = 50;
+    pub const MONEY_SMALL: u16 = 20;
+    pub const MONEY_BIG: u16 = 100;
 }
 
 pub mod misc {
@@ -141,9 +141,9 @@ pub fn tower_center(x: usize, y: usize) -> Vec2 {
     vec2(tile_to_f32(2 * x + 1), tile_to_f32(2 * y + 1 + size::GUI_HEIGHT))
 }
 
-pub fn tower_to_enemy_distance(tower: &Tower, t_enemy: &Transform, enemy: Drones) -> f32 {
+pub fn tower_to_enemy_distance(tower: &Tower, enemy_pos: Vec2, enemy: Drones) -> f32 {
     let enemy_size = body_size(enemy.get_tiles());
-    let enemy_center = Vec2::new(t_enemy.translation.x + enemy_size.x / 2., t_enemy.translation.y + enemy_size.y / 2.);
+    let enemy_center = enemy_pos + enemy_size / 2.;
     let tower_center = tower_center(tower.x, tower.y);
     tower_center.distance(enemy_center)
 }

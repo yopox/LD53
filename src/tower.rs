@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use bevy::math::vec3;
+use bevy::math::{vec3, Vec3Swizzles};
 use bevy::prelude::*;
 use bevy_tweening::{Animator, Tween};
 use bevy_tweening::EaseMethod::Linear;
@@ -269,7 +269,7 @@ pub fn tower_fire(
         match tower.model {
             Towers::Lightning | Towers::PaintBomb => {
                 let chosen_enemy = enemies.iter()
-                    .filter(|(_, t_enemy, enemy)| util::tower_to_enemy_distance(tower, *t_enemy, enemy.class) <= tower.range())
+                    .filter(|(_, t_enemy, enemy)| util::tower_to_enemy_distance(tower, t_enemy.translation.xy(), enemy.class) <= tower.range())
                     .max_by_key(|(_, _, enemy)| (enemy.advance * 4096.) as usize);
 
                 if let Some((_, t_enemy, e)) = chosen_enemy {
@@ -279,7 +279,7 @@ pub fn tower_fire(
             }
             Towers::Scrambler => {
                 enemies.iter()
-                    .filter(|(_, t_enemy, enemy)| util::tower_to_enemy_distance(tower, *t_enemy, enemy.class) <= tower.range())
+                    .filter(|(_, t_enemy, enemy)| util::tower_to_enemy_distance(tower, t_enemy.translation.xy(), enemy.class) <= tower.range())
                     .for_each(|(e, _, _)| {
                         if let Some(mut entity_commands) = commands.get_entity(e) {
                             fired = true;

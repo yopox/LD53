@@ -95,7 +95,25 @@ lazy_static! {
         ].into(),
         [
             (0., Drones::Medium1),
-            (3., Drones::Medium2),
+        ].into(),
+        [
+            (0., Drones::Medium1),
+            (2., Drones::Simple1),
+            (4., Drones::Simple3),
+        ].into(),
+        [
+            (0., Drones::Simple2),
+            (2., Drones::Simple1),
+            (4., Drones::Simple3),
+            (6., Drones::Simple1),
+            (10., Drones::Simple2),
+            (12., Drones::Simple1),
+            (14., Drones::Simple3),
+            (16., Drones::Simple1),
+        ].into(),
+        [
+            (0., Drones::Medium2),
+            (3., Drones::Medium1),
         ].into(),
         [
             (0., Drones::Medium1),
