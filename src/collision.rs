@@ -31,7 +31,7 @@ pub struct HitBox {
     pub body_type: BodyType,
     pub width: f32,
     pub height: f32,
-    pub bottom_right_anchor: bool,
+    pub offset: Vec2,
     pub single_hit: bool,
 }
 
@@ -91,11 +91,17 @@ pub fn collide(
             // Collide outer bounds
             // collide 1/3 args must be the center of the rectangle, 2/4 args are the rectangle size
             if collide_aabb::collide(
-                vec3(pos1.translation.x + if body1.bottom_right_anchor { -body1.width / 2. } else { body1.width / 2. },
-                     pos1.translation.y + body1.height / 2., 0.),
+                vec3(
+                    pos1.translation.x + body1.width / 2. + body1.offset.x,
+                    pos1.translation.y + body1.height / 2. + body1.offset.y,
+                    0.,
+                ),
                 vec2(body1.width, body1.height),
-                vec3(pos2.translation.x + if body2.bottom_right_anchor { -body2.width / 2. } else { body2.width / 2. },
-                     pos2.translation.y + body2.height / 2., 0.),
+                vec3(
+                    pos2.translation.x + body2.width / 2. + body2.offset.x,
+                    pos2.translation.y + body2.height / 2. + body2.offset.y,
+                    0.,
+                ),
                 vec2(body2.width, body2.height),
             ).is_none() { continue; }
 

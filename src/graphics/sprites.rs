@@ -1,6 +1,8 @@
 use bevy::math::Vec2;
 use strum_macros::EnumIter;
 
+use crate::collision::body_size;
+
 pub type X = usize;
 pub type Y = usize;
 pub type INDEX = usize;
@@ -53,6 +55,34 @@ impl DroneModels {
             DroneModels::Big1 => Vec2::new(8., -4.),
             DroneModels::Big2 => Vec2::new(8., -1.),
             DroneModels::Invader => Vec2::new(8., 2.),
+        }
+    }
+
+    pub fn get_hitbox(&self) -> Vec2 {
+        match self {
+            DroneModels::Simple1 | DroneModels::Simple2 | DroneModels::Simple3 =>
+                Vec2::new(8., 13.),
+            DroneModels::Medium1 =>
+                Vec2::new(14., 11.),
+            DroneModels::Medium2 | DroneModels::Medium3 | DroneModels::Medium4 =>
+                Vec2::new(16., 8.),
+            DroneModels::Big1 | DroneModels::Big2 =>
+                Vec2::new(24., 8.),
+            _ => body_size(self.get_tiles()),
+        }
+    }
+
+    pub fn get_offset(&self) -> Vec2 {
+        match self {
+            DroneModels::Simple1 | DroneModels::Simple2 | DroneModels::Simple3 =>
+                Vec2::new(0., 5.),
+            DroneModels::Medium1 =>
+                Vec2::new(1., 5.),
+            DroneModels::Medium2 | DroneModels::Medium3 | DroneModels::Medium4 =>
+                Vec2::new(0., 8.),
+            DroneModels::Big1 | DroneModels::Big2 =>
+                Vec2::new(0., 8.),
+            _ => Vec2::ZERO,
         }
     }
 }

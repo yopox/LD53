@@ -10,7 +10,7 @@ use bevy_tweening::lens::TransformScaleLens;
 use strum_macros::EnumIter;
 
 use crate::battle::BattleUI;
-use crate::collision::{body_size, BodyType, HitBox};
+use crate::collision::{BodyType, HitBox};
 use crate::drones::Enemy;
 use crate::graphics::MainBundle;
 use crate::graphics::sprites::TILE;
@@ -42,13 +42,13 @@ impl Shots {
     }
 
     pub fn instantiate(&self, tower: &Tower) -> (Shot, HitBox) {
-        let body_size = body_size(&[self.get_tile()]);
+        let hitbox: Vec2 = self.get_hitbox();
         let shot = self.get_shot(tower);
         let solid_body = HitBox {
             body_type: BodyType::ShipShot,
-            width: body_size.x,
-            height: body_size.y,
-            bottom_right_anchor: false,
+            width: hitbox.x,
+            height: hitbox.y,
+            offset: self.get_offset(),
             single_hit: self.is_single_hit(),
         };
         (shot, solid_body)
@@ -62,9 +62,21 @@ impl Shots {
     }
 
     pub const fn get_tile(&self) -> TILE {
-        match &self {
-            Shots::Electricity => (0, 0, 65, 16, 8, false, 0),
-            Shots::Bomb => (0, 0, 65, 16, 7, false, 0),
+        match self {
+            Shots::Electricity => (0, 0, 35, 16, 8, false, 0),
+            Shots::Bomb => (0, 0, 32, 16, 7, false, 0),
+        }
+    }
+
+    pub const fn get_hitbox(&self) -> Vec2 {
+        match self {
+            _ => Vec2::new(4., 4.),
+        }
+    }
+
+    pub const fn get_offset(&self) -> Vec2 {
+        match self {
+            _ => Vec2::new(2., 2.),
         }
     }
 

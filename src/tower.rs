@@ -19,8 +19,9 @@ use crate::logic::tower_stats;
 use crate::logic::tower_stats::{MAX_DAMAGE, MAX_RELOAD, MIN_DAMAGE, MIN_RELOAD};
 use crate::shot::Shots;
 use crate::util;
-use crate::util::{battle_z_from_y, vec2_with_battle_z, with_z, z_pos};
+use crate::util::{vec2_with_battle_z, with_z, z_pos};
 use crate::util::misc::SLOW_DOWN_DELAY;
+use crate::util::size::{f32_tile_to_f32, tile_to_f32};
 use crate::util::tweening::SHOT_DESPAWN;
 
 #[derive(Component, Clone)]
@@ -292,7 +293,12 @@ pub fn tower_fire(
 
 fn shoot(commands: &mut Commands, textures: &Res<Textures>, t_tower: Transform, tower: &Tower, enemy_position: Vec3) {
     let distance = t_tower.translation.distance(enemy_position);
-    let shot_translation = vec3(t_tower.translation.x, t_tower.translation.y + 1., z_pos::SHOT);
+    let width = body_size(tower.model.get_tiles()).x;
+    let shot_translation = vec3(
+        t_tower.translation.x + (width - tile_to_f32(1)) / 2.,
+        t_tower.translation.y + f32_tile_to_f32(1.75),
+        z_pos::SHOT,
+    );
     let shot_kind = tower.model.get_shot().expect("The tower can't shoot!");
     let shot = shot_kind.instantiate(tower);
     commands

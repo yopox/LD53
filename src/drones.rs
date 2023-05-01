@@ -66,12 +66,12 @@ impl Drones {
             stats: self.get_default_stats().clone(),
             advance: 0.,
         }, {
-             let body_size = body_size(self.get_tiles());
+             let hitbox: Vec2 = self.get_model().get_hitbox();
              HitBox {
                  body_type: BodyType::Enemy,
-                 width: body_size.x,
-                 height: body_size.y,
-                 bottom_right_anchor: false,
+                 width: hitbox.x,
+                 height: hitbox.y,
+                 offset: self.get_model().get_offset(),
                  single_hit: false,
              }
          })
