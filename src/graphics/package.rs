@@ -10,7 +10,7 @@ use rand::RngCore;
 use crate::{graphics, util};
 use crate::battle::Money;
 use crate::graphics::sprites::TILE;
-use crate::util::is_in;
+use crate::util::{battle_z_from_y, is_in, z_pos};
 use crate::util::size::tile_to_f32;
 
 #[derive(Component)]
@@ -61,7 +61,7 @@ pub fn spawn(builder: &mut ChildBuilder, offset: Vec2, atlas: &Handle<TextureAtl
     let (_, _, i, bg, fg, f, r) = package.tile();
     builder
         .spawn(graphics::sprite_f32(
-            i, offset.x, offset.y, util::z_pos::PACKAGES - util::z_pos::ENEMIES,
+            i, offset.x, offset.y, z_pos::ATTACHED_PACKAGE_OFFSET,
             bg.into(), fg.into(), f, r, atlas.clone(),
         ))
         .insert(package)

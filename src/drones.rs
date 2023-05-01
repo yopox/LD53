@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use bevy::math::vec3;
 use bevy::prelude::*;
 use bevy_text_mode::TextModeTextureAtlasSprite;
 use bevy_tweening::{Animator, Delay, EaseFunction, Tween, TweenCompleted};
@@ -9,14 +10,16 @@ use strum_macros::EnumIter;
 use crate::collision::{body_size, BodyType, Contact, HitBox};
 use crate::graphics::{sprite_f32, tween};
 use crate::graphics::animation::Wiggle;
-use crate::graphics::grid::CurrentPath;
+use crate::graphics::grid::{CurrentPath, GridElement};
 use crate::graphics::loading::Textures;
 use crate::graphics::package::{ClickablePackage, Package};
 use crate::graphics::sprites::{DroneModels, TILE};
 use crate::shot::{Bomb, Shot, Shots, spawn_bomb};
 use crate::tower::Slow;
 use crate::util;
-use crate::util::size::{f32_tile_to_f32, tile_to_f32};
+use crate::util::{vec3_with_battle_z, z_pos};
+use crate::util::size::{f32_tile_to_f32, HEIGHT, tile_to_f32};
+use crate::util::z_pos::{BATTLE_MAX, BATTLE_MIN};
 
 #[derive(Debug, Clone)]
 pub struct Stats {
@@ -200,26 +203,25 @@ fn kill_drone(
                     let (_, _, i, bg, fg, f, r) = package.tile();
                     let progress = path.0.pos(enemy.advance).unwrap();
                     let offset = enemy.class.get_model().package_offset();
-                    let (px, py, pz) = (x + offset.x, y + offset.y, util::z_pos::PACKAGES);
+                    let start = vec3_with_battle_z(x + offset.x, y + offset.y);
+                    let end = vec3_with_battle_z(
+                        f32_tile_to_f32(progress.x * 2. + 0.5),
+                        f32_tile_to_f32(progress.y * 2. + util::size::GUI_HEIGHT as f32 + 0.5),
+                    );
+
                     commands
                         .spawn(sprite_f32(
-                            i, px, py, pz,
+                            i, start.x, start.y, start.z,
                             bg.into(), fg.into(), f, r,
                             textures.tileset.clone(),
                         ))
                         .insert(package.clone())
                         .insert(ClickablePackage)
+                        .insert(GridElement)
                         .insert(Animator::new(Tween::new(
                             EaseFunction::CubicOut,
                             Duration::from_millis(util::tweening::PACKAGE_DROP),
-                            TransformPositionLens {
-                                start: Vec3::new(px, py, pz),
-                                end: Vec3::new(
-                                    f32_tile_to_f32(progress.x * 2. + 0.5),
-                                    f32_tile_to_f32(progress.y * 2. + util::size::GUI_HEIGHT as f32 + 0.5),
-                                    util::z_pos::PACKAGES,
-                                ),
-                            },
+                            TransformPositionLens { start, end },
                         )))
                     ;
                 }

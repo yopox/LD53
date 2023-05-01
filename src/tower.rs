@@ -11,7 +11,7 @@ use crate::battle::{BattleUI, CursorState, Money};
 use crate::collision::body_size;
 use crate::drones::Enemy;
 use crate::graphics::{gui, MainBundle, sprite_from_tile, sprites};
-use crate::graphics::grid::Grid;
+use crate::graphics::grid::{Grid, GridElement};
 use crate::graphics::gui::HoveredPos;
 use crate::graphics::loading::Textures;
 use crate::graphics::sprites::TILE;
@@ -168,6 +168,7 @@ pub fn place_tower(
         .insert(JustFired::new(time, tower.model.initial_delay()))
         .insert(gui::HoverPopup::new(tower.get_name(), &tower.get_description(), Some(("Damage", 1)), Some(("Speed", 4)), size.x, size.y))
         .insert(BattleUI)
+        .insert(GridElement)
     ;
 }
 

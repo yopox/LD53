@@ -1,3 +1,4 @@
+use bevy::math::vec3;
 use bevy::prelude::*;
 
 use crate::collision::body_size;
@@ -45,11 +46,12 @@ pub mod z_pos {
 
     // Battle elements
     pub const TOWERS: f32 = 4.;
-    pub const PACKAGES: f32 = 5.99;
-    pub const ENEMIES: f32 = 6.;
+    pub const BATTLE_MIN: f32 = 6.;
+    pub const BATTLE_MAX: f32 = 6.99;
     pub const SHOT: f32 = 7.;
     pub const BOMB: f32 = 7.1;
     pub const EXPLOSION: f32 = 9.;
+    pub const ATTACHED_PACKAGE_OFFSET: f32 = -1. / 4096.;
 
     // GUI
     pub const TRANSITION: f32 = 10.;
@@ -92,6 +94,21 @@ pub mod misc {
 
 pub const fn with_z(Vec3 { x, y, .. }: Vec3, z: f32) -> Vec3 {
     Vec3 { x, y, z }
+}
+
+pub fn battle_z_from_y(y: f32) -> f32 {
+    use crate::util::size::{HEIGHT, tile_to_f32};
+    use crate::util::z_pos::{BATTLE_MAX, BATTLE_MIN};
+
+    BATTLE_MIN + (BATTLE_MAX - BATTLE_MIN) / tile_to_f32(HEIGHT + 10) * y
+}
+
+pub fn vec3_with_battle_z(x: f32, y: f32) -> Vec3 {
+    vec3(x, y, battle_z_from_y(y))
+}
+
+pub fn vec2_with_battle_z(Vec2 { x, y }: Vec2) -> Vec3 {
+    vec3(x, y, battle_z_from_y(y))
 }
 
 pub fn cursor_pos(

@@ -5,11 +5,13 @@ use crate::{GameState, util};
 use crate::drones::{despawn_drone, Drones, drones_dead, update_drones};
 use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::{Wiggle, wiggle};
+use crate::graphics::grid::GridElement;
 use crate::graphics::loading::Textures;
 use crate::graphics::package::collect_package;
 use crate::graphics::palette::Palette;
 use crate::shot::{bomb_exploded, bomb_exploding, make_bomb_explode, remove_shots};
 use crate::tower::{remove_slow_down, sell_tower, tower_fire, Towers, update_just_fired};
+use crate::util::battle_z_from_y;
 
 pub struct BattlePlugin;
 
@@ -80,14 +82,16 @@ fn setup(
         commands
             .spawn((drone, hitbox))
             .insert(
-                MainBundle::from_xyz(0., 0., util::z_pos::ENEMIES)
+                MainBundle::from_xyz(0., 0., battle_z_from_y(0.))
             )
             .insert(Wiggle::with_frequency(Wiggle::slow()))
             .with_children(|builder| {
                 sprite_from_tile(builder, d.get_tiles(), atlas, 0.);
                 package::spawn(builder, d.get_model().package_offset(), atlas);
             })
-            .insert(BattleUI);
+            .insert(BattleUI)
+            .insert(GridElement)
+        ;
     }
 }
 

@@ -9,6 +9,7 @@ use crate::{GameState, logic, util};
 use crate::graphics::loading::Textures;
 use crate::graphics::sprite;
 use crate::graphics::sprites::TILE;
+use crate::util::{battle_z_from_y, size, z_pos};
 use crate::util::size::is_oob;
 
 pub struct GridPlugin;
@@ -62,7 +63,7 @@ fn setup(
     let path = logic::path::Path::from_points(points.clone());
     commands.insert_resource(CurrentPath(path));
 
-    let mut grid = vec![vec![RoadElement::Plain; util::size::WIDTH]; util::size::HEIGHT];
+    let mut grid = vec![vec![RoadElement::Plain; size::WIDTH]; size::HEIGHT];
 
     // Draw road
     for i in 0..points.len() - 1 {
@@ -86,8 +87,8 @@ fn setup(
         }
     }
 
-    for y in 0..util::size::GRID_HEIGHT {
-        for x in 0..util::size::WIDTH {
+    for y in 0..size::GRID_HEIGHT {
+        for x in 0..size::WIDTH {
             if grid[y][x] == RoadElement::Road { continue }
             for (dx, dy) in [
                 (0, -2),
@@ -147,7 +148,7 @@ fn draw_road_tiles(grid: &Vec<Vec<RoadElement>>, commands: &mut Commands, atlas:
         for x in 0..grid[y].len() {
             for (dx, dy, i, bg, fg, f, r) in grid[y][x].get_tiles() {
                 let tile = sprite(
-                    i, 2 * x + dx, 2 * y + dy + util::size::GUI_HEIGHT, util::z_pos::ROAD,
+                    i, 2 * x + dx, 2 * y + dy + size::GUI_HEIGHT, z_pos::ROAD,
                     bg.into(), fg.into(), f, r, atlas.clone(),
                 );
                 commands
@@ -164,5 +165,13 @@ fn cleanup(
 ) {
     for id in &entities {
         commands.entity(id).despawn_recursive();
+    }
+}
+
+pub fn update_z(
+    mut query: Query<&mut Transform, (Or<(Changed<Transform>, Added<Transform>)>, With<GridElement>)>,
+) {
+    for mut pos in query.iter_mut() {
+        pos.translation.z = battle_z_from_y(pos.translation.y);
     }
 }
