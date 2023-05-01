@@ -77,7 +77,7 @@ pub(in crate::graphics) fn start_transition(
                     )
             ))
             .with_children(|builder| {
-                let last_y = util::transition::HALF_HEIGHT - 1;
+                let last_y = util::transition::HALF_HEIGHT;
                 for y in 0..=last_y {
                     for x in 0..WIDTH {
                         let (index, flip) = match (x, y) {
