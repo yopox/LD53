@@ -112,10 +112,6 @@ pub fn vec2_with_battle_z(Vec2 { x, y }: Vec2) -> Vec3 {
     vec3(x, y, battle_z_from_y(y))
 }
 
-pub fn with_battle_z(pos: Vec3) -> Vec3 {
-    with_z(pos, battle_z_from_y(pos.y))
-}
-
 pub fn cursor_pos(
     windows: Query<&Window>,
 ) -> Option<Vec2> {

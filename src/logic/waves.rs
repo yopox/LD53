@@ -1,0 +1,155 @@
+use std::time::Duration;
+
+use bevy::prelude::{Resource, Timer};
+use bevy::time::TimerMode;
+use lazy_static::lazy_static;
+
+use crate::drones::Drones;
+use crate::logic::waves::WaveIteratorElement::{NextDrone, NextWave};
+
+#[derive(Debug, Clone)]
+struct Wave {
+    /// Spawn time after beginning of wave
+    /// first one should be roughly zero
+    timed_departures: Vec<(f32, Drones)>,
+    /// Delay after last spawn
+    end_delay: f32,
+}
+
+pub const WAVES_INTERVAL: f32 = 30.;
+
+impl<T> From<T> for Wave where T: Into<Vec<(f32, Drones)>> {
+    fn from(timed_departures: T) -> Self {
+        Wave {
+            end_delay: WAVES_INTERVAL,
+            timed_departures: timed_departures.into(),
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum WaveIteratorElement {
+    /// Spawn a drone now, and wait t seconds
+    NextDrone(Drones, f32),
+    /// Spawn a new wave now, and wait t seconds
+    NextWave(f32),
+}
+
+#[derive(Resource)]
+pub struct WaveIterator {
+    pub next: Timer,
+    /// Upcoming elements, in reversed order
+    /// i.e. pop gives the next element
+    pub upcoming: Vec<WaveIteratorElement>,
+}
+
+impl WaveIterator {
+    fn from_waves(waves: Vec<Wave>) -> WaveIterator {
+        let mut result = Vec::new();
+        for wave in waves.iter() {
+            let mut prev: Option<(Drones, f32)> = None;
+
+            for (t1, drone) in wave.timed_departures.iter() {
+                match prev {
+                    Some((drone, t0)) => { result.push(NextDrone(drone, t1 - t0)) }
+                    None => { result.push(NextWave(*t1)) }
+                }
+                prev = Some((*drone, *t1));
+            }
+
+            match prev {
+                Some((drone, _)) => { result.push(NextDrone(drone, wave.end_delay)) }
+                None => { panic!("Waves should not be empty.") }
+            }
+        }
+
+        result.reverse();
+
+        WaveIterator {
+            next: Timer::new(Duration::ZERO, TimerMode::Once),
+            upcoming: result,
+        }
+    }
+
+    pub fn get_static() -> WaveIterator {
+        WaveIterator::from_waves(WAVES.to_vec())
+    }
+}
+
+lazy_static! {
+    static ref WAVES: Vec<Wave> = vec![
+        [
+            (0.0, Drones::Simple1),
+            (2.0, Drones::Simple1),
+        ].into(),
+        [
+            (0.0, Drones::Simple1),
+            (2.0, Drones::Simple2),
+            (2.5, Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Simple2),
+            (1.0, Drones::Simple1),
+            (2.0, Drones::Simple3),
+            (3.0, Drones::Simple1),
+        ].into(),
+        [
+            (0.0, Drones::Medium1),
+            (1.0, Drones::Medium2),
+        ].into(),
+        [
+            (0.0, Drones::Medium1),
+            (0.5, Drones::Medium1),
+            (1.0, Drones::Medium2),
+            (1.5, Drones::Medium2),
+        ].into(),
+        [
+            (0.0, Drones::Medium1),
+            (0.5, Drones::Medium2),
+            (1.0, Drones::Medium3),
+            (1.5, Drones::Medium4),
+            (2.0, Drones::Simple2),
+            (2.5, Drones::Simple1),
+            (3.0, Drones::Simple3),
+            (3.5, Drones::Simple1),
+        ].into(),
+        [
+            (0.0, Drones::Big1),
+            (3.0, Drones::Big2),
+        ].into(),
+        [
+            (0.0, Drones::Big1),
+            (0.5, Drones::Medium2),
+            (1.0, Drones::Simple1),
+            (1.5, Drones::Simple3),
+            (3.0, Drones::Big2),
+            (3.5, Drones::Medium3),
+            (4.0, Drones::Medium4),
+            (4.5, Drones::Simple2),
+            (5.0, Drones::Simple1),
+        ].into(),
+    ];
+}
+
+#[test]
+fn ensure_waves_are_sorted() {
+    for wave in WAVES.iter() {
+        let mut t = 0.;
+        for (t1, _) in wave.timed_departures.iter() {
+            assert!(*t1 >= t);
+            t = *t1;
+        }
+    }
+}
+
+#[test]
+fn ensure_iterator_produces_correct_results() {
+    for elt in WaveIterator::get_static().upcoming.iter() {
+        eprintln!("Got {elt:?}");
+        let t = match elt {
+            NextDrone(_, t) => *t,
+            NextWave(t) => *t,
+        };
+        assert!(t >= 0.);
+    }
+}

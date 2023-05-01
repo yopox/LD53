@@ -14,7 +14,7 @@ use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
 use crate::graphics::text::TextStyles;
 use crate::tower::Towers;
-use crate::util::{is_in, with_battle_z, z_pos};
+use crate::util::{is_in, z_pos};
 use crate::util::size::{f32_tile_to_f32, is_oob, tile_to_f32};
 
 pub struct GuiPlugin;
