@@ -1,9 +1,12 @@
 use bevy::prelude::*;
+use bevy::sprite::Anchor;
 
 use crate::GameState;
+use crate::graphics::loading::Fonts;
 use crate::graphics::palette::Palette;
-use crate::graphics::text::color_text;
+use crate::graphics::text;
 use crate::graphics::transition::Transition;
+use crate::util::size::{tile_to_f32, WIDTH};
 use crate::util::z_pos;
 
 pub struct TitlePlugin;
@@ -21,16 +24,16 @@ impl Plugin for TitlePlugin {
     }
 }
 
-fn setup_title (
+fn setup_title(
     mut commands: Commands,
+    fonts: Res<Fonts>,
 ) {
-    for (t, x, y) in [
-        ("Bevy game template", 11, 15),
-        ("Change this for more fun.", 5, 12),
-        ("Press any key to continue", 20, 6),
+    for (t, x, y, ts) in [
+        ("Sabotage prime Inc", WIDTH / 4, 15, text::TextStyles::Heading),
+        ("Press any key to continue", WIDTH / 4, 6, text::TextStyles::Body),
     ] {
         commands
-            .spawn(color_text(t, x, y, z_pos::TITLE_TEXT, Palette::A, Palette::E))
+            .spawn(text::ttf_anchor(tile_to_f32(x), tile_to_f32(y), z_pos::TITLE_TEXT, t, ts, &fonts, Palette::A, Anchor::BottomLeft))
             .insert(TitleUI);
     }
 }

@@ -24,7 +24,10 @@ impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system(setup.in_schedule(OnEnter(GameState::Battle)))
-            .add_systems((update_money, update_cursor, update_popup, update_tower_button, update_text_button, place_tower).in_set(OnUpdate(GameState::Battle)))
+            .add_systems(
+                (update_money, update_cursor, update_popup, update_tower_button,
+                 update_text_button, place_tower)
+                    .in_set(OnUpdate(GameState::Battle)))
         ;
     }
 }
@@ -86,6 +89,7 @@ fn setup(
                 x, y, z_pos::GUI_FG,
                 text, style, &fonts, Palette::D,
             ))
+            .insert(BattleUI)
         ;
     }
 
@@ -95,6 +99,7 @@ fn setup(
             "€0", TextStyles::Heading, &fonts, Palette::D,
         ))
         .insert(MoneyText)
+        .insert(BattleUI)
     ;
 
     // Background
@@ -108,7 +113,7 @@ fn setup(
                 i, x, y, z_pos::GUI_BG,
                 bg, fg, false, 0,
                 textures.tileset.clone(),
-            ));
+            )).insert(BattleUI);
         }
     }
 
@@ -125,6 +130,7 @@ fn setup(
             }
         })
         .insert(Cursor)
+        .insert(BattleUI)
     ;
 
     // Tower buttons
@@ -141,7 +147,8 @@ fn setup(
                     TextStyles::Heading, &fonts, Palette::D,
                     Anchor::TopCenter,
                 ));
-            });
+            })
+            .insert(BattleUI);
     }
 
     // Text buttons
@@ -158,6 +165,7 @@ fn setup(
                 Anchor::CenterRight,
             ))
             .insert(b.clone())
+            .insert(BattleUI)
         ;
     }
 }

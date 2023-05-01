@@ -5,6 +5,7 @@ use graphics::palette::Palette;
 
 use crate::battle::BattlePlugin;
 use crate::collision::CollisionPlugin;
+use crate::game_over::GameOverPlugin;
 use crate::graphics::GraphicsPlugin;
 use crate::music::MusicPlugin;
 use crate::title::TitlePlugin;
@@ -20,6 +21,7 @@ mod tower;
 mod shot;
 mod battle;
 mod collision;
+mod game_over;
 mod music;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
@@ -57,6 +59,7 @@ fn main() {
         .add_plugin(GraphicsPlugin)
         .add_plugin(BattlePlugin)
         .add_plugin(CollisionPlugin)
+        .add_plugin(GameOverPlugin)
         .add_startup_system(init)
         .run();
 }

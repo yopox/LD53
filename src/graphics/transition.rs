@@ -64,7 +64,7 @@ pub(in crate::graphics) fn start_transition(
         );
 
         // Spawn tiles
-        let mut left_end_y = tile_to_f32(2) + 4.;
+        let mut left_end_y = 3.;
         let mut left_start_y = left_end_y - tile_to_f32(util::transition::HALF_HEIGHT);
         if open { (left_end_y, left_start_y) = (left_start_y, left_end_y); }
         commands
@@ -93,7 +93,7 @@ pub(in crate::graphics) fn start_transition(
                 }
             });
 
-        let mut right_end_y = tile_to_f32(2 + util::transition::HALF_HEIGHT) - 3.;
+        let mut right_end_y = tile_to_f32(util::transition::HALF_HEIGHT) - 3.;
         let mut right_start_y = right_end_y + tile_to_f32(util::transition::HALF_HEIGHT);
         if open { (right_end_y, right_start_y) = (right_start_y, right_end_y); }
         commands

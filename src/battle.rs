@@ -1,15 +1,15 @@
 use bevy::prelude::*;
 
 use crate::{collision, GameState};
-use crate::drones::{despawn_drone, drones_dead, update_drones};
+use crate::drones::{despawn_drone, drone_won, drones_dead, update_drones};
 use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::{Wiggle, wiggle};
 use crate::graphics::grid::{GridElement, update_z};
 use crate::graphics::loading::Textures;
 use crate::graphics::package::collect_package;
 use crate::graphics::palette::Palette;
-use crate::music::{BGM, PlayBgmEvent};
 use crate::logic::waves::{WaveIterator, WaveIteratorElement};
+use crate::music::{BGM, PlayBgmEvent};
 use crate::shot::{bomb_exploded, bomb_exploding, make_bomb_explode, remove_shots};
 use crate::tower::{remove_slow_down, sell_tower, tower_fire, Towers, update_just_fired, upgrade_tower};
 use crate::util::battle_z_from_y;
@@ -27,7 +27,7 @@ impl Plugin for BattlePlugin {
             )
             .add_systems(
                 (update_just_fired, remove_shots, tower_fire,
-                 sell_tower, upgrade_tower,
+                 sell_tower, upgrade_tower, drone_won,
                  update_drones, despawn_drone, drones_dead.after(collision::collide).after(wiggle))
                     .in_set(OnUpdate(GameState::Battle))
             )
@@ -42,6 +42,12 @@ impl Plugin for BattlePlugin {
 
 #[derive(Component)]
 pub struct BattleUI;
+
+#[derive(Resource, Default)]
+pub struct DronesStats {
+    pub killed: u8,
+    pub survived: u8,
+}
 
 #[derive(Resource)]
 pub struct Money(pub u16);
@@ -71,14 +77,14 @@ impl CursorState {
 
 fn setup(
     mut commands: Commands,
-    textures: Res<Textures>,
     mut bgm: EventWriter<PlayBgmEvent>,
 ) {
     bgm.send(PlayBgmEvent(BGM::Theme));
 
     commands.insert_resource(CursorState::Select);
     commands.insert_resource(Money(200));
-    commands.insert_resource(WaveIterator::get_static())
+    commands.insert_resource(DronesStats::default());
+    commands.insert_resource(WaveIterator::get_static());
 }
 
 fn reset_state(

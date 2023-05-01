@@ -1,4 +1,4 @@
-use bevy::math::Vec2;
+use bevy::prelude::*;
 
 pub struct Path {
     /// Vec2(x, y) -> (1., 2.) is the center of the tile (1, 2)
@@ -54,6 +54,10 @@ impl Path {
         let y = y1 + proportion * (y2 - y1);
 
         return Some(Vec2::new(x, y));
+    }
+
+    pub fn drone_won(&self, advance: f32) -> bool {
+        advance >= self.length
     }
 }
 

@@ -53,26 +53,28 @@ pub mod z_pos {
     pub const ATTACHED_PACKAGE_OFFSET: f32 = -1. / 4096.;
 
     // GUI
-    pub const TRANSITION: f32 = 10.;
     pub const GUI_BG: f32 = 11.;
     pub const GUI_FG: f32 = 12.;
     pub const POPUP_BG: f32 = 13.;
     pub const POPUP_FG: f32 = 14.;
+    pub const TRANSITION: f32 = 20.;
 }
 
 pub mod transition {
     use crate::util::size::HEIGHT;
 
-    pub const HALF_HEIGHT: usize = HEIGHT / 2 - 1;
+    pub const HALF_HEIGHT: usize = HEIGHT / 2 + 1;
     pub const SPEED: u64 = 800;
 }
 
 pub mod tweening {
+    // UID of events
     pub const TRANSITION_OVER: u64 = 1;
     pub const SHOT_DESPAWN: u64 = 2;
     pub const BOMB_EXPLODED: u64 = 3;
     pub const DRONE_DESPAWN: u64 = 4;
 
+    // durations of tweenings
     pub const DELAY: u64 = 200;
     pub const DRONE_DEATH_FREEZE: u64 = 400;
     pub const DRONE_DEATH_ALPHA: u64 = 800;

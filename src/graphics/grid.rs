@@ -51,6 +51,7 @@ fn setup(
     mut commands: Commands,
     textures: Res<Textures>,
 ) {
+    const GRID_WIDTH: f32 = 20.;
     let points = vec![
         Vec2::new(1., 5.),
         Vec2::new(3., 5.),
@@ -61,7 +62,7 @@ fn setup(
         Vec2::new(11., 3.),
         Vec2::new(16., 3.),
         Vec2::new(16., 5.),
-        Vec2::new(22., 5.),
+        Vec2::new(GRID_WIDTH, 5.),
     ];
     let path = logic::path::Path::from_points(points.clone());
     commands.insert_resource(CurrentPath(path));

@@ -1,11 +1,13 @@
 use std::time::Duration;
 
+use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 use bevy_text_mode::TextModeTextureAtlasSprite;
 use bevy_tweening::{Animator, Delay, EaseFunction, Tween, TweenCompleted};
 use bevy_tweening::lens::TransformPositionLens;
 use strum_macros::EnumIter;
 
+use crate::battle::DronesStats;
 use crate::collision::{body_size, BodyType, Contact, HitBox};
 use crate::graphics::{sprite_f32, tween};
 use crate::graphics::animation::Wiggle;
@@ -244,10 +246,26 @@ fn kill_drone(
 
 pub fn despawn_drone(
     mut commands: Commands,
+    mut stats: ResMut<DronesStats>,
     mut tween_completed: EventReader<TweenCompleted>,
 ) {
     for TweenCompleted { entity, user_data } in tween_completed.iter() {
         if *user_data != util::tweening::DRONE_DESPAWN { continue }
+        stats.killed += 1;
         commands.entity(*entity).despawn_recursive();
+    }
+}
+
+pub fn drone_won(
+    drones: Query<(Entity, &Enemy), Changed<Transform>>,
+    mut stats: ResMut<DronesStats>,
+    path: Res<CurrentPath>,
+    mut commands: Commands,
+) {
+    for (e_drone, drone) in drones.iter() {
+        if path.0.drone_won(drone.advance) {
+            stats.survived += 1;
+            commands.get_entity(e_drone).map(EntityCommands::despawn_recursive);
+        }
     }
 }

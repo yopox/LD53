@@ -9,7 +9,6 @@ use crate::graphics::gui::GuiPlugin;
 use crate::graphics::loading::LoadingPlugin;
 use crate::graphics::palette::Palette;
 use crate::graphics::sprites::TILE;
-use crate::graphics::text::TextPlugin;
 use crate::graphics::transition::TransitionPlugin;
 use crate::util::size::tile_to_f32;
 
@@ -137,7 +136,6 @@ impl Plugin for GraphicsPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system(component_animator_system::<TextModeTextureAtlasSprite>)
-            .add_plugin(TextPlugin)
             .add_plugin(LoadingPlugin)
             .add_plugin(TransitionPlugin)
             .add_plugin(AnimationPlugin)
