@@ -30,7 +30,7 @@ impl Plugin for BattlePlugin {
             .add_systems(
                 (update_just_fired, remove_shots, tower_fire,
                  sell_tower, upgrade_tower, drone_won, kill_drone,
-                 update_drones, despawn_drone, drones_dead.after(collision::collide).after(wiggle))
+                 update_drones.before(wiggle), despawn_drone, drones_dead.after(collision::collide).after(wiggle))
                     .in_set(OnUpdate(GameState::Battle))
             )
             .add_systems(
