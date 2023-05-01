@@ -25,6 +25,7 @@ impl Default for Tile {
     }
 }
 
+#[allow(dead_code)]
 impl Tile {
     pub fn new(index: usize, flip: bool, rotation: u8) -> Self {
         Tile { index, flip, rotation, ..Tile::default() }

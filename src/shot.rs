@@ -113,7 +113,7 @@ impl Bomb {
     }
 }
 
-pub fn spawn_bomb(bomb: Bomb, mut commands: &mut Commands) {
+pub fn spawn_bomb(bomb: Bomb, commands: &mut Commands) {
     commands
         .spawn(bomb)
         .insert(MainBundle::from_xyz(bomb.x, bomb.y, z_pos::BOMB))

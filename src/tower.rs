@@ -36,6 +36,7 @@ impl Tower {
     pub fn range(&self) -> f32 { tower_stats::range(self) }
     pub fn damage(&self) -> f32 { tower_stats::damage(self) }
     pub fn shot_speed(&self) -> f32 { tower_stats::shot_speed(self) }
+    pub fn slow_factor(&self) -> f32 { tower_stats::slow_factor(self) }
 
     pub fn upgrade_cost(&self) -> Option<u16> {
         match self.rank {
@@ -180,7 +181,7 @@ pub fn sell_tower(
     towers: Query<(&Tower, Entity)>,
     mouse: Res<Input<MouseButton>>,
     cursor_state: Option<ResMut<CursorState>>,
-    hovered: Option<ResMut<HoveredPos>>,
+    hovered: Option<Res<HoveredPos>>,
     grid: Option<ResMut<Grid>>,
     money: Option<ResMut<Money>>,
 ) {
@@ -189,7 +190,7 @@ pub fn sell_tower(
     if !mouse.just_pressed(MouseButton::Left) { return; }
     if cursor_state.ne(&CursorState::Sell) { return; }
 
-    let Some(mut hovered) = hovered else { return; };
+    let Some(hovered) = hovered else { return; };
     let Some(mut grid) = grid else { return; };
 
     let pos = &(hovered.0.0, hovered.0.1);
@@ -209,11 +210,10 @@ pub fn sell_tower(
 }
 
 pub fn upgrade_tower(
-    mut commands: Commands,
     mut towers: Query<(&mut Tower, &mut HoverPopup)>,
     mouse: Res<Input<MouseButton>>,
     cursor_state: Option<ResMut<CursorState>>,
-    hovered: Option<ResMut<HoveredPos>>,
+    hovered: Option<Res<HoveredPos>>,
     money: Option<ResMut<Money>>,
 ) {
     let Some(mut cursor_state) = cursor_state else { return; };
@@ -221,7 +221,7 @@ pub fn upgrade_tower(
     if !mouse.just_pressed(MouseButton::Left) { return; }
     if cursor_state.ne(&CursorState::Upgrade) { return; }
 
-    let Some(mut hovered) = hovered else { return; };
+    let Some(hovered) = hovered else { return; };
     let Some(mut money) = money else { return; };
     let pos = &(hovered.0.0, hovered.0.1);
 
@@ -236,6 +236,7 @@ pub fn upgrade_tower(
                     hp.attr1 = t.get_attr1();
                     hp.attr2 = t.get_attr2();
                     hp.force_redraw = true;
+                    cursor_state.set_if_neq(CursorState::Select);
                 }
                 Some(_) => {
                     // Not enough money
@@ -274,7 +275,7 @@ pub fn tower_fire(
                     .for_each(|(e, _, _)| {
                         if let Some(mut entity_commands) = commands.get_entity(e) {
                             entity_commands.insert(Slow {
-                                index: SlowIndex::Level0,
+                                factor: tower.slow_factor(),
                                 t_final: time.elapsed() + Duration::from_secs_f32(SLOW_DOWN_DELAY),
                             });
                         }
@@ -328,33 +329,10 @@ pub fn update_just_fired(
     }
 }
 
-#[derive(Debug, Copy, Clone)]
-pub enum SlowIndex {
-    Level0 = 0,
-    Level1,
-    Level2,
-}
-
-impl SlowIndex {
-    pub fn to_f32(&self) -> f32 {
-        match &self {
-            SlowIndex::Level0 => 0.66,
-            SlowIndex::Level1 => 0.5,
-            SlowIndex::Level2 => 0.33,
-        }
-    }
-}
-
 #[derive(Component)]
 pub struct Slow {
-    index: SlowIndex,
+    pub factor: f32,
     t_final: Duration,
-}
-
-impl Slow {
-    pub fn to_f32(&self) -> f32 {
-        self.index.to_f32()
-    }
 }
 
 pub fn remove_slow_down(

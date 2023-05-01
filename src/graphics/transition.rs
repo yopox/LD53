@@ -120,7 +120,7 @@ pub(in crate::graphics) fn start_transition(
 
 pub(in crate::graphics) fn end_transition(
     mut commands: Commands,
-    mut transition: Option<Res<Transition>>,
+    transition: Option<Res<Transition>>,
     mut tween_completed: EventReader<TweenCompleted>,
     mut next_state: ResMut<NextState<GameState>>,
 ) {

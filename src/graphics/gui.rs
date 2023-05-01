@@ -8,7 +8,7 @@ use strum::IntoEnumIterator;
 use crate::{GameState, tower, util};
 use crate::battle::{BattleUI, CursorState, Money};
 use crate::collision::body_size;
-use crate::graphics::{grid, MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, sprite_from_tile_with_alpha_and_x_offset, text};
+use crate::graphics::{MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, sprite_from_tile_with_alpha_and_x_offset, text};
 use crate::graphics::grid::{Grid, RoadElement};
 use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
@@ -213,7 +213,7 @@ fn update_cursor(
     let (x, y) = (x as isize, y as isize - util::size::GUI_HEIGHT as isize);
     let (x, y) = (x / 2, y / 2);
 
-    /// Set visibility and position on [grid::RoadElement::Rock] hover.
+    // Set visibility and position on [grid::RoadElement::Rock] hover.
     if is_oob(x, y) { return; }
 
     if grid.elements[y as usize][x as usize] == RoadElement::Rock {
@@ -276,7 +276,6 @@ fn update_popup(
         if is_in(cursor_pos, pos.translation.xy(), Vec2::new(info.width, info.height)) {
             let mut recreate_popup = info.force_redraw;
             info.force_redraw = false;
-            delete_popup = false;
 
             match popup.get_single() {
                 Ok((p, popup_id)) if p.0 == id => {
@@ -397,12 +396,11 @@ fn update_tower_button(
     money: Res<Money>,
 ) {
     let Some(mut cursor_state) = cursor_state else { return; };
-    let mut cursor_state = cursor_state;
     let Some(cursor_pos) = util::cursor_pos(windows) else { return; };
     let clicked = mouse.just_pressed(MouseButton::Left);
 
     for (button, pos, id) in &buttons {
-        let mut button_state = ButtonState::CanBuild;
+        let mut button_state: ButtonState;
         if money.0 < button.0.get_cost() { button_state = ButtonState::CantBuild; } else if let CursorState::Build(t) = cursor_state.as_ref() {
             button_state = if *t == button.0 { ButtonState::Selected } else { ButtonState::CanBuild };
         } else {
@@ -424,7 +422,7 @@ struct TransparentTower;
 
 fn place_tower(
     mut commands: Commands,
-    mut state: Option<Res<CursorState>>,
+    state: Option<ResMut<CursorState>>,
     cursor: Option<Res<HoveredPos>>,
     mut transparent_tower: Query<(&mut Transform, Entity), With<TransparentTower>>,
     textures: Res<Textures>,
@@ -444,11 +442,9 @@ fn place_tower(
         _ => None,
     };
 
-    let state = state.as_ref();
-
     if let Ok((mut pos, id)) = transparent_tower.get_single_mut() {
         // The transparent tower exists
-        match (state, cursor) {
+        match (state.as_ref().clone(), cursor) {
             (CursorState::Build(t), Some((x, y))) => {
                 if cursor_changed {
                     // Update its position
@@ -464,7 +460,7 @@ fn place_tower(
                         grid.towers.insert((x, y));
                         tower::place_tower(x, y, &mut commands, *t, &textures.tileset, &time);
                     }
-                    commands.insert_resource(CursorState::Select);
+                    state.set_if_neq(CursorState::Select);
                     return;
                 }
             }
@@ -475,7 +471,7 @@ fn place_tower(
         }
     } else {
         // There is no transparent tower
-        if let CursorState::Build(t) = state {
+        if let CursorState::Build(t) = state.as_ref() {
             let Some((x, y)) = cursor else { return; };
             let tower_pos = util::grid_to_tower_pos(x, y, *t);
             commands

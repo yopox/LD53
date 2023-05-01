@@ -80,7 +80,7 @@ pub fn collide(
 ) {
     let bodies = &colliders.iter().collect::<Vec<(&HitBox, &Transform, Entity)>>();
     for (i, &(body1, pos1, id1)) in bodies.iter().enumerate() {
-        'for_body: for &(body2, pos2, id2) in bodies.iter().skip(i) {
+        for &(body2, pos2, id2) in bodies.iter().skip(i) {
             if !body1.body_type.can_collide(&body2.body_type) { continue; }
 
             // Collide outer bounds

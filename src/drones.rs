@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use bevy::math::vec3;
 use bevy::prelude::*;
 use bevy_text_mode::TextModeTextureAtlasSprite;
 use bevy_tweening::{Animator, Delay, EaseFunction, Tween, TweenCompleted};
@@ -17,9 +16,8 @@ use crate::graphics::sprites::{DroneModels, TILE};
 use crate::shot::{Bomb, Shot, Shots, spawn_bomb};
 use crate::tower::Slow;
 use crate::util;
-use crate::util::{vec3_with_battle_z, z_pos};
-use crate::util::size::{f32_tile_to_f32, HEIGHT, tile_to_f32};
-use crate::util::z_pos::{BATTLE_MAX, BATTLE_MIN};
+use crate::util::vec3_with_battle_z;
+use crate::util::size::{f32_tile_to_f32, tile_to_f32};
 
 #[derive(Debug, Clone)]
 pub struct Stats {
@@ -104,8 +102,8 @@ pub fn update_drones(
     let Some(path) = path else { return; };
     for (mut pos, mut drone, slowed) in drones.iter_mut() {
         let speed_modulator = match slowed {
-            | Some(slow) => slow.to_f32(),
-            | None => 1.,
+            Some(slow) => slow.factor,
+            None => 1.,
         };
 
         drone.advance += speed_modulator * drone.stats.speed * time.delta_seconds();
@@ -138,7 +136,7 @@ pub fn drones_dead(
                 let Ok((&shot, &t_shot)) = shots.get(*e_shot) else { continue };
 
                 // Despawn shot
-                if let Some(mut entity_commands) = commands.get_entity(*e_shot) {
+                if let Some(entity_commands) = commands.get_entity(*e_shot) {
                     entity_commands.despawn_recursive()
                 }
 
@@ -163,7 +161,7 @@ pub fn drones_dead(
 }
 
 fn kill_drone(
-    mut commands: &mut Commands,
+    commands: &mut Commands,
     children: &Query<&Children>,
     enemy: &Enemy,
     e_enemy: &Entity,

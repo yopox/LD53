@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use strum::IntoEnumIterator;
 
-use crate::{GameState, util};
+use crate::GameState;
 use crate::drones::{despawn_drone, Drones, drones_dead, update_drones};
 use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::{Wiggle, wiggle};
@@ -102,7 +102,7 @@ fn reset_state(
     state: Option<ResMut<CursorState>>,
 ) {
     let Some(mut state) = state else { return; };
-    /// Return to [CursorState::Select]
+    // Return to [CursorState::Select]
     if mouse.just_pressed(MouseButton::Right) || keys.just_pressed(KeyCode::Escape) {
         state.set_if_neq(CursorState::Select);
     }

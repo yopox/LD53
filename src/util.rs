@@ -37,9 +37,7 @@ pub mod size {
 
 pub mod z_pos {
     // Background
-    pub const BACKGROUND: f32 = 0.;
     pub const TITLE_TEXT: f32 = 1.;
-    pub const GRID: f32 = 2.;
     pub const ROAD: f32 = 3.;
 
     pub const CURSOR: f32 = 3.5;
@@ -97,7 +95,7 @@ pub const fn with_z(Vec3 { x, y, .. }: Vec3, z: f32) -> Vec3 {
 }
 
 pub fn battle_z_from_y(y: f32) -> f32 {
-    use crate::util::size::{HEIGHT, tile_to_f32};
+    use crate::util::size::HEIGHT;
     use crate::util::z_pos::{BATTLE_MAX, BATTLE_MIN};
 
     BATTLE_MIN + (BATTLE_MAX - BATTLE_MIN) / tile_to_f32(HEIGHT + 10) * y

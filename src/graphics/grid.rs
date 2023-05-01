@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use enum_derived::Rand;
 use rand::{RngCore, thread_rng};
 
-use crate::{GameState, logic, util};
+use crate::{GameState, logic};
 use crate::graphics::loading::Textures;
 use crate::graphics::sprite;
 use crate::graphics::sprites::TILE;

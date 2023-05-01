@@ -64,3 +64,12 @@ pub fn shot_speed(tower: &Tower) -> f32 {
         _ => 120.,
     }
 }
+
+pub fn slow_factor(tower: &Tower) -> f32 {
+    match (tower.model, tower.rank) {
+        (Towers::Scrambler, 1) => 0.66,
+        (Towers::Scrambler, 2) => 0.5,
+        (Towers::Scrambler, _) => 0.33,
+        _ => panic!("This tower doesn't have a slow factor"),
+    }
+}

@@ -107,7 +107,7 @@ pub fn sprite_from_tile_with_alpha(
     z: f32,
     alpha: f32,
 ) {
-    sprite_from_tile_with_alpha_and_x_offset(builder, tiles, atlas, z, 1.0, 0.0);
+    sprite_from_tile_with_alpha_and_x_offset(builder, tiles, atlas, z, alpha, 0.0);
 }
 
 pub fn sprite_from_tile_with_alpha_and_x_offset(

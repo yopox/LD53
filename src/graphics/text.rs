@@ -24,6 +24,7 @@ pub struct Text {
     fg: Palette,
 }
 
+#[allow(dead_code)]
 pub fn text(text: &str, x: usize, y: usize, z: f32) -> Text {
     Text {
         text: text.to_string(),
@@ -46,6 +47,7 @@ pub fn color_text(text: &str, x: usize, y: usize, z: f32, bg: Palette, fg: Palet
     }
 }
 
+#[allow(dead_code)]
 pub fn from_middle(text: &str, x: isize, y: isize, z: f32, bg: Palette, fg: Palette) -> Text {
     color_text(
         text,
