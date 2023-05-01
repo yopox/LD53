@@ -1,4 +1,5 @@
 use bevy::app::App;
+use bevy::ecs::system::EntityCommands;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
 use bevy::sprite::{Anchor, MaterialMesh2dBundle};
@@ -191,19 +192,19 @@ fn update_cursor(
     hovered: Option<ResMut<HoveredPos>>,
     cursor_state: Option<Res<CursorState>>,
 ) {
-    let mut clean = || commands.remove_resource::<HoveredPos>();
+    let mut clean = Commands::remove_resource::<HoveredPos>;
     let Ok((mut pos, mut vis, id)) = cursor.get_single_mut() else {
-        clean();
+        clean(&mut commands);
         return;
     };
     vis.set_if_neq(Visibility::Hidden);
 
     let Some(grid) = grid else {
-        clean();
+        clean(&mut commands);
         return;
     };
     let Some(cursor_pos) = util::cursor_pos(windows) else {
-        clean();
+        clean(&mut commands);
         return;
     };
 
@@ -237,7 +238,7 @@ fn update_cursor(
         pos.translation.x = tile_to_f32(x as usize * 2);
         pos.translation.y = tile_to_f32(y as usize * 2 + util::size::GUI_HEIGHT);
     } else {
-        clean();
+        clean(&mut commands);
     }
 }
 

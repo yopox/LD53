@@ -1,6 +1,7 @@
 use std::cmp::{max, min};
 use std::collections::{HashMap, HashSet};
 
+use bevy::math::vec2;
 use bevy::prelude::*;
 use enum_derived::Rand;
 use rand::{RngCore, thread_rng};
@@ -11,6 +12,7 @@ use crate::{GameState, logic};
 use crate::graphics::loading::Textures;
 use crate::graphics::sprite;
 use crate::graphics::sprites::TILE;
+use crate::logic::path_points::path_of_level_n;
 use crate::util::{battle_z_from_y, size, z_pos};
 use crate::util::size::is_oob;
 
@@ -53,19 +55,8 @@ fn setup(
     mut commands: Commands,
     textures: Res<Textures>,
 ) {
-    const GRID_WIDTH: f32 = 20.;
-    let points = vec![
-        Vec2::new(1., 5.),
-        Vec2::new(3., 5.),
-        Vec2::new(3., 3.),
-        Vec2::new(8., 3.),
-        Vec2::new(8., 5.),
-        Vec2::new(11., 5.),
-        Vec2::new(11., 3.),
-        Vec2::new(16., 3.),
-        Vec2::new(16., 5.),
-        Vec2::new(GRID_WIDTH, 5.),
-    ];
+    let level: u8 = 0;
+    let points = path_of_level_n(level);
     let path = logic::path::Path::from_points(points.clone());
     commands.insert_resource(CurrentPath(path));
 
