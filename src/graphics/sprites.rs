@@ -1,8 +1,6 @@
 use bevy::math::Vec2;
 use strum_macros::EnumIter;
 
-use crate::util;
-
 pub type X = usize;
 pub type Y = usize;
 pub type INDEX = usize;
@@ -23,6 +21,7 @@ pub enum DroneModels {
     Medium4,
     Big1,
     Big2,
+    Invader,
 }
 
 impl DroneModels {
@@ -37,6 +36,7 @@ impl DroneModels {
             DroneModels::Medium4 => &DRONE_MEDIUM_4,
             DroneModels::Big1 => &DRONE_BIG_1,
             DroneModels::Big2 => &DRONE_BIG_2,
+            DroneModels::Invader => &INVADER,
         }
     }
 
@@ -52,6 +52,7 @@ impl DroneModels {
             DroneModels::Medium4 => Vec2::new(4., -5.),
             DroneModels::Big1 => Vec2::new(8., -4.),
             DroneModels::Big2 => Vec2::new(8., -1.),
+            DroneModels::Invader => Vec2::new(8., 2.),
         }
     }
 }
@@ -132,6 +133,18 @@ const DRONE_BIG_2: &'static [TILE] = &[
     (0, 0, 181, 16, 9, false, 0),
     (1, 0, 182, 16, 9, false, 0),
     (2, 0, 181, 16, 9, true, 0),
+];
+
+const INVADER: &'static [TILE] = &[
+    (0, 2, 147, 16, 9, false, 0),
+    (1, 2, 148, 16, 9, false, 0),
+    (2, 2, 147, 16, 9, true, 0),
+    (0, 1, 179, 16, 9, false, 0),
+    (1, 1, 180, 16, 9, false, 0),
+    (2, 1, 179, 16, 9, true, 0),
+    (0, 0, 416, 16, 16, false, 0),
+    (1, 0, 416, 16, 16, false, 0),
+    (2, 0, 416, 16, 16, false, 0),
 ];
 
 pub const TOWER_1: &'static [TILE] = &[

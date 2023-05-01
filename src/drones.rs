@@ -35,6 +35,7 @@ pub enum Drones {
     Medium4,
     Big1,
     Big2,
+    Invader, // was here
 }
 
 #[derive(Component)]
@@ -53,6 +54,8 @@ impl Drones {
                 Stats { hp: 80., speed: 0.35 },
             Drones::Big1 | Drones::Big2 =>
                 Stats { hp: 300., speed: 0.25 },
+            Drones::Invader =>
+                Stats { hp: 1000., speed: 0.125 },
         }
     }
 
@@ -83,6 +86,7 @@ impl Drones {
             Drones::Medium4 => DroneModels::Medium4,
             Drones::Big1 => DroneModels::Big1,
             Drones::Big2 => DroneModels::Big2,
+            Drones::Invader => DroneModels::Invader,
         }
     }
 
