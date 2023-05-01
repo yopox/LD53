@@ -1,7 +1,9 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 
 use crate::{collision, GameState};
-use crate::drones::{despawn_drone, drone_won, drones_dead, kill_drone, update_drones};
+use crate::drones::{despawn_drone, drone_won, drones_dead, Enemy, kill_drone, update_drones};
 use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::{Wiggle, wiggle};
 use crate::graphics::grid::{GridElement, update_z};
@@ -32,7 +34,7 @@ impl Plugin for BattlePlugin {
                     .in_set(OnUpdate(GameState::Battle))
             )
             .add_systems(
-                (bomb_exploding, make_bomb_explode, bomb_exploded, spawn_waves,
+                (bomb_exploding, make_bomb_explode, bomb_exploded, spawn_waves, skip_wave,
                  remove_slow_down, collect_package, reset_state, update_z)
                     .in_set(OnUpdate(GameState::Battle))
             )
@@ -139,6 +141,18 @@ fn spawn_waves(
                 ;
             }
             None => {}
+        }
+    }
+}
+
+fn skip_wave(
+    mut wave_iterator: ResMut<WaveIterator>,
+    enemies: Query<&Enemy>,
+) {
+    if enemies.is_empty() {
+        if wave_iterator.next.remaining_secs() >= 1.1 {
+            let new_elapsed = wave_iterator.next.duration() - Duration::from_secs_f32(1.);
+            wave_iterator.next.set_elapsed(new_elapsed);
         }
     }
 }
