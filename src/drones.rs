@@ -16,8 +16,8 @@ use crate::graphics::sprites::{DroneModels, TILE};
 use crate::shot::{Bomb, Shot, Shots, spawn_bomb};
 use crate::tower::Slow;
 use crate::util;
-use crate::util::vec3_with_battle_z;
 use crate::util::size::{f32_tile_to_f32, tile_to_f32};
+use crate::util::vec3_with_battle_z;
 
 #[derive(Debug, Clone)]
 pub struct Stats {

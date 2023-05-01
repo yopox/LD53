@@ -21,6 +21,9 @@ impl Plugin for GridPlugin {
                 setup.in_schedule(OnEnter(GameState::Main))
             )
             .add_system(
+                update_z.in_set(OnUpdate(GameState::Main))
+            )
+            .add_system(
                 cleanup.in_schedule(OnExit(GameState::Main))
             )
         ;

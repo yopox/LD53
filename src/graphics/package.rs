@@ -10,7 +10,7 @@ use rand::RngCore;
 use crate::{graphics, util};
 use crate::battle::Money;
 use crate::graphics::sprites::TILE;
-use crate::util::{battle_z_from_y, is_in, z_pos};
+use crate::util::{is_in, z_pos};
 use crate::util::size::tile_to_f32;
 
 #[derive(Component)]
