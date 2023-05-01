@@ -58,6 +58,9 @@ pub fn damage(tower: &Tower) -> f32 {
 pub const MIN_DAMAGE: f32 = 3.0;
 pub const MAX_DAMAGE: f32 = 12.0;
 
+/// Damage of an exploding package
+pub const OMEGA_DAMAGES: f32 = 100.;
+
 /// Speed of this tower's shots
 pub fn shot_speed(tower: &Tower) -> f32 {
     match (tower.model, tower.rank) {

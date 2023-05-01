@@ -7,11 +7,14 @@ use bevy::sprite::TextureAtlas;
 use enum_derived::Rand;
 use rand::RngCore;
 
-use crate::{graphics, util};
+use crate::{graphics, shot, util};
 use crate::battle::Money;
 use crate::graphics::sprites::TILE;
+use crate::logic::tower_stats::OMEGA_DAMAGES;
 use crate::music::{PlaySfxEvent, SFX};
+use crate::shot::spawn_bomb;
 use crate::util::{is_in, z_pos};
+use crate::util::size::battle::OMEGA_RANGE;
 use crate::util::size::tile_to_f32;
 
 #[derive(Component)]
@@ -88,7 +91,9 @@ pub fn collect_package(
                 PackageKind::Money => { money.0 += util::package::MONEY_BIG; }
                 PackageKind::Coffee => {}
                 PackageKind::Cursed => {}
-                PackageKind::Omega => {}
+                PackageKind::Omega => {
+                    spawn_bomb(shot::Bomb::new(cursor_pos, OMEGA_RANGE, OMEGA_DAMAGES), &mut commands);
+                }
             }
 
             match p.kind {

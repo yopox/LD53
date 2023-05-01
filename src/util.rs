@@ -33,6 +33,7 @@ pub mod size {
         use crate::util::size::TILE_SIZE;
 
         pub const BOMB_RANGE: f32 = 2. * TILE_SIZE as f32;
+        pub const OMEGA_RANGE: f32 = 6. * TILE_SIZE as f32;
     }
 }
 

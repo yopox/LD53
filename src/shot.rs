@@ -119,6 +119,15 @@ pub struct Bomb {
 }
 
 impl Bomb {
+    pub const fn new(pos: Vec2, radius: f32, damages: f32) -> Self {
+        Bomb {
+            x: pos.x,
+            y: pos.y,
+            radius,
+            damages,
+        }
+    }
+
     pub const fn position(&self) -> Vec2 {
         vec2(self.x, self.y)
     }
@@ -162,7 +171,7 @@ pub fn make_bomb_explode(
 ) {
     for (e, bomb) in bombs.iter() {
         if let Some(mut entity_commands) = commands.get_entity(e) {
-            let mut color: Color = Palette::K.transparent(0.25);
+            let color: Color = Palette::K.transparent(0.25);
             let material = materials.add(color.into());
             let mut end_color = color;
             end_color.set_a(0.0);
