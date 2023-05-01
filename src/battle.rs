@@ -5,7 +5,7 @@ use crate::drones::{despawn_drone, Drones, drones_dead, update_drones};
 use crate::GameState;
 use crate::graphics::{MainBundle, package, sprite_from_tile};
 use crate::graphics::animation::{Wiggle, wiggle};
-use crate::graphics::grid::GridElement;
+use crate::graphics::grid::{GridElement, update_z};
 use crate::graphics::loading::Textures;
 use crate::graphics::package::collect_package;
 use crate::graphics::palette::Palette;
@@ -29,9 +29,7 @@ impl Plugin for BattlePlugin {
                  sell_tower, upgrade_tower,
                  update_drones, despawn_drone, drones_dead.after(wiggle),
                  bomb_exploding, make_bomb_explode, bomb_exploded,
-                 remove_slow_down,
-                 collect_package,
-                 reset_state)
+                 remove_slow_down, collect_package, reset_state, update_z)
                     .in_set(OnUpdate(GameState::Main))
             )
         ;

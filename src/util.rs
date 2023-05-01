@@ -43,12 +43,13 @@ pub mod z_pos {
     pub const CURSOR: f32 = 3.5;
 
     // Battle elements
-    pub const TOWERS: f32 = 4.;
     pub const BATTLE_MIN: f32 = 6.;
     pub const BATTLE_MAX: f32 = 6.99;
     pub const SHOT: f32 = 7.;
     pub const BOMB: f32 = 7.1;
-    pub const EXPLOSION: f32 = 9.;
+    pub const EXPLOSION: f32 = 8.;
+    pub const TRANSPARENT_TOWER: f32 = 9.;
+
     pub const ATTACHED_PACKAGE_OFFSET: f32 = -1. / 4096.;
 
     // GUI
@@ -98,7 +99,9 @@ pub fn battle_z_from_y(y: f32) -> f32 {
     use crate::util::size::HEIGHT;
     use crate::util::z_pos::{BATTLE_MAX, BATTLE_MIN};
 
-    BATTLE_MIN + (BATTLE_MAX - BATTLE_MIN) / tile_to_f32(HEIGHT + 10) * y
+    let max_y = tile_to_f32(HEIGHT + 10);
+
+    BATTLE_MIN + (BATTLE_MAX - BATTLE_MIN) / max_y * (max_y - y)
 }
 
 pub fn vec3_with_battle_z(x: f32, y: f32) -> Vec3 {
@@ -107,6 +110,10 @@ pub fn vec3_with_battle_z(x: f32, y: f32) -> Vec3 {
 
 pub fn vec2_with_battle_z(Vec2 { x, y }: Vec2) -> Vec3 {
     vec3(x, y, battle_z_from_y(y))
+}
+
+pub fn with_battle_z(pos: Vec3) -> Vec3 {
+    with_z(pos, battle_z_from_y(pos.y))
 }
 
 pub fn cursor_pos(
@@ -125,7 +132,7 @@ pub fn grid_to_tower_pos(x: usize, y: usize, t: Towers) -> Vec2 {
     return Vec2::new(x, y);
 }
 
-/// Returns true if [p] is in the rect with [o] bottom-left origin and [size] dimensions.
+/// Returns true if [p] is in the rectangle with [o] bottom-left origin and [size] dimensions.
 pub fn is_in(p: Vec2, o: Vec2, size: Vec2) -> bool {
     p.x >= o.x && p.x <= o.x + size.x && p.y >= o.y && p.y <= o.y + size.y
 }

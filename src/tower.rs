@@ -19,7 +19,7 @@ use crate::logic::tower_stats;
 use crate::logic::tower_stats::{MAX_DAMAGE, MAX_RELOAD, MIN_DAMAGE, MIN_RELOAD};
 use crate::shot::Shots;
 use crate::util;
-use crate::util::{with_z, z_pos};
+use crate::util::{battle_z_from_y, vec2_with_battle_z, with_z, z_pos};
 use crate::util::misc::SLOW_DOWN_DELAY;
 use crate::util::tweening::SHOT_DESPAWN;
 
@@ -159,7 +159,7 @@ pub fn place_tower(
     commands
         .spawn(tower.clone())
         .insert(
-            MainBundle::from_xyz(tower_pos.x, tower_pos.y, z_pos::TOWERS)
+            MainBundle::from_translation(vec2_with_battle_z(tower_pos))
         )
         .with_children(|builder|
             sprite_from_tile(builder, tower.model.get_tiles(), atlas, 0.)

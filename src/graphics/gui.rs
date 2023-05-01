@@ -14,7 +14,7 @@ use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
 use crate::graphics::text::TextStyles;
 use crate::tower::Towers;
-use crate::util::is_in;
+use crate::util::{is_in, with_battle_z, z_pos};
 use crate::util::size::{f32_tile_to_f32, is_oob, tile_to_f32};
 
 pub struct GuiPlugin;
@@ -82,7 +82,7 @@ fn setup(
     ] {
         commands
             .spawn(text::ttf(
-                x, y, util::z_pos::GUI_FG,
+                x, y, z_pos::GUI_FG,
                 text, style, &fonts, Palette::D,
             ))
         ;
@@ -90,7 +90,7 @@ fn setup(
 
     commands
         .spawn(text::ttf(
-            left_margin, f32_tile_to_f32(0.5), util::z_pos::GUI_FG,
+            left_margin, f32_tile_to_f32(0.5), z_pos::GUI_FG,
             "€0", TextStyles::Heading, &fonts, Palette::D,
         ))
         .insert(MoneyText)
@@ -104,7 +104,7 @@ fn setup(
                 _ => (416, Palette::E, Palette::Transparent),
             };
             commands.spawn(sprite(
-                i, x, y, util::z_pos::GUI_BG,
+                i, x, y, z_pos::GUI_BG,
                 bg, fg, false, 0,
                 textures.tileset.clone(),
             ));
@@ -113,7 +113,7 @@ fn setup(
 
     // Cursor
     commands
-        .spawn(MainBundle::from_xyz(0., 0., util::z_pos::CURSOR))
+        .spawn(MainBundle::from_xyz(0., 0., z_pos::CURSOR))
         .with_children(|builder| {
             for (x, y, r) in [(0, 1, 0), (1, 1, 1), (1, 0, 2), (0, 0, 3)] {
                 builder.spawn(sprite(
@@ -131,11 +131,11 @@ fn setup(
         let width = body_size(tower.get_tiles()).x;
         commands
             .spawn(TowerButton(tower))
-            .insert(MainBundle::from_xyz(tile_to_f32(14 + 4 * i), f32_tile_to_f32(2.), util::z_pos::GUI_FG))
+            .insert(MainBundle::from_xyz(tile_to_f32(14 + 4 * i), f32_tile_to_f32(2.), z_pos::GUI_FG))
             .with_children(|builder| {
                 sprite_from_tile_with_alpha_and_x_offset(builder, tower.get_tiles(), &textures.tileset, 0., ButtonState::CanBuild.get_alpha(), (tile_to_f32(2) - width) / 2.);
                 builder.spawn(text::ttf_anchor(
-                    f32_tile_to_f32(1.0), f32_tile_to_f32(0.3), util::z_pos::GUI_FG,
+                    f32_tile_to_f32(1.0), f32_tile_to_f32(0.3), z_pos::GUI_FG,
                     &format!("€{}", tower.get_cost()),
                     TextStyles::Heading, &fonts, Palette::D,
                     Anchor::TopCenter,
@@ -152,7 +152,7 @@ fn setup(
     ] {
         commands
             .spawn(text::ttf_anchor(
-                f32_tile_to_f32(x), f32_tile_to_f32(y), util::z_pos::GUI_FG,
+                f32_tile_to_f32(x), f32_tile_to_f32(y), z_pos::GUI_FG,
                 b.get_text(), TextStyles::Heading, &fonts, Palette::D,
                 Anchor::CenterRight,
             ))
@@ -312,7 +312,7 @@ fn spawn_popup(
         .spawn(MainBundle::from_xyz(
             owner_pos.translation.x + info.width + f32_tile_to_f32(0.5),
             owner_pos.translation.y + info.height - tile_to_f32(3),
-            util::z_pos::POPUP_BG,
+            z_pos::POPUP_BG,
         ))
         .insert(Popup(owner_id))
         .insert(BattleUI)
@@ -337,7 +337,7 @@ fn spawn_popup(
                 }
             }
 
-            let fg_z = util::z_pos::POPUP_FG - util::z_pos::POPUP_BG;
+            let fg_z = z_pos::POPUP_FG - z_pos::POPUP_BG;
 
             for (text, style, y) in [(&info.name, TextStyles::Heading, 3.9), (&info.description, TextStyles::Body, 2.6)] {
                 builder.spawn(text::ttf(
@@ -473,7 +473,7 @@ fn place_tower(
             let tower_pos = util::grid_to_tower_pos(x, y, *t);
             commands
                 .spawn(TransparentTower)
-                .insert(MainBundle::from_xyz(tower_pos.x, tower_pos.y, util::z_pos::TOWERS))
+                .insert(MainBundle::from_xyz(tower_pos.x, tower_pos.y, z_pos::TRANSPARENT_TOWER))
                 .with_children(|builder| {
                     sprite_from_tile_with_alpha(builder, t.get_tiles(), &textures.tileset, 0., 0.85);
                 });
