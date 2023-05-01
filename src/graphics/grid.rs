@@ -247,13 +247,13 @@ impl RoadElement {
             }
             RoadElement::Rock => {
                 if is(w, RoadElement::Road) && is(s, RoadElement::Road) {
-                    tiles[2] = (0, 0, 321, 4, 3, true, 3);
+                    tiles[2] = (0, 0, 324, 4, 3, false, 0);
                 } else if is(w, RoadElement::Road) && is(n, RoadElement::Road) {
-                    tiles[0] = (0, 1, 321, 4, 3, true, 2);
+                    tiles[0] = (0, 1, 324, 4, 3, true, 2);
                 } else if is(e, RoadElement::Road) && is(s, RoadElement::Road) {
-                    tiles[3] = (1, 0, 321, 4, 3, true, 0);
+                    tiles[3] = (1, 0, 324, 4, 3, true, 0);
                 } else if is(e, RoadElement::Road) && is(n, RoadElement::Road) {
-                    tiles[1] = (1, 1, 321, 4, 3, true, 1);
+                    tiles[1] = (1, 1, 324, 4, 3, false, 2);
                 }
 
                 if adjacent.values().filter(|e| **e == RoadElement::Plain).count() >= 3 {
