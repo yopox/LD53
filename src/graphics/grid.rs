@@ -12,7 +12,7 @@ use crate::{GameState, logic};
 use crate::graphics::loading::Textures;
 use crate::graphics::sprite;
 use crate::graphics::sprites::TILE;
-use crate::logic::path_points::path_of_level_n;
+use crate::logic::path::path_of_level_n;
 use crate::util::{battle_z_from_y, size, z_pos};
 use crate::util::size::is_oob;
 
