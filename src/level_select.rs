@@ -145,10 +145,12 @@ fn update(
     if transition.is_some() { return; }
     let Some(cursor_pos) = util::cursor_pos(windows) else { return; };
 
+    let mut text = text.single_mut();
+    text.sections[0].value = "Select a level".to_string();
+
     for (pos, level) in &buttons {
         if !is_in(cursor_pos, pos.translation.xy(), vec2(tile_to_f32(1), tile_to_f32(1))) { continue; }
 
-        let mut text = text.single_mut();
         text.sections[0].value = match level.0 {
             6 => "Endless".to_string(),
             i => format!("Level {}", i),
