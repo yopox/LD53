@@ -77,6 +77,8 @@ impl WaveIterator {
                 1 => &WAVES_1,
                 2 => &WAVES_2,
                 3 => &WAVES_3,
+                4 => &WAVES_4,
+                5 => &WAVES_5,
                 _ => &WAVES,
             }
         )
@@ -158,7 +160,59 @@ lazy_static! {
         ].into(),
     ];
 
-static ref WAVES_1: Vec<Wave> = vec![
+    static ref WAVES_1: Vec<Wave> = vec![
+        [
+            (0.0, Drones::Simple1),
+        ].into(),
+        [
+            (0.0, Drones::Simple2),
+            (4.0, Drones::Simple3),
+        ].into(),
+        [
+            (0.0, Drones::Simple1),
+            (4.0, Drones::Simple3),
+            (8.0, Drones::Simple1),
+            (12.0, Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Medium2),
+        ].into(),
+    ];
+
+    static ref WAVES_2: Vec<Wave> = vec![
+        [
+            (0.0, Drones::Simple3),
+            (2.0, Drones::Simple3),
+        ].into(),
+        [
+            (0.0, Drones::Simple2),
+            (3.0, Drones::Simple1),
+            (6.0, Drones::Simple2),
+            (9.0, Drones::Simple1),
+        ].into(),
+        [
+            (0.0, Drones::Simple3),
+            (3.0, Drones::Simple2),
+            (6.0, Drones::Simple3),
+            (9.0, Drones::Simple2),
+            (12.0, Drones::Simple3),
+            (15.0, Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Medium1),
+        ].into(),
+        [
+            (0.0, Drones::Simple1),
+            (5.0, Drones::Medium2),
+            (10.0, Drones::Simple1),
+        ].into(),
+        [
+            (0.0, Drones::Medium3),
+            (8.0, Drones::Medium2),
+        ].into(),
+    ];
+
+    static ref WAVES_3: Vec<Wave> = vec![
         [
             (0.0, Drones::Simple1),
             (2.0, Drones::Simple1),
@@ -223,7 +277,7 @@ static ref WAVES_1: Vec<Wave> = vec![
         ].into(),
     ];
 
-    static ref WAVES_2: Vec<Wave> = vec![
+    static ref WAVES_4: Vec<Wave> = vec![
         [
             (0., Drones::Simple1),
             (2., Drones::Simple2),
@@ -279,7 +333,7 @@ static ref WAVES_1: Vec<Wave> = vec![
         ].into(),
     ];
 
-    static ref WAVES_3: Vec<Wave> = vec![
+    static ref WAVES_5: Vec<Wave> = vec![
           [
             (0., Drones::Simple1),
             (2., Drones::Simple2),
@@ -347,6 +401,9 @@ static ref WAVES_1: Vec<Wave> = vec![
             (3.0, Drones::Big1),
             (6.0, Drones::Big2),
             (9.0, Drones::Big2),
+        ].into(),
+        [
+            (0.0, Drones::Invader),
         ].into(),
     ];
 }
