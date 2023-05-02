@@ -51,7 +51,7 @@ fn main() {
                         size::SCALE * tile_to_f32(size::WIDTH),
                         size::SCALE * tile_to_f32(size::HEIGHT),
                     ).into(),
-                    title: "Sabotage inc.".to_string(),
+                    title: "Sabotage, Inc.".to_string(),
                     canvas: Some("#bevy".to_owned()),
                     ..default()
                 }),

@@ -75,7 +75,7 @@ fn setup(
             tile_to_f32(util::size::WIDTH / 2),
             f32_tile_to_f32(util::size::GUI_HEIGHT as f32 / 2. + 1.25),
             util::z_pos::GUI_BG,
-            "SABOTAGE INC.",
+            "SABOTAGE, INC.",
             TextStyles::Heading, &fonts, Palette::B,
             Anchor::Center,
         ))
