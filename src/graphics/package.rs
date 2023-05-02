@@ -7,7 +7,7 @@ use bevy::sprite::TextureAtlas;
 use enum_derived::Rand;
 
 use crate::{graphics, shot, util};
-use crate::battle::Money;
+use crate::battle::{CursorState, Money};
 use crate::graphics::sprites::TILE;
 use crate::logic::tower_stats::OMEGA_DAMAGES;
 use crate::music::{PlaySfxEvent, SFX};
@@ -77,21 +77,29 @@ pub fn collect_package(
     packages: Query<(&Package, &Transform, Entity)>,
     windows: Query<&Window>,
     mouse: Res<Input<MouseButton>>,
+    state: Option<Res<CursorState>>,
     mut money: ResMut<Money>,
 ) {
     let Some(cursor_pos) = util::cursor_pos(windows) else { return; };
     if !mouse.just_pressed(MouseButton::Left) { return; }
+    let sell = state.is_some() && state.unwrap().eq(&CursorState::Sell);
+
     for (p, t, id) in &packages {
         // Click on package
         if is_in(cursor_pos, t.translation.xy(), Vec2::new(tile_to_f32(1), tile_to_f32(1))) {
             commands.entity(id).despawn_recursive();
-            match p.kind {
-                PackageKind::Common => { money.0 += util::package::MONEY_SMALL; }
-                PackageKind::Money => { money.0 += util::package::MONEY_BIG; }
-                PackageKind::Coffee => {}
-                PackageKind::Cursed => {}
-                PackageKind::Omega => {
-                    spawn_bomb(shot::Bomb::new(cursor_pos, OMEGA_RANGE, OMEGA_DAMAGES), &mut commands);
+
+            if sell {
+                money.0 += util::package::MONEY_SELL;
+            } else {
+                match p.kind {
+                    PackageKind::Common => { money.0 += util::package::MONEY_SMALL; }
+                    PackageKind::Money => { money.0 += util::package::MONEY_BIG; }
+                    PackageKind::Coffee => {}
+                    PackageKind::Cursed => { if money.0 >= util::package::MONEY_CURSE { money.0 -= util::package::MONEY_CURSE; } }
+                    PackageKind::Omega => {
+                        spawn_bomb(shot::Bomb::new(cursor_pos, OMEGA_RANGE, OMEGA_DAMAGES), &mut commands);
+                    }
                 }
             }
 
