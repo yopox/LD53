@@ -59,6 +59,10 @@ fn setup(
     let path = logic::path::Path::from_points(points.clone());
     commands.insert_resource(CurrentPath(path));
 
+    draw_road(&mut commands, &textures, points);
+}
+
+pub fn draw_road(mut commands: &mut Commands, textures: &Res<Textures>, points: Vec<Vec2>) {
     let mut grid = vec![vec![RoadElement::Plain; size::WIDTH]; size::HEIGHT];
 
     // Draw road

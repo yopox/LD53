@@ -7,6 +7,7 @@ use crate::battle::BattlePlugin;
 use crate::collision::CollisionPlugin;
 use crate::game_over::GameOverPlugin;
 use crate::graphics::GraphicsPlugin;
+use crate::level_select::LevelSelectPlugin;
 use crate::music::MusicPlugin;
 use crate::title::TitlePlugin;
 use crate::util::size;
@@ -23,20 +24,28 @@ mod battle;
 mod collision;
 mod game_over;
 mod music;
+mod level_select;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
     #[default]
     Loading,
     Title,
+    Select,
     Battle,
     GameOver,
+}
+
+#[derive(Resource)]
+pub struct Progress {
+    pub level_unlocked: u8,
 }
 
 fn main() {
     App::new()
         .insert_resource(ClearColor(Palette::E.into()))
         .insert_resource(Msaa::Off)
+        .insert_resource(Progress { level_unlocked: 1 })
         .add_plugins(DefaultPlugins
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
@@ -60,6 +69,7 @@ fn main() {
         .add_plugin(BattlePlugin)
         .add_plugin(CollisionPlugin)
         .add_plugin(GameOverPlugin)
+        .add_plugin(LevelSelectPlugin)
         .add_startup_system(init)
         .run();
 }
