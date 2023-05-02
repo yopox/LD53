@@ -109,11 +109,20 @@ fn reset_state(
     mouse: Res<Input<MouseButton>>,
     keys: Res<Input<KeyCode>>,
     state: Option<ResMut<CursorState>>,
+    mut pause: ResMut<Pause>,
+    mut time: ResMut<Time>,
 ) {
     let Some(mut state) = state else { return; };
     // Return to [CursorState::Select]
     if mouse.just_pressed(MouseButton::Right) || keys.just_pressed(KeyCode::Escape) {
         state.set_if_neq(CursorState::Select);
+    }
+    if keys.just_pressed(KeyCode::Space) {
+        pause.0 = !pause.0;
+        match pause.0 {
+            true => time.pause(),
+            false => time.unpause(),
+        }
     }
 }
 
