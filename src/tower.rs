@@ -146,6 +146,14 @@ impl Towers {
             Towers::Scrambler => 50,
         }
     }
+
+    pub const fn unlocked_at(&self) -> u8 {
+        match self {
+            Towers::Lightning => 1,
+            Towers::PaintBomb => 2,
+            Towers::Scrambler => 4,
+        }
+    }
 }
 
 /// Place a tower on (x, y) in grid coordinates.

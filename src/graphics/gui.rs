@@ -14,6 +14,7 @@ use crate::graphics::grid::{Grid, RoadElement};
 use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
 use crate::graphics::text::TextStyles;
+use crate::level_select::CurrentLevel;
 use crate::music::{PlaySfxEvent, SFX};
 use crate::tower::{Tower, Towers};
 use crate::util::{is_in, z_pos};
@@ -483,6 +484,7 @@ fn update_tower_button(
     windows: Query<&Window>,
     mouse: Res<Input<MouseButton>>,
     money: Res<Money>,
+    current_level: Res<CurrentLevel>,
 ) {
     let Some(mut cursor_state) = cursor_state else { return; };
     let Some(cursor_pos) = util::cursor_pos(windows) else { return; };
@@ -490,7 +492,7 @@ fn update_tower_button(
 
     for (button, pos, id) in &buttons {
         let button_state: ButtonState;
-        if money.0 < button.0.get_cost() {
+        if money.0 < button.0.get_cost() || current_level.0 < button.0.unlocked_at() {
             button_state = ButtonState::CantBuild;
         } else if is_in(cursor_pos, pos.translation.xy(), Vec2::new(tile_to_f32(2), tile_to_f32(3))) {
             button_state = ButtonState::Selected;
