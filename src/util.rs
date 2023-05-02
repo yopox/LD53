@@ -60,7 +60,7 @@ pub mod z_pos {
     pub const GUI_FG: f32 = 12.;
     pub const POPUP_BG: f32 = 13.;
     pub const POPUP_FG: f32 = 14.;
-    pub const TRANSITION: f32 = 20.;
+    pub const TRANSITION: f32 = 80.;
 }
 
 pub mod transition {
