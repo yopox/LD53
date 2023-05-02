@@ -620,8 +620,12 @@ fn update_text_button(
 
         if clicked && hovered {
             match button {
-                TextButton::Upgrade => { cursor_state.set_if_neq(CursorState::Upgrade); }
-                TextButton::Sell => { cursor_state.set_if_neq(CursorState::Sell); }
+                TextButton::Upgrade => {
+                    if cursor_state.eq(&CursorState::Upgrade) { cursor_state.set_if_neq(CursorState::Select); } else { cursor_state.set_if_neq(CursorState::Upgrade); }
+                }
+                TextButton::Sell => {
+                    if cursor_state.eq(&CursorState::Sell) { cursor_state.set_if_neq(CursorState::Select); } else { cursor_state.set_if_neq(CursorState::Sell); }
+                }
                 TextButton::X2 => {
                     match x2.0 {
                         true => { time.set_relative_speed(0.5); }
