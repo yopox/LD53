@@ -110,7 +110,7 @@ fn test_path_some() {
 
 const GRID_WIDTH: f32 = 20.;
 
-pub const PATH_0: [Vec2; 10] = [
+pub const PATH_1: [Vec2; 10] = [
     vec2(0., 5.),
     vec2(3., 5.),
     vec2(3., 3.),
@@ -121,20 +121,6 @@ pub const PATH_0: [Vec2; 10] = [
     vec2(16., 3.),
     vec2(16., 5.),
     vec2(GRID_WIDTH, 5.),
-];
-
-const PATH_1: [Vec2; 11] = [
-    vec2(0., 2.),
-    vec2(2., 2.),
-    vec2(2., 6.),
-    vec2(6., 6.),
-    vec2(6., 2.),
-    vec2(10., 2.),
-    vec2(10., 6.),
-    vec2(14., 6.),
-    vec2(14., 2.),
-    vec2(18., 2.),
-    vec2(GRID_WIDTH, 2.),
 ];
 
 const PATH_2: [Vec2; 14] = [
@@ -201,7 +187,6 @@ const PATH_6: [Vec2; 2] = [
 
 pub fn path_of_level_n(level: u8) -> Vec<Vec2> {
     match level {
-        0 => PATH_0.to_vec(),
         1 => PATH_1.to_vec(),
         2 => PATH_2.to_vec(),
         3 => PATH_3.to_vec(),

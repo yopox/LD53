@@ -78,9 +78,9 @@ impl WaveIterator {
     pub fn from_level(level: u8) -> WaveIterator {
         WaveIterator::from_waves(
             match level {
-                0 => &WAVES_0,
                 1 => &WAVES_1,
                 2 => &WAVES_2,
+                3 => &WAVES_3,
                 _ => &WAVES,
             }
         )
@@ -162,7 +162,7 @@ lazy_static! {
         ].into(),
     ];
 
-static ref WAVES_0: Vec<Wave> = vec![
+static ref WAVES_1: Vec<Wave> = vec![
         [
             (0.0, Drones::Simple1),
             (2.0, Drones::Simple1),
@@ -227,7 +227,7 @@ static ref WAVES_0: Vec<Wave> = vec![
         ].into(),
     ];
 
-    static ref WAVES_1: Vec<Wave> = vec![
+    static ref WAVES_2: Vec<Wave> = vec![
         [
             (0., Drones::Simple1),
             (2., Drones::Simple2),
@@ -283,7 +283,7 @@ static ref WAVES_0: Vec<Wave> = vec![
         ].into(),
     ];
 
-    static ref WAVES_2: Vec<Wave> = vec![
+    static ref WAVES_3: Vec<Wave> = vec![
           [
             (0., Drones::Simple1),
             (2., Drones::Simple2),
