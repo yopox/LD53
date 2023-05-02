@@ -16,3 +16,6 @@ Cargo.lock
 
 assets/MRMOTEXT EX.png
 assets/*.ttf
+
+/dist
+dist.zip

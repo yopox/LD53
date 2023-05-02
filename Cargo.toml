@@ -15,6 +15,11 @@ opt-level = 1
 lto = true
 codegen-units = 1
 
+[features]
+dev = [
+    "bevy/bevy_dylib",
+]
+
 [dependencies]
 bevy = { version = "0.10", default-features = false, features = ["bevy_asset", "bevy_winit", "png", "x11"] }
 bevy_asset_loader = { version = "0.16", default-features = false, features = ["2d"] }
@@ -28,4 +33,10 @@ strum = "0.24"
 strum_macros = "0.24"
 enum-derived = "0.8.2"
 
-rand = { version = "0.8", features = ["alloc"]}
+rand = { version = "0.8", features = ["alloc"] }
+
+winit = { version = "0.28", default-features = false }
+image = { version = "0.24", default-features = false }
+
+[build-dependencies]
+embed-resource = "1.4"
