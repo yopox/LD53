@@ -6,7 +6,7 @@ use bevy_text_mode::TextModeTextureAtlasSprite;
 use strum::IntoEnumIterator;
 
 use crate::{GameState, tower, util};
-use crate::battle::{BattleUI, CursorState, Money};
+use crate::battle::{BattleUI, CursorState, Money, Pause, X2};
 use crate::collision::body_size;
 use crate::graphics::{circle, MainBundle, sprite, sprite_f32, sprite_from_tile_with_alpha, sprite_from_tile_with_alpha_and_x_offset, text};
 use crate::graphics::circle::Circles;
@@ -595,6 +595,9 @@ fn place_tower(
 fn update_text_button(
     cursor_state: Option<ResMut<CursorState>>,
     mut buttons: Query<(&TextButton, &Transform, &mut Text)>,
+    mut time: ResMut<Time>,
+    mut pause: ResMut<Pause>,
+    mut x2: ResMut<X2>,
     windows: Query<&Window>,
     mouse: Res<Input<MouseButton>>,
 ) {
@@ -610,13 +613,33 @@ fn update_text_button(
         let mut highlight = hovered;
 
         if *button == TextButton::Sell && cursor_state.eq(&CursorState::Sell) { highlight = true; } else if *button == TextButton::Upgrade && cursor_state.eq(&CursorState::Upgrade) { highlight = true; }
+        if *button == TextButton::Pause && pause.0 { highlight = true; }
+        if *button == TextButton::X2 && x2.0 { highlight = true; }
 
         if clicked && hovered {
             match button {
                 TextButton::Upgrade => { cursor_state.set_if_neq(CursorState::Upgrade); }
                 TextButton::Sell => { cursor_state.set_if_neq(CursorState::Sell); }
-                TextButton::X2 => {}
-                TextButton::Pause => {}
+                TextButton::X2 => {
+                    match x2.0 {
+                        true => { time.set_relative_speed(1.0 / 1.5); }
+                        false => {
+                            highlight = true;
+                            time.set_relative_speed(1.5);
+                        }
+                    }
+                    x2.0 = !x2.0;
+                }
+                TextButton::Pause => {
+                    match pause.0 {
+                        true => { time.unpause(); }
+                        false => {
+                            highlight = true;
+                            time.pause();
+                        }
+                    }
+                    pause.0 = !pause.0;
+                }
             }
         }
 

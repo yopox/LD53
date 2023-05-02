@@ -78,12 +78,23 @@ impl CursorState {
     }
 }
 
+#[derive(Resource)]
+pub struct Pause(pub bool);
+
+#[derive(Resource)]
+pub struct X2(pub bool);
+
 fn setup(
     mut commands: Commands,
     mut bgm: EventWriter<PlayBgmEvent>,
     level: Res<CurrentLevel>,
 ) {
-    bgm.send(PlayBgmEvent(if level.0 >= 6 { BGM::ThemeMadness } else { BGM::Theme }));
+    commands.insert_resource(Pause(false));
+    commands.insert_resource(X2(false));
+
+    bgm.send(PlayBgmEvent(if current_level.0 == 6 { BGM::ThemeMadness } else { BGM::Theme }));
+
+    let level = 0;
 
     commands.insert_resource(CursorState::Select);
     commands.insert_resource(Money(200));
