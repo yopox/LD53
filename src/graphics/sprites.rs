@@ -189,10 +189,10 @@ pub const TOWER_1: &'static [TILE] = &[
 pub const TOWER_2: &'static [TILE] = &[
     (0, 2, 160, 16, 15, false, 0),
     (1, 2, 161, 16, 15, false, 0),
-    (0, 1, 192, 16, 3, false, 0),
-    (1, 1, 193, 16, 3, false, 0),
-    (0, 0, 224, 16, 3, false, 0),
-    (1, 0, 225, 16, 3, false, 0),
+    (0, 1, 192, 16, 14, false, 0),
+    (1, 1, 193, 16, 14, false, 0),
+    (0, 0, 224, 16, 14, false, 0),
+    (1, 0, 225, 16, 14, false, 0),
 ];
 
 pub const TOWER_3: &'static [TILE] = &[

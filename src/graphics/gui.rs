@@ -141,7 +141,7 @@ fn setup(
         let width = body_size(tower.get_tiles()).x;
         commands
             .spawn(TowerButton(tower))
-            .insert(MainBundle::from_xyz(tile_to_f32(14 + 4 * i), f32_tile_to_f32(2.), z_pos::GUI_FG))
+            .insert(MainBundle::from_xyz(tile_to_f32(15 + 4 * i), f32_tile_to_f32(2.), z_pos::GUI_FG))
             .with_children(|builder| {
                 sprite_from_tile_with_alpha_and_x_offset(builder, tower.get_tiles(), &textures.tileset, 0., ButtonState::CanBuild.get_alpha(), (tile_to_f32(2) - width) / 2.);
                 builder.spawn(text::ttf_anchor(
