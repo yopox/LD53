@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_pkv::PkvStore;
 use bevy_text_mode::TextModePlugin;
 
 use graphics::palette::Palette;
@@ -42,7 +43,6 @@ fn main() {
     App::new()
         .insert_resource(ClearColor(Palette::E.into()))
         .insert_resource(Msaa::Off)
-        .insert_resource(Progress { level_unlocked: 1 })
         .add_plugins(DefaultPlugins
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
@@ -59,6 +59,7 @@ fn main() {
             })
         )
         .add_state::<GameState>()
+        .insert_resource(PkvStore::new("yopox", "Sabotage, Inc."))
         .add_plugin(TextModePlugin)
         .add_plugin(MusicPlugin)
         .add_plugin(GraphicsPlugin)
@@ -70,7 +71,7 @@ fn main() {
         .run();
 }
 
-fn init(mut commands: Commands) {
+fn init(mut commands: Commands, pkv: Res<PkvStore>) {
     commands.spawn(Camera2dBundle {
         transform: Transform {
             scale: Vec3::new(1. / size::SCALE, 1. / size::SCALE, 1.),
@@ -82,4 +83,10 @@ fn init(mut commands: Commands) {
         },
         ..Default::default()
     });
+
+    if let Ok(level) = pkv.get::<u8>("level") {
+        commands.insert_resource(Progress { level_unlocked: level });
+    } else {
+        commands.insert_resource(Progress { level_unlocked: 1 });
+    }
 }

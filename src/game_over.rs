@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::render::render_resource::ShaderType;
 use bevy::sprite::Anchor;
+use bevy_pkv::PkvStore;
 
 use crate::{GameState, Progress};
 use crate::battle::DronesStats;
@@ -38,6 +39,7 @@ fn setup(
     mut commands: Commands,
     mut bgm: EventWriter<PlayBgmEvent>,
     mut progress: ResMut<Progress>,
+    mut pkv: ResMut<PkvStore>,
     stats: ResMut<DronesStats>,
     current_level: Res<CurrentLevel>,
     fonts: Res<Fonts>,
@@ -74,7 +76,10 @@ fn setup(
         } else {
             texts.push(("Nice job! Can you survive the next level?".to_string(), 5));
         }
-        if progress.level_unlocked <= current_level.0 { progress.level_unlocked += 1; }
+        if progress.level_unlocked <= current_level.0 {
+            progress.level_unlocked += 1;
+            let _ = pkv.set("level", &progress.level_unlocked);
+        }
     }
 
     for (t, y) in texts {

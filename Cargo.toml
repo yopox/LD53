@@ -27,6 +27,7 @@ bevy_common_assets = { version = "0.6", features = ["ron"] }
 bevy_text_mode = "0.1.1"
 bevy_tweening = { version = "0.7", features = ["bevy_sprite"] }
 bevy_kira_audio = "0.15.0"
+bevy_pkv = { version = "0.7" }
 
 lazy_static = "1.4"
 strum = "0.24"
