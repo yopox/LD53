@@ -11,7 +11,7 @@ use crate::graphics::text::{TextStyles, ttf_anchor};
 use crate::graphics::transition::Transition;
 use crate::music::{BGM, PlayBgmEvent};
 use crate::util::is_in;
-use crate::util::size::tile_to_f32;
+use crate::util::size::{f32_tile_to_f32, tile_to_f32};
 
 pub struct LevelSelectPlugin;
 
@@ -60,7 +60,18 @@ fn setup(
     commands
         .spawn(ttf_anchor(
             tile_to_f32(util::size::WIDTH / 2),
-            tile_to_f32(util::size::GUI_HEIGHT / 2),
+            f32_tile_to_f32(util::size::GUI_HEIGHT as f32 / 2. + 1.25),
+            util::z_pos::GUI_BG,
+            "SABOTAGE INC.",
+            TextStyles::Heading, &fonts, Palette::B,
+            Anchor::Center,
+        ))
+        .insert(SelectUI);
+
+    commands
+        .spawn(ttf_anchor(
+            tile_to_f32(util::size::WIDTH / 2),
+            f32_tile_to_f32(util::size::GUI_HEIGHT as f32 / 2. - 1.25),
             util::z_pos::GUI_BG,
             "Select a level",
             TextStyles::Heading, &fonts, Palette::B,

@@ -9,12 +9,10 @@ use crate::game_over::GameOverPlugin;
 use crate::graphics::GraphicsPlugin;
 use crate::level_select::LevelSelectPlugin;
 use crate::music::MusicPlugin;
-use crate::title::TitlePlugin;
 use crate::util::size;
 use crate::util::size::tile_to_f32;
 
 mod util;
-mod title;
 mod graphics;
 mod logic;
 mod drones;
@@ -30,7 +28,6 @@ mod level_select;
 pub enum GameState {
     #[default]
     Loading,
-    Title,
     Select,
     Battle,
     GameOver,
@@ -54,7 +51,7 @@ fn main() {
                         size::SCALE * tile_to_f32(size::WIDTH),
                         size::SCALE * tile_to_f32(size::HEIGHT),
                     ).into(),
-                    title: "LD53".to_string(),
+                    title: "Sabotage inc.".to_string(),
                     canvas: Some("#bevy".to_owned()),
                     ..default()
                 }),
@@ -64,7 +61,6 @@ fn main() {
         .add_state::<GameState>()
         .add_plugin(TextModePlugin)
         .add_plugin(MusicPlugin)
-        .add_plugin(TitlePlugin)
         .add_plugin(GraphicsPlugin)
         .add_plugin(BattlePlugin)
         .add_plugin(CollisionPlugin)
