@@ -31,10 +31,10 @@ pub struct CurrentLevel(pub u8);
 impl CurrentLevel {
     pub const fn get_name(&self) -> &'static str {
         match self.0 {
-            0 => "Haunted streets",
-            1 => "Zorro was never there",
-            2 => "Crippling maze",
-            3 => "",
+            1 => "Haunted streets",
+            2 => "Zorro was never here",
+            3 => "Crippling maze",
+            4 => "Circle of death",
             6 => "Highway to hell",
             _ => ""
         }
