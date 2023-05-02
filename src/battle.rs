@@ -10,6 +10,7 @@ use crate::graphics::grid::{GridElement, update_z};
 use crate::graphics::loading::Textures;
 use crate::graphics::package::collect_package;
 use crate::graphics::palette::Palette;
+use crate::graphics::transition::Transition;
 use crate::level_select::CurrentLevel;
 use crate::logic::waves::{WaveIterator, WaveIteratorElement};
 use crate::music::{BGM, PlayBgmEvent};
@@ -161,13 +162,19 @@ fn spawn_waves(
 }
 
 fn skip_wave(
+    mut commands: Commands,
+    transition: Option<Res<Transition>>,
     mut wave_iterator: ResMut<WaveIterator>,
     enemies: Query<&Enemy>,
 ) {
+    if transition.is_some() { return; }
     if enemies.is_empty() {
         if wave_iterator.next.remaining_secs() >= 2.1 {
             let new_elapsed = wave_iterator.next.duration() - Duration::from_secs_f32(2.);
             wave_iterator.next.set_elapsed(new_elapsed);
+        }
+        if wave_iterator.upcoming.is_empty() {
+            commands.insert_resource(Transition::to(GameState::GameOver));
         }
     }
 }
