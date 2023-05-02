@@ -594,6 +594,7 @@ fn place_tower(
 }
 
 fn update_text_button(
+    mut sfx: EventWriter<PlaySfxEvent>,
     cursor_state: Option<ResMut<CursorState>>,
     mut buttons: Query<(&TextButton, &Transform, &mut Text)>,
     mut time: ResMut<Time>,
@@ -632,6 +633,7 @@ fn update_text_button(
                     x2.0 = !x2.0;
                 }
                 TextButton::Pause => {
+                    sfx.send(PlaySfxEvent(SFX::Pause));
                     match pause.0 {
                         true => { time.unpause(); }
                         false => {
