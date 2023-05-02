@@ -48,26 +48,33 @@ fn setup(
         ("You've seen all drones!".into(), 16),
     ];
 
+    let mut won = true;
+
     if stats.survived == 0 {
         texts.push((format!("You've taken down all {} of them!", stats.killed), 11));
-        texts.push((format!("Nice job! See you at next level..."), 6));
     } else if stats.killed == 0 {
+        won = false;
         texts.push(("You've not taken down a single drone.".to_string(), 11));
         texts.push(("Do I need to teach you how to build a tower?".to_string(), 6));
     } else {
         texts.push((format!("You've taken down {} of them,", stats.killed), 11));
-        texts.push((format!("but {} of them survived.", stats.killed), 8));
+        texts.push((format!("but {} of them survived.", stats.survived), 8));
         if stats.survived > 5 {
+            won = false;
             texts.push((format!("Try harder next time..."), 5));
-        } else {
-            let text = if current_level.0 >= 5 {
-                "Nice job! Thank you for playing our game. Endless mode coming soon!"
-            } else {
-                "Nice job! Can you survive next level?"
-            }.to_string();
-            texts.push((text, 5));
-            if progress.level_unlocked <= current_level.0 { progress.level_unlocked += 1; }
         }
+    }
+
+    if won {
+        if current_level.0 == 6 {
+            texts.push(("You are the new boss of Sabotage, Inc.!".to_string(), 5));
+        } else if current_level.0 == 5 {
+            texts.push(("Nice job! Thank you for playing our game.".to_string(), 5));
+            texts.push(("Can you survive the endless mode?".to_string(), 2));
+        } else {
+            texts.push(("Nice job! Can you survive the next level?".to_string(), 5));
+        }
+        if progress.level_unlocked <= current_level.0 { progress.level_unlocked += 1; }
     }
 
     for (t, y) in texts {
