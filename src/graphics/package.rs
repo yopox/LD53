@@ -25,8 +25,8 @@ pub enum PackageKind {
     Common,
     #[weight(2)]
     Money,
-    #[weight(2)]
-    Coffee,
+    // #[weight(0)]
+    // Coffee,
     #[weight(2)]
     Cursed,
     Omega,
@@ -37,8 +37,8 @@ impl PackageKind {
         return match self {
             PackageKind::Common => 393,
             PackageKind::Money => 395,
-            PackageKind::Coffee => 397,
-            PackageKind::Cursed => 399,
+            // PackageKind::Coffee => 397,
+            PackageKind::Cursed => 397,
             PackageKind::Omega => 401,
         } as usize;
     }
@@ -96,8 +96,8 @@ pub fn collect_package(
                 match p.kind {
                     PackageKind::Common => { money.0 += util::package::MONEY_SMALL; }
                     PackageKind::Money => { money.0 += util::package::MONEY_BIG; }
-                    PackageKind::Coffee => {}
-                    PackageKind::Cursed => { if money.0 >= util::package::MONEY_CURSE { money.0 -= util::package::MONEY_CURSE; } }
+                    // PackageKind::Coffee => {}
+                    PackageKind::Cursed => { if money.0 >= util::package::MONEY_CURSE { money.0 -= util::package::MONEY_CURSE; } else { money.0 = 0; } }
                     PackageKind::Omega => {
                         spawn_bomb(shot::Bomb::new(cursor_pos, OMEGA_RANGE, OMEGA_DAMAGES), &mut commands);
                     }

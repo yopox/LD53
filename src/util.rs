@@ -89,7 +89,7 @@ pub mod package {
     pub const MONEY_SELL: u16 = 10;
     pub const MONEY_SMALL: u16 = 20;
     pub const MONEY_BIG: u16 = 60;
-    pub const MONEY_CURSE: u16 = 50;
+    pub const MONEY_CURSE: u16 = 30;
 }
 
 pub mod misc {
