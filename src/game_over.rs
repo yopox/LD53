@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::render::render_resource::ShaderType;
 use bevy::sprite::Anchor;
 
 use crate::{GameState, Progress};
@@ -88,10 +89,17 @@ fn cleanup(
 }
 
 fn exit_game_over(
-    keys: Res<Input<KeyCode>>,
     mut commands: Commands,
+    keys: Res<Input<KeyCode>>,
+    mouse: Res<Input<MouseButton>>,
+    transition: Option<Res<Transition>>,
 ) {
-    for _ in keys.get_just_released() {
-        commands.insert_resource(Transition::to(GameState::Select))
+    if transition.is_some() { return; }
+    for _ in keys.get_just_pressed() {
+        commands.insert_resource(Transition::to(GameState::Select));
+        return;
+    }
+    if mouse.just_pressed(MouseButton::Left) {
+        commands.insert_resource(Transition::to(GameState::Select));
     }
 }
