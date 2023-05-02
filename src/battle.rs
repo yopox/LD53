@@ -92,7 +92,11 @@ fn setup(
     commands.insert_resource(Pause(false));
     commands.insert_resource(X2(false));
 
-    bgm.send(PlayBgmEvent(if level.0 == 6 { BGM::ThemeMadness } else { BGM::Theme }));
+    bgm.send(PlayBgmEvent(match level.0 {
+        6 => BGM::ThemeMadness,
+        3 | 5 => BGM::Boss,
+        _ => BGM::Theme,
+    }));
 
     commands.insert_resource(CursorState::Select);
     commands.insert_resource(Money(200));
