@@ -91,6 +91,7 @@ pub fn collect_package(
 
             if sell {
                 money.0 += util::package::MONEY_SELL;
+                sfx.send(PlaySfxEvent(SFX::SellTower));
             } else {
                 match p.kind {
                     PackageKind::Common => { money.0 += util::package::MONEY_SMALL; }
@@ -101,12 +102,12 @@ pub fn collect_package(
                         spawn_bomb(shot::Bomb::new(cursor_pos, OMEGA_RANGE, OMEGA_DAMAGES), &mut commands);
                     }
                 }
+                match p.kind {
+                    PackageKind::Cursed => sfx.send(PlaySfxEvent(SFX::PackageMalus)),
+                    _ => sfx.send(PlaySfxEvent(SFX::PackageBonus)),
+                }
             }
 
-            match p.kind {
-                PackageKind::Cursed => sfx.send(PlaySfxEvent(SFX::PackageMalus)),
-                _ => sfx.send(PlaySfxEvent(SFX::PackageBonus)),
-            }
         }
     }
 }
