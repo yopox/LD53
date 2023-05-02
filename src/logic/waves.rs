@@ -66,7 +66,7 @@ impl WaveIterator {
         result.reverse();
 
         WaveIterator {
-            next: Timer::new(Duration::ZERO, TimerMode::Once),
+            next: Timer::new(Duration::from_secs_f32(2.), TimerMode::Once),
             upcoming: result,
         }
     }
@@ -79,6 +79,8 @@ impl WaveIterator {
         WaveIterator::from_waves(
             match level {
                 0 => &WAVES_0,
+                1 => &WAVES_1,
+                2 => &WAVES_2,
                 _ => &WAVES,
             }
         )
@@ -212,7 +214,7 @@ static ref WAVES_0: Vec<Wave> = vec![
         ].into(),
         [
             (0.0, Drones::Medium1),
-            (3.0, Drones::Medium2),
+            (3.0, Drones::Medium4),
             (8.0, Drones::Simple2),
             (10., Drones::Simple3),
             (12., Drones::Simple1),
@@ -221,7 +223,134 @@ static ref WAVES_0: Vec<Wave> = vec![
             (0., Drones::Medium1),
             (3., Drones::Medium2),
             (6., Drones::Medium3),
-            (9., Drones::Medium3),
+            (9., Drones::Medium4),
+        ].into(),
+    ];
+
+    static ref WAVES_1: Vec<Wave> = vec![
+        [
+            (0., Drones::Simple1),
+            (2., Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Simple1),
+            (1.5, Drones::Simple3),
+            (3.0, Drones::Simple1),
+            (4.5, Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Simple1),
+            (1.0, Drones::Simple3),
+            (3.0, Drones::Simple1),
+            (4.5, Drones::Simple2),
+            (6.0, Drones::Simple1),
+            (7.5, Drones::Simple3),
+            (9.0, Drones::Simple1),
+            (10.5, Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Medium1),
+            (1.5, Drones::Medium3),
+            (3.0, Drones::Medium4),
+            (4.5, Drones::Medium2),
+        ].into(),
+        [
+            (0.0, Drones::Medium1),
+            (2.0, Drones::Medium3),
+            (4.0, Drones::Medium4),
+            (6.0, Drones::Medium2),
+            (10.0, Drones::Simple1),
+            (11.5, Drones::Simple3),
+            (13., Drones::Simple1),
+            (14., Drones::Simple2),
+            (15., Drones::Simple1),
+            (16., Drones::Simple3),
+        ].into(),
+        [
+            (0.0, Drones::Medium1),
+            (2.0, Drones::Medium3),
+            (4.0, Drones::Medium4),
+            (6.0, Drones::Medium2),
+            (8.0, Drones::Medium3),
+            (10., Drones::Medium1),
+            (12., Drones::Medium3),
+            (14., Drones::Medium4),
+            (16., Drones::Medium2),
+            (18., Drones::Medium1),
+        ].into(),
+        [
+            (0., Drones::Big1),
+        ].into(),
+    ];
+
+    static ref WAVES_2: Vec<Wave> = vec![
+          [
+            (0., Drones::Simple1),
+            (2., Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Simple1),
+            (1.5, Drones::Simple3),
+            (3.0, Drones::Simple1),
+            (4.5, Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Medium4),
+            (3.0, Drones::Medium3),
+            (8.0, Drones::Simple1),
+            (9.5, Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Medium1),
+            (3.0, Drones::Medium3),
+            (6.0, Drones::Medium2),
+            (10., Drones::Simple1),
+            (12., Drones::Simple2),
+            (14., Drones::Simple3),
+            (16., Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Medium1),
+            (2.0, Drones::Medium3),
+            (4.0, Drones::Medium2),
+            (6.0, Drones::Medium3),
+            (10.0, Drones::Simple1),
+            (11.5, Drones::Simple2),
+            (13.0, Drones::Simple3),
+            (14.5, Drones::Simple2),
+            (16.0, Drones::Simple1),
+            (17.5, Drones::Simple2),
+            (19.0, Drones::Simple3),
+            (20.5, Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Big1),
+        ].into(),
+        [
+            (0.0, Drones::Big2),
+            (4.0, Drones::Big1),
+        ].into(),
+        [
+            (0.0, Drones::Big2),
+            (10., Drones::Simple1),
+            (12., Drones::Simple2),
+            (14., Drones::Simple3),
+            (16., Drones::Simple2),
+            (18., Drones::Simple3),
+        ].into(),
+        [
+            (0.0, Drones::Big1),
+            (10., Drones::Medium1),
+            (12., Drones::Medium3),
+            (14., Drones::Medium2),
+            (16., Drones::Medium3),
+            (18., Drones::Medium1),
+        ].into(),
+        [
+            (0.0, Drones::Big2),
+            (3.0, Drones::Big1),
+            (6.0, Drones::Big2),
+            (9.0, Drones::Big2),
         ].into(),
     ];
 }

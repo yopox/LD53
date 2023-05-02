@@ -11,6 +11,7 @@ use crate::{GameState, logic};
 use crate::graphics::loading::Textures;
 use crate::graphics::sprite;
 use crate::graphics::sprites::TILE;
+use crate::level_select::CurrentLevel;
 use crate::logic::path::path_of_level_n;
 use crate::util::{battle_z_from_y, size, z_pos};
 use crate::util::size::is_oob;
@@ -53,9 +54,9 @@ pub struct GridElement;
 fn setup(
     mut commands: Commands,
     textures: Res<Textures>,
+    level: Res<CurrentLevel>,
 ) {
-    let level: u8 = 0;
-    let points = path_of_level_n(level);
+    let points = path_of_level_n(level.0);
     let path = logic::path::Path::from_points(points.clone());
     commands.insert_resource(CurrentPath(path));
 

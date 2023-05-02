@@ -136,7 +136,7 @@ impl Towers {
 
     /// Returns the delay on tower construction
     pub const fn initial_delay(&self) -> f32 {
-        0.
+        3.
     }
 
     pub const fn get_cost(&self) -> u16 {

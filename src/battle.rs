@@ -81,16 +81,14 @@ impl CursorState {
 fn setup(
     mut commands: Commands,
     mut bgm: EventWriter<PlayBgmEvent>,
-    current_level: Res<CurrentLevel>,
+    level: Res<CurrentLevel>,
 ) {
-    bgm.send(PlayBgmEvent(if current_level.0 == 6 { BGM::ThemeMadness } else { BGM::Theme }));
-
-    let level = 0;
+    bgm.send(PlayBgmEvent(if level.0 >= 6 { BGM::ThemeMadness } else { BGM::Theme }));
 
     commands.insert_resource(CursorState::Select);
     commands.insert_resource(Money(200));
     commands.insert_resource(DronesStats::default());
-    commands.insert_resource(WaveIterator::from_level(level));
+    commands.insert_resource(WaveIterator::from_level(level.0));
 }
 
 fn reset_state(
@@ -154,8 +152,8 @@ fn skip_wave(
     enemies: Query<&Enemy>,
 ) {
     if enemies.is_empty() {
-        if wave_iterator.next.remaining_secs() >= 1.1 {
-            let new_elapsed = wave_iterator.next.duration() - Duration::from_secs_f32(1.);
+        if wave_iterator.next.remaining_secs() >= 2.1 {
+            let new_elapsed = wave_iterator.next.duration() - Duration::from_secs_f32(2.);
             wave_iterator.next.set_elapsed(new_elapsed);
         }
     }
