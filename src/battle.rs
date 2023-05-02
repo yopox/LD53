@@ -168,7 +168,7 @@ fn skip_wave(
     enemies: Query<&Enemy>,
 ) {
     if transition.is_some() { return; }
-    if enemies.is_empty() {
+    if enemies.is_empty() && wave_iterator.next.elapsed().gt(&Duration::from_secs(1)) {
         if wave_iterator.next.remaining_secs() >= 2.1 {
             let new_elapsed = wave_iterator.next.duration() - Duration::from_secs_f32(2.);
             wave_iterator.next.set_elapsed(new_elapsed);
