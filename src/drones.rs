@@ -8,7 +8,7 @@ use bevy_tweening::{Animator, Delay, EaseFunction, Tween, TweenCompleted};
 use bevy_tweening::lens::TransformPositionLens;
 use strum_macros::EnumIter;
 
-use crate::battle::DronesStats;
+use crate::battle::{BattleUI, DronesStats};
 use crate::collision::{body_size, BodyType, Contact, HitBox};
 use crate::graphics::{sprite_f32, tween};
 use crate::graphics::animation::Wiggle;
@@ -243,6 +243,7 @@ fn drop_package(
         .insert(package.clone())
         .insert(ClickablePackage)
         .insert(GridElement)
+        .insert(BattleUI)
         .insert(Animator::new(Tween::new(
             EaseFunction::CubicOut,
             Duration::from_millis(util::tweening::PACKAGE_DROP),
