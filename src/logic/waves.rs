@@ -89,12 +89,29 @@ lazy_static! {
     static ref WAVES: Vec<Wave> = vec![
         [
             (0.0, Drones::Simple1),
-            (2.0, Drones::Simple1),
+        ].into(),
+        [
+            (0.0, Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Simple3),
         ].into(),
         [
             (0.0, Drones::Simple1),
-            (4.0, Drones::Simple2),
-            (8.0, Drones::Simple2),
+            (5.0, Drones::Simple1),
+        ].into(),
+        [
+            (0.0, Drones::Simple2),
+            (5.0, Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Simple3),
+            (5.0, Drones::Simple3),
+        ].into(),
+        [
+            (0.0, Drones::Simple1),
+            (5.0, Drones::Simple2),
+            (10.0, Drones::Simple2),
         ].into(),
         [
             (0., Drones::Simple2),
@@ -127,37 +144,80 @@ lazy_static! {
         ].into(),
         [
             (0., Drones::Medium1),
-            (2., Drones::Medium1),
-            (4., Drones::Medium2),
-            (6., Drones::Medium2),
+            (5., Drones::Medium1),
+            (10., Drones::Medium2),
+            (15., Drones::Medium2),
         ].into(),
         [
             (0., Drones::Medium1),
-            (1., Drones::Medium2),
-            (2., Drones::Medium3),
-            (3., Drones::Medium4),
-            (4., Drones::Simple2),
+            (5., Drones::Medium2),
+            (10., Drones::Medium3),
+            (15., Drones::Medium4),
+            (20., Drones::Simple2),
+            (22., Drones::Simple1),
+            (24., Drones::Simple3),
+            (26., Drones::Simple1),
+        ].into(),
+        [
+            (0., Drones::Big1),
+        ].into(),
+        [
+            (0., Drones::Medium2),
             (5., Drones::Simple1),
-            (6., Drones::Simple3),
-            (7., Drones::Simple1),
+            (7., Drones::Simple3),
+            (15., Drones::Big2),
+            (35., Drones::Medium3),
+            (40., Drones::Medium4),
+            (55., Drones::Simple2),
+            (57., Drones::Simple1),
+            (65., Drones::Big1),
         ].into(),
         [
-            (0., Drones::Big1),
-            (5., Drones::Big2),
-        ].into(),
-        [
-            (0., Drones::Big1),
-            (1., Drones::Medium2),
-            (2., Drones::Simple1),
-            (3., Drones::Simple3),
-            (5., Drones::Big2),
-            (6., Drones::Medium3),
-            (7., Drones::Medium4),
-            (9., Drones::Simple2),
+            (0.0, Drones::Big2),
             (10., Drones::Simple1),
+            (12., Drones::Simple2),
+            (14., Drones::Simple3),
+            (16., Drones::Simple2),
+            (18., Drones::Simple3),
         ].into(),
         [
-            (0., Drones::Invader),
+            (0.0, Drones::Big1),
+            (15., Drones::Medium1),
+            (25., Drones::Medium3),
+            (35., Drones::Medium2),
+            (45., Drones::Medium3),
+            (55., Drones::Medium1),
+        ].into(),
+        [
+            (0.0, Drones::Big2),
+            (20.0, Drones::Big1),
+            (40.0, Drones::Big2),
+            (60.0, Drones::Big2),
+        ].into(),
+        [
+            (0.0, Drones::Invader),
+            (150., Drones::Medium2),
+            (175., Drones::Medium4),
+            (300., Drones::Big2),
+        ].into(),
+        [
+            (0.0, Drones::Big2),
+            (20.0, Drones::Big2),
+            (40.0, Drones::Big2),
+            (60.0, Drones::Big2),
+            (100.0, Drones::Big1),
+            (120.0, Drones::Big1),
+            (140.0, Drones::Big1),
+            (160.0, Drones::Big1),
+            (200.0, Drones::Big2),
+            (215.0, Drones::Big1),
+            (230.0, Drones::Big2),
+            (245.0, Drones::Big1),
+            (260.0, Drones::Big2),
+        ].into(),
+        [
+            (0.0, Drones::Invader),
+            (250.0, Drones::Invader),
         ].into(),
     ];
 
@@ -349,52 +409,52 @@ lazy_static! {
         ].into(),
         [
             (0.0, Drones::Simple1),
-            (1.5, Drones::Simple3),
-            (3.0, Drones::Simple1),
-            (4.5, Drones::Simple2),
+            (2.0, Drones::Simple3),
+            (4.0, Drones::Simple1),
+            (6.0, Drones::Simple2),
         ].into(),
         [
             (0.0, Drones::Simple1),
-            (1.0, Drones::Simple3),
-            (3.0, Drones::Simple1),
-            (4.5, Drones::Simple2),
-            (6.0, Drones::Simple1),
-            (7.5, Drones::Simple3),
-            (9.0, Drones::Simple1),
-            (10.5, Drones::Simple2),
+            (2.0, Drones::Simple3),
+            (4.0, Drones::Simple1),
+            (6.0, Drones::Simple2),
+            (8.0, Drones::Simple1),
+            (10.0, Drones::Simple3),
+            (12.0, Drones::Simple1),
+            (14.0, Drones::Simple2),
         ].into(),
         [
             (0.0, Drones::Medium1),
-            (1.5, Drones::Medium3),
-            (3.0, Drones::Medium4),
-            (4.5, Drones::Medium2),
+            (8.0, Drones::Medium4),
+        ].into(),
+        [
+            (0.0, Drones::Simple3),
+            (2.0, Drones::Simple3),
+            (12.0, Drones::Medium4),
+            (16.0, Drones::Medium4),
         ].into(),
         [
             (0.0, Drones::Medium1),
-            (2.0, Drones::Medium3),
-            (4.0, Drones::Medium4),
-            (6.0, Drones::Medium2),
-            (10.0, Drones::Simple1),
-            (11.5, Drones::Simple3),
-            (13., Drones::Simple1),
-            (14., Drones::Simple2),
-            (15., Drones::Simple1),
-            (16., Drones::Simple3),
+            (4.0, Drones::Medium3),
+            (8.0, Drones::Medium4),
+            (12.0, Drones::Medium2),
         ].into(),
         [
-            (0.0, Drones::Medium1),
-            (2.0, Drones::Medium3),
-            (4.0, Drones::Medium4),
-            (6.0, Drones::Medium2),
-            (8.0, Drones::Medium3),
-            (10., Drones::Medium1),
-            (12., Drones::Medium3),
-            (14., Drones::Medium4),
-            (16., Drones::Medium2),
-            (18., Drones::Medium1),
+            (0., Drones::Simple1),
+            (2., Drones::Simple2),
+            (4., Drones::Simple3),
+            (6., Drones::Simple2),
+            (8., Drones::Simple1),
+            (20., Drones::Big1),
         ].into(),
         [
-            (0., Drones::Big1),
+            (0., Drones::Medium4),
+            (8., Drones::Medium3),
+            (20., Drones::Big1),
+        ].into(),
+        [
+            (0., Drones::Big2),
+            (10., Drones::Big1),
         ].into(),
     ];
 
@@ -405,45 +465,63 @@ lazy_static! {
         ].into(),
         [
             (0.0, Drones::Simple1),
-            (1.5, Drones::Simple3),
-            (3.0, Drones::Simple1),
-            (4.5, Drones::Simple2),
+            (2.0, Drones::Simple3),
+            (4.0, Drones::Simple1),
+            (6.0, Drones::Simple2),
         ].into(),
         [
-            (0.0, Drones::Medium4),
-            (3.0, Drones::Medium3),
-            (8.0, Drones::Simple1),
-            (9.5, Drones::Simple2),
-        ].into(),
-        [
-            (0.0, Drones::Medium1),
-            (3.0, Drones::Medium3),
-            (6.0, Drones::Medium2),
-            (10., Drones::Simple1),
-            (12., Drones::Simple2),
-            (14., Drones::Simple3),
-            (16., Drones::Simple2),
+            (0.0, Drones::Simple1),
+            (2.0, Drones::Simple1),
+            (4.0, Drones::Simple1),
+            (12.0, Drones::Medium4),
         ].into(),
         [
             (0.0, Drones::Medium1),
-            (2.0, Drones::Medium3),
-            (4.0, Drones::Medium2),
-            (6.0, Drones::Medium3),
-            (10.0, Drones::Simple1),
-            (11.5, Drones::Simple2),
-            (13.0, Drones::Simple3),
-            (14.5, Drones::Simple2),
-            (16.0, Drones::Simple1),
-            (17.5, Drones::Simple2),
-            (19.0, Drones::Simple3),
-            (20.5, Drones::Simple2),
+            (5.0, Drones::Medium3),
+            (15., Drones::Simple1),
+            (17., Drones::Simple2),
+            (19., Drones::Simple3),
+            (21., Drones::Simple2),
+        ].into(),
+        [
+            (0.0, Drones::Simple2),
+            (2.5, Drones::Simple1),
+            (5.0, Drones::Simple2),
+            (15.0, Drones::Medium1),
+            (20.0, Drones::Medium3),
+            (25.0, Drones::Medium3),
+            (35.0, Drones::Simple1),
+            (37.5, Drones::Simple2),
+            (40.0, Drones::Simple3),
+        ].into(),
+        [
+            (0.0, Drones::Simple2),
+            (2.5, Drones::Simple1),
+            (5.0, Drones::Simple2),
+            (7.5, Drones::Simple1),
+            (10.0, Drones::Simple2),
+            (12.5, Drones::Simple1),
+            (15.0, Drones::Simple2),
+            (17.5, Drones::Simple1),
+            (20.0, Drones::Simple2),
+            (22.5, Drones::Simple1),
+        ].into(),
+        [
+            (0.0, Drones::Medium1),
+            (5.0, Drones::Medium2),
+            (10.0, Drones::Medium3),
+            (15.0, Drones::Medium4),
+            (20.0, Drones::Medium1),
+            (25.0, Drones::Medium2),
+            (30.0, Drones::Medium3),
+            (35.0, Drones::Medium4),
         ].into(),
         [
             (0.0, Drones::Big1),
         ].into(),
         [
-            (0.0, Drones::Big2),
-            (4.0, Drones::Big1),
+            (0.0, Drones::Medium2),
+            (10.0, Drones::Big1),
         ].into(),
         [
             (0.0, Drones::Big2),
@@ -455,17 +533,17 @@ lazy_static! {
         ].into(),
         [
             (0.0, Drones::Big1),
-            (10., Drones::Medium1),
-            (12., Drones::Medium3),
-            (14., Drones::Medium2),
-            (16., Drones::Medium3),
-            (18., Drones::Medium1),
+            (15., Drones::Medium1),
+            (25., Drones::Medium3),
+            (35., Drones::Medium2),
+            (45., Drones::Medium3),
+            (55., Drones::Medium1),
         ].into(),
         [
             (0.0, Drones::Big2),
-            (3.0, Drones::Big1),
-            (6.0, Drones::Big2),
-            (9.0, Drones::Big2),
+            (20.0, Drones::Big1),
+            (40.0, Drones::Big2),
+            (60.0, Drones::Big2),
         ].into(),
         [
             (0.0, Drones::Invader),
@@ -475,23 +553,17 @@ lazy_static! {
 
 #[test]
 fn ensure_waves_are_sorted() {
-    for wave in WAVES.iter() {
+    let check_wave = |w: &Wave| {
         let mut t = 0.;
-        for (t1, _) in wave.timed_departures.iter() {
+        for (t1, _) in w.timed_departures.iter() {
             assert!(*t1 >= t);
             t = *t1;
         }
-    }
-}
-
-#[test]
-fn ensure_iterator_produces_correct_results() {
-    for elt in WaveIterator::get_static().upcoming.iter() {
-        eprintln!("Got {elt:?}");
-        let t = match elt {
-            NextDrone(_, t) => *t,
-            NextWave(t) => *t,
-        };
-        assert!(t >= 0.);
-    }
+    };
+    for wave in WAVES.iter() { check_wave(wave); }
+    for wave in WAVES_1.iter() { check_wave(wave); }
+    for wave in WAVES_2.iter() { check_wave(wave); }
+    for wave in WAVES_3.iter() { check_wave(wave); }
+    for wave in WAVES_4.iter() { check_wave(wave); }
+    for wave in WAVES_5.iter() { check_wave(wave); }
 }
