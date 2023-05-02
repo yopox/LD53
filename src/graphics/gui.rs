@@ -624,10 +624,10 @@ fn update_text_button(
                 TextButton::Sell => { cursor_state.set_if_neq(CursorState::Sell); }
                 TextButton::X2 => {
                     match x2.0 {
-                        true => { time.set_relative_speed(1.0 / 1.5); }
+                        true => { time.set_relative_speed(0.5); }
                         false => {
                             highlight = true;
-                            time.set_relative_speed(1.5);
+                            time.set_relative_speed(2.0);
                         }
                     }
                     x2.0 = !x2.0;
