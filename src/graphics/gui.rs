@@ -79,17 +79,18 @@ fn setup(
     mut commands: Commands,
     fonts: Res<Fonts>,
     textures: Res<Textures>,
+    level: Res<CurrentLevel>,
 ) {
     // Text
     let left_margin = f32_tile_to_f32(2.);
     for (x, y, text, style) in [
-        (left_margin, f32_tile_to_f32(3.6), "Level 1", TextStyles::Heading),
-        (left_margin, f32_tile_to_f32(2.1), "Haunted streets", TextStyles::Body),
+        (left_margin, f32_tile_to_f32(3.6), format!("Level {}", level.0), TextStyles::Heading),
+        (left_margin, f32_tile_to_f32(2.1), level.get_name().to_string(), TextStyles::Body),
     ] {
         commands
             .spawn(text::ttf(
                 x, y, z_pos::GUI_FG,
-                text, style, &fonts, Palette::D,
+                &text, style, &fonts, Palette::D,
             ))
             .insert(BattleUI)
         ;

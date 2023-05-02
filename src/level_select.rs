@@ -28,6 +28,19 @@ impl Plugin for LevelSelectPlugin {
 #[derive(Resource)]
 pub struct CurrentLevel(pub u8);
 
+impl CurrentLevel {
+    pub const fn get_name(&self) -> &'static str {
+        match self.0 {
+            0 => "Haunted streets",
+            1 => "Zorro was never there",
+            2 => "Crippling maze",
+            3 => "",
+            6 => "Highway to hell",
+            _ => ""
+        }
+    }
+}
+
 #[derive(Component)]
 struct SelectUI;
 

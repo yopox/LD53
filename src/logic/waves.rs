@@ -71,10 +71,6 @@ impl WaveIterator {
         }
     }
 
-    pub fn get_static() -> WaveIterator {
-        WaveIterator::from_waves(&WAVES)
-    }
-
     pub fn from_level(level: u8) -> WaveIterator {
         WaveIterator::from_waves(
             match level {

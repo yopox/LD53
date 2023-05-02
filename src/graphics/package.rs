@@ -5,7 +5,6 @@ use bevy::math::{Vec2, Vec3Swizzles};
 use bevy::prelude::{Commands, Component, Entity, EventWriter, MouseButton, Query, Res, ResMut, Transform, Window};
 use bevy::sprite::TextureAtlas;
 use enum_derived::Rand;
-use rand::RngCore;
 
 use crate::{graphics, shot, util};
 use crate::battle::Money;

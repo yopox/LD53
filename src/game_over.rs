@@ -59,7 +59,12 @@ fn setup(
         if stats.survived > 5 {
             texts.push((format!("Try harder next time..."), 5));
         } else {
-            texts.push((format!("Nice job! Can you survive next level?"), 5));
+            let text = if current_level.0 >= 5 {
+                "Nice job! Thank you for playing our game. Endless mode coming soon!"
+            } else {
+                "Nice job! Can you survive next level?"
+            }.to_string();
+            texts.push((text, 5));
             if progress.level_unlocked <= current_level.0 { progress.level_unlocked += 1; }
         }
     }
