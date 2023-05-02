@@ -111,7 +111,7 @@ fn setup(
         (17, 3, 423, 4),
         (16, 3, 422, 6),
     ] {
-        let unlocked = level <= progress.level_unlocked || level == 6 && progress.level_unlocked >= 3;
+        let unlocked = level <= progress.level_unlocked || level == 6 && progress.level_unlocked > 3;
         let fg = if unlocked { Palette::G } else { Palette::M };
         let bg = if y > 5 { Palette::E } else { Palette::Transparent };
         let sprite = sprite(
@@ -156,7 +156,7 @@ fn update(
             i => format!("Level {}", i),
         };
 
-        let unlocked = level.0 <= progress.level_unlocked || level.0 == 6 && progress.level_unlocked >= 3;
+        let unlocked = level.0 <= progress.level_unlocked || level.0 == 6 && progress.level_unlocked > 3;
         if mouse.just_pressed(MouseButton::Left) && unlocked {
             commands.insert_resource(CurrentLevel(level.0));
             commands.insert_resource(Transition::to(GameState::Battle));
