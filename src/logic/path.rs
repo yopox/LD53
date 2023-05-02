@@ -1,6 +1,8 @@
 use bevy::math::vec2;
 use bevy::prelude::*;
 
+use crate::logic::gen::gen_path;
+
 pub struct Path {
     /// Vec2(x, y) -> (1., 2.) is the center of the tile (1, 2)
     points: Vec<Vec2>,
@@ -192,6 +194,7 @@ pub fn path_of_level_n(level: u8) -> Vec<Vec2> {
         3 => PATH_3.to_vec(),
         4 => PATH_4.to_vec(),
         5 => PATH_5.to_vec(),
-        _ => PATH_6.to_vec(),
+        6 => PATH_6.to_vec(),
+        _ => gen_path(),
     }
 }

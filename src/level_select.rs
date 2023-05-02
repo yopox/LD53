@@ -122,20 +122,20 @@ fn setup(
         (29, 7, 423, 5),
         (30, 7, 423, 5),
         (31, 7, 422, 5),
-        (22, 8, 423, 4),
-        (22, 7, 423, 4),
-        (22, 6, 423, 4),
-        (22, 5, 423, 4),
-        (22, 4, 423, 4),
-        (22, 3, 423, 4),
-        (21, 3, 423, 4),
-        (20, 3, 423, 4),
-        (19, 3, 423, 4),
-        (18, 3, 423, 4),
-        (17, 3, 423, 4),
+        (22, 8, 423, 6),
+        (22, 7, 423, 6),
+        (22, 6, 423, 6),
+        (22, 5, 423, 6),
+        (22, 4, 423, 6),
+        (22, 3, 423, 6),
+        (21, 3, 423, 6),
+        (20, 3, 423, 6),
+        (19, 3, 423, 6),
+        (18, 3, 423, 6),
+        (17, 3, 423, 6),
         (16, 3, 422, 6),
     ] {
-        let unlocked = level <= progress.level_unlocked || level == 6 && progress.level_unlocked > 3;
+        let unlocked = level <= progress.level_unlocked;
         let fg = if unlocked { Palette::G } else { Palette::M };
         let bg = if y > 5 { Palette::E } else { Palette::Transparent };
         let sprite = sprite(
@@ -176,11 +176,10 @@ fn update(
         if !is_in(cursor_pos, pos.translation.xy(), vec2(tile_to_f32(1), tile_to_f32(1))) { continue; }
 
         text.sections[0].value = match level.0 {
-            6 => "Endless".to_string(),
             i => format!("Level {}", i),
         };
 
-        let unlocked = level.0 <= progress.level_unlocked || level.0 == 6 && progress.level_unlocked > 3;
+        let unlocked = level.0 <= progress.level_unlocked;
         if mouse.just_pressed(MouseButton::Left) && unlocked {
             commands.insert_resource(CurrentLevel(level.0));
             commands.insert_resource(Transition::to(GameState::Battle));

@@ -72,7 +72,7 @@ fn setup(
             texts.push(("You are the new boss of Sabotage, Inc.!".to_string(), 5));
         } else if current_level.0 == 5 {
             texts.push(("Nice job! Thank you for playing our game.".to_string(), 5));
-            texts.push(("Can you survive the endless mode?".to_string(), 2));
+            texts.push(("Can you survive the last level?".to_string(), 2));
         } else {
             texts.push(("Nice job! Can you survive the next level?".to_string(), 5));
         }
