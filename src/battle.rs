@@ -10,6 +10,7 @@ use crate::graphics::grid::{GridElement, update_z};
 use crate::graphics::loading::Textures;
 use crate::graphics::package::collect_package;
 use crate::graphics::palette::Palette;
+use crate::level_select::CurrentLevel;
 use crate::logic::waves::{WaveIterator, WaveIteratorElement};
 use crate::music::{BGM, PlayBgmEvent};
 use crate::shot::{bomb_exploded, bomb_exploding, make_bomb_explode, remove_shots};
@@ -80,8 +81,9 @@ impl CursorState {
 fn setup(
     mut commands: Commands,
     mut bgm: EventWriter<PlayBgmEvent>,
+    current_level: Res<CurrentLevel>,
 ) {
-    bgm.send(PlayBgmEvent(BGM::Theme));
+    bgm.send(PlayBgmEvent(if current_level.0 == 6 { BGM::ThemeMadness } else { BGM::Theme }));
 
     let level = 0;
 
