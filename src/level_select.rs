@@ -4,9 +4,12 @@ use bevy::sprite::Anchor;
 
 use crate::{GameState, Progress, util};
 use crate::graphics::{grid, sprite};
+use crate::graphics::grid::GridUI;
 use crate::graphics::loading::{Fonts, Textures};
 use crate::graphics::palette::Palette;
 use crate::graphics::text::{TextStyles, ttf_anchor};
+use crate::graphics::transition::Transition;
+use crate::music::{BGM, PlayBgmEvent};
 use crate::util::is_in;
 use crate::util::size::tile_to_f32;
 
@@ -22,6 +25,9 @@ impl Plugin for LevelSelectPlugin {
     }
 }
 
+#[derive(Resource)]
+pub struct CurrentLevel(pub u8);
+
 #[derive(Component)]
 struct SelectUI;
 
@@ -33,10 +39,13 @@ struct LevelButton(pub u8);
 
 fn setup(
     mut commands: Commands,
+    mut bgm: EventWriter<PlayBgmEvent>,
     textures: Res<Textures>,
     fonts: Res<Fonts>,
     progress: Res<Progress>,
 ) {
+    bgm.send(PlayBgmEvent(BGM::Title));
+
     let path = vec![
         vec2(3., 3.),
         vec2(16., 3.),
@@ -57,6 +66,7 @@ fn setup(
             TextStyles::Heading, &fonts, Palette::B,
             Anchor::Center,
         ))
+        .insert(MainText)
         .insert(SelectUI);
 
     for (x, y, index, level) in [
@@ -101,7 +111,8 @@ fn setup(
         (17, 3, 423, 4),
         (16, 3, 422, 6),
     ] {
-        let fg = if level <= progress.level_unlocked { Palette::G } else { Palette::M };
+        let unlocked = level <= progress.level_unlocked || level == 6 && progress.level_unlocked >= 3;
+        let fg = if unlocked { Palette::G } else { Palette::M };
         let bg = if y > 5 { Palette::E } else { Palette::Transparent };
         let sprite = sprite(
             index, x, y + util::size::GUI_HEIGHT, util::z_pos::GUI_BG,
@@ -128,7 +139,10 @@ fn update(
     buttons: Query<(&Transform, &LevelButton)>,
     mut text: Query<&mut Text, With<MainText>>,
     mouse: Res<Input<MouseButton>>,
+    progress: Res<Progress>,
+    transition: Option<Res<Transition>>,
 ) {
+    if transition.is_some() { return; }
     let Some(cursor_pos) = util::cursor_pos(windows) else { return; };
 
     for (pos, level) in &buttons {
@@ -140,10 +154,19 @@ fn update(
             i => format!("Level {}", i),
         };
 
-        if mouse.just_pressed(MouseButton::Left) {
-            // TODO: set level
+        let unlocked = level.0 <= progress.level_unlocked || level.0 == 6 && progress.level_unlocked >= 3;
+        if mouse.just_pressed(MouseButton::Left) && unlocked {
+            commands.insert_resource(CurrentLevel(level.0));
+            commands.insert_resource(Transition::to(GameState::Battle));
         }
     }
 }
 
-fn clean() {}
+fn clean(
+    mut commands: Commands,
+    q1: Query<Entity, With<SelectUI>>,
+    q2: Query<Entity, With<GridUI>>,
+) {
+    for id in &q1 { commands.entity(id).despawn_recursive(); }
+    for id in &q2 { commands.entity(id).despawn_recursive(); }
+}

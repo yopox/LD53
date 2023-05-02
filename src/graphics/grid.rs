@@ -34,7 +34,7 @@ impl Plugin for GridPlugin {
 }
 
 #[derive(Component)]
-struct GridUI;
+pub struct GridUI;
 
 #[derive(Resource)]
 pub struct CurrentPath(pub logic::path::Path);

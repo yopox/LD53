@@ -1,12 +1,14 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 
+use crate::{GameState, Progress};
 use crate::battle::DronesStats;
-use crate::GameState;
 use crate::graphics::loading::Fonts;
 use crate::graphics::palette::Palette;
 use crate::graphics::text;
 use crate::graphics::transition::Transition;
+use crate::level_select::CurrentLevel;
+use crate::music::{BGM, PlayBgmEvent};
 use crate::util::size::{tile_to_f32, WIDTH};
 use crate::util::z_pos;
 
@@ -32,10 +34,15 @@ impl Plugin for GameOverPlugin {
 }
 
 fn setup(
-    stats: ResMut<DronesStats>,
     mut commands: Commands,
+    mut bgm: EventWriter<PlayBgmEvent>,
+    mut progress: ResMut<Progress>,
+    stats: ResMut<DronesStats>,
+    current_level: Res<CurrentLevel>,
     fonts: Res<Fonts>,
 ) {
+    bgm.send(PlayBgmEvent(BGM::Pause));
+
     let mut texts: Vec<(String, usize)> = vec![
         ("You've seen all drones!".into(), 16),
     ];
@@ -53,6 +60,7 @@ fn setup(
             texts.push((format!("Try harder next time..."), 5));
         } else {
             texts.push((format!("Nice job! Can you survive next level?"), 5));
+            if progress.level_unlocked <= current_level.0 { progress.level_unlocked += 1; }
         }
     }
 
@@ -79,6 +87,6 @@ fn exit_game_over(
     mut commands: Commands,
 ) {
     for _ in keys.get_just_released() {
-        commands.insert_resource(Transition::to(GameState::Battle))
+        commands.insert_resource(Transition::to(GameState::Select))
     }
 }
